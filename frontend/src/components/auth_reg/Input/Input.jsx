@@ -1,10 +1,17 @@
+// src/components/auth_reg/Input/Input.jsx
 import { useState } from "react";
 import "./Input.css";
-import { Eye, ClosedEye } from "../../../assets/Eyes.jsx";
+import { Eye, ClosedEye } from "../../../assets/Eyes";
 
-export function Input({ placeholder, type, maxlength, name, autoComplete }) {
+export function Input({ 
+  placeholder, 
+  type, 
+  maxlength, 
+  autoComplete,
+  value,
+  onChange 
+}) {
   const [showPassword, setShowPassword] = useState(false);
-
   const isPasswordField = type === "password";
   const inputType = isPasswordField
     ? showPassword
@@ -18,9 +25,10 @@ export function Input({ placeholder, type, maxlength, name, autoComplete }) {
         type={inputType}
         placeholder={placeholder}
         maxLength={maxlength}
-        name={name}
         className="inputAR"
         autoComplete={autoComplete}
+        value={value}
+        onChange={onChange}
       />
 
       {isPasswordField && (

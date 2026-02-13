@@ -1,0 +1,36 @@
+/* src/components/auth_reg/AuthLink/AuthLink.css */
+.auth-link {
+  margin-top: 20px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+
+.auth-link-text {
+  margin-right: 5px;
+}
+
+.auth-link-link {
+  color: #1e3a5f;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.auth-link-link:hover {
+  color: #2A4A7A;
+  border-bottom-color: #2A4A7A;
+}
+
+.auth-link-link:active {
+  transform: translateY(1px);
+}
+
+.auth-link-link:focus-visible {
+  outline: 2px solid #1e3a5f;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
