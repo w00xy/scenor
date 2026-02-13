@@ -1,0 +1,12 @@
+.container_ar{
+  width: 540px;
+  height: 487px;
+  border-radius: 24px;
+  background-color: #0F0F1A;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  
+}

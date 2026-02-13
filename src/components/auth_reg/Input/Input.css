@@ -1,0 +1,32 @@
+.inputAR {
+  width: 340px;
+  height: 25px;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  color: #ffffff;
+  font-size: 14px;
+  display: flex;
+}
+
+.inputAR input,
+button {
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px #0f0f1a;
+  caret-color: #ffffff;
+
+
+}
