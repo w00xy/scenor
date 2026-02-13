@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from database.engine import get_db
 from schemas import UserCreateSchema, UserOutSchema
 from repositories.user_service import create_user, get_user_by_id, UserAlreadyExistsError
+from core.deps import get_current_user
+from database.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -19,6 +21,14 @@ async def register_user(
     except UserAlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))
     return user
+
+
+@router.get("/me", response_model=UserOutSchema)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user),
+):
+    """Получить данные текущего авторизованного пользователя (JWT)."""
+    return current_user
 
 
 @router.get("/", response_model=UserOutSchema)

@@ -40,3 +40,15 @@ async def get_user_by_id(db: AsyncSession, user_id: int) -> User | None:
     """Возвращает пользователя по id или None."""
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalars().one_or_none()
+
+
+async def get_user_by_email_or_username(
+    db: AsyncSession, email_or_username: str
+) -> User | None:
+    """Возвращает пользователя по email или username или None."""
+    result = await db.execute(
+        select(User).where(
+            (User.email == email_or_username) | (User.username == email_or_username)
+        )
+    )
+    return result.scalars().one_or_none()
