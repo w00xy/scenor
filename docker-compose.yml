@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: scenor_db
+    environment:
+      POSTGRES_DB: scenor_db
+      POSTGRES_USER: scenor_user
+      POSTGRES_PASSWORD: scenor_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scenor_user -d scenor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: scenor_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://scenor_user:scenor_password@db:5432/scenor_db
+      - SECRET_KEY=your-secret-key-change-in-production
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  # Frontend service (React app) - to be implemented
+  # frontend:
+  #   build:
+  #     context: ./frontend
+ #     dockerfile: Dockerfile
+  #   container_name: scenor_frontend
+  #   ports:
+  #     - "300:300"
+  #   depends_on:
+  #     - backend
+
+volumes:
+  postgres_data:
