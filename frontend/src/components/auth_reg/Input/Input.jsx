@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./Input.css";
-import { Eye, ClosedEye } from "../../../../public/Eyes";
+import { Eye, ClosedEye } from "../../../assets/Eyes.jsx";
 
 export function Input({ placeholder, type, maxlength, name, autoComplete }) {
   const [showPassword, setShowPassword] = useState(false);
