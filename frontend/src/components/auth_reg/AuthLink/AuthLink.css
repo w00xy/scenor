@@ -4,7 +4,7 @@
   text-align: center;
   font-family: "Inter", sans-serif;
   font-size: 14px;
-  color: #6b6b6b;
+  color: white;
 }
 
 .auth-link-text {
@@ -12,8 +12,8 @@
 }
 
 .auth-link-link {
-  color: #1e3a5f;
-  text-decoration: none;
+  color: white;
+  text-decoration: underline;
   font-weight: 500;
   cursor: pointer;
   transition: color 0.2s ease;
@@ -21,8 +21,7 @@
 }
 
 .auth-link-link:hover {
-  color: #2A4A7A;
-  border-bottom-color: #2A4A7A;
+  color: lightgray;
 }
 
 .auth-link-link:active {
