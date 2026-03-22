@@ -1,0 +1,70 @@
+import "./Reg.scss";
+import { ARForm } from "../../components/auth_reg/ARForm/ARForm";
+import { InputField } from "../../components/auth_reg/InputField/InputField";
+import { ModeName } from "../../components/auth_reg/ModeName/ModeName";
+import { ARButton } from "../../components/auth_reg/ARButton/ARButton";
+import { AuthLink } from "../../components/auth_reg/AuthLink/AuthLink";
+import { Input } from "../../components/auth_reg/Input/Input";
+import { FieldSpacer } from "../../components/auth_reg/FieldSpacer/FieldSpacer";
+import { useRegister } from "../../hooks/useRegister";
+
+export function Reg() {
+  const {
+    username,
+    setUsername,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    handleRegister,
+  } = useRegister();
+
+  return (
+    <main>
+      <ARForm>
+        <ModeName text="Регистрация" />
+
+        <FieldSpacer height={24} />
+        <InputField>
+          <Input
+            placeholder="Имя пользователя"
+            type="text"
+            maxlength={30}
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </InputField>
+
+        <FieldSpacer height={16} />
+        <InputField>
+          <Input
+            placeholder="Электронная почта"
+            type="text"
+            maxlength={50}
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </InputField>
+
+        <FieldSpacer height={16} />
+        <InputField>
+          <Input
+            placeholder="Пароль"
+            type="password"
+            maxlength={28}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </InputField>
+
+        <FieldSpacer height={16} />
+        <ARButton text="Зарегистрироваться" onClick={handleRegister} />
+        <FieldSpacer height={12} />
+        <AuthLink text="Уже есть аккаунт?" linkText="Войти" linkTo="/auth" />
+      </ARForm>
+    </main>
+  );
+}

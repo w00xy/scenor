@@ -1,0 +1,29 @@
+@use "../../../styles/variables/_variables.scss" as *;
+
+.auth-link {
+  text-align: center;
+  font-family: $font-family;
+  font-size: 14px;
+  color: $color-white;
+
+  &-text {
+    margin-right: 5px;
+  }
+
+  &-link {
+    color: #ff4b33;
+    text-decoration: underline;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    border-bottom: 1px solid transparent;
+
+    &:hover {
+      color: lightgray;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}
