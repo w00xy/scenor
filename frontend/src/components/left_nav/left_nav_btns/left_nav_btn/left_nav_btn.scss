@@ -1,0 +1,24 @@
+@use "../../../../styles/mixins/_mixins" as *;
+
+.left_nav_button {
+  display: flex;
+  width: 100%;
+  justify-content: start;
+  padding: 7px 0px 8px 7px;
+  gap: 6px;
+  @include left_menu_btn;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &.active {
+    background-color: #2F2F2F;
+    border-radius: 6px;
+  }
+
+  &.collapsed {
+    justify-content: center;
+    padding: 8px;
+    width: auto; 
+  }
+
+}

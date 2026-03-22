@@ -1,11 +1,17 @@
-// src/context/FieldFeedbackContext.jsx
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useFieldFeedback } from '../hooks/useFieldFeedback';
 import { FieldFeedback } from '../components/auth_reg/FieldFeedback/FieldFeedback';
 
-const FieldFeedbackContext = createContext(null);
+type FeedbackType = 'error' | 'success' | 'warning';
 
-export function FieldFeedbackProvider({ children }) {
+interface FieldFeedbackContextType {
+  showFeedback: (message: string, type?: FeedbackType) => void;
+  hideFeedback: () => void;
+}
+
+const FieldFeedbackContext = createContext<FieldFeedbackContextType | undefined>(undefined);
+
+export const FieldFeedbackProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { feedback, showFeedback, hideFeedback } = useFieldFeedback();
 
   return (
@@ -20,12 +26,12 @@ export function FieldFeedbackProvider({ children }) {
       )}
     </FieldFeedbackContext.Provider>
   );
-}
+};
 
-export function useFieldFeedbackContext() {
+export const useFieldFeedbackContext = (): FieldFeedbackContextType => {
   const context = useContext(FieldFeedbackContext);
   if (!context) {
     throw new Error('useFieldFeedbackContext must be used within FieldFeedbackProvider');
   }
   return context;
-}
+};

@@ -1,4 +1,3 @@
-// src/hooks/useRegister.js
 import { useState } from "react";
 import { useFieldFeedbackContext } from "../context/FieldFeedbackContext";
 import { validateRegistrationForm } from "../utils/validation/registrationValidation";
@@ -10,11 +9,10 @@ export function useRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Используем общую валидацию с тремя полями
     const validation = validateRegistrationForm(username, email, password);
 
     if (!validation.isValid) {
@@ -26,7 +24,6 @@ export function useRegister() {
       // Имитация запроса к серверу
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Здесь будет реальный запрос к API
       console.log("Данные для регистрации:", {
         username: username.trim(),
         email: email.trim(),
@@ -34,9 +31,6 @@ export function useRegister() {
       });
 
       showFeedback("Регистрация успешна! Теперь можете войти", "success");
-      
-      // Убрали очистку формы
-      
     } catch (error) {
       console.error("Ошибка при регистрации:", error);
       showFeedback("Ошибка сервера. Попробуйте позже", "error");

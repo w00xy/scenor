@@ -1,5 +1,9 @@
-// src/utils/validation/passwordValidation.js
-export const validatePassword = (password) => {
+interface ValidationResult {
+  isValid: boolean;
+  message: string;
+}
+
+export const validatePassword = (password: string): ValidationResult => {
   if (password.length < 6) {
     return {
       isValid: false,
@@ -48,7 +52,6 @@ export const validatePassword = (password) => {
   };
 };
 
-// Упрощенная валидация для проверки только длины (если нужно)
-export const validatePasswordLength = (password) => {
+export const validatePasswordLength = (password: string): boolean => {
   return password.length >= 6;
 };

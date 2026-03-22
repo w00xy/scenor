@@ -1,18 +1,18 @@
-// src/hooks/useLogin.js
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFieldFeedbackContext } from "../context/FieldFeedbackContext";
 
 export function useLogin() {
   const { showFeedback } = useFieldFeedbackContext();
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Проверка на пустые поля
     const isEmailEmpty = !email || email.trim() === "";
     const isPasswordEmpty = !password || password.trim() === "";
 
@@ -22,30 +22,13 @@ export function useLogin() {
     }
 
     try {
-      // Имитация запроса к серверу
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Здесь будет реальный запрос к вашему API
-      // const response = await fetch('/api/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     email: email.trim(),
-      //     password
-      //   })
-      // });
-
-      // const data = await response.json();
-
-      // Имитация ответа от сервера (для теста)
-      const mockSuccess = Math.random() > 0.5; // 50% успеха
+      const mockSuccess = Math.random() > 0.5;
 
       if (mockSuccess) {
         showFeedback("Успешный вход!", "success");
-        // Здесь редирект или сохранение токена
-        console.log("Успешный вход:", { email: email.trim() });
+        navigate("/overview_scen");
       } else {
-        // ЕДИНАЯ ОШИБКА для неверных данных
         showFeedback("Неверный Email или пароль", "error");
       }
     } catch (error) {

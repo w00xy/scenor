@@ -1,0 +1,35 @@
+@use "../../../styles/variables/_variables.scss" as *;
+
+.LMTDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+
+  &.collapsed {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .menu-buttons__top {
+      flex-direction: column;
+      padding: 8px 12px 8px 12px;
+    }
+  }
+}
+
+.logo-name__div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  p {
+    color: $color-white;
+    font-size: 20px;
+    font-family: $font-family;
+  }
+}
+
+.menu-buttons__top {
+  display: flex;
+  gap: 6px;
+}

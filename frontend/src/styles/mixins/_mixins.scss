@@ -1,0 +1,11 @@
+@use "../variables/_variables" as *;
+
+@mixin left_menu_btn{
+  font-family: $font-family;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}

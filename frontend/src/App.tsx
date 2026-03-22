@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Auth } from "./pages/authorization/Auth.js";
+import { Auth } from "./pages/authorization/Auth";
 import { Reg } from "./pages/registration/Reg";
+import { Overview_Scen } from "./pages/overview_scen/Overview_scen";
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/register" element={<Reg />} />
+          <Route path="/overview_scen" element={<Overview_Scen />} />
         </Routes>
       </BrowserRouter>
     </FieldFeedbackProvider>

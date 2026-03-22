@@ -1,2 +1,2 @@
 /* импорт общих стилей */
-@import "../authorization/Auth.scss";
+@use "../authorization/Auth.scss" as *;

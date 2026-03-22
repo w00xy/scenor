@@ -1,9 +1,8 @@
-// src/utils/validation/emailValidation.js
-export const validateEmail = (email) => {
+export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-export const getEmailErrorMessage = () => {
+export const getEmailErrorMessage = (): string => {
   return "Введите корректный email адрес";
 };
