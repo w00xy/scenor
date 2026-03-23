@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+/dist
+/build
+
+# Optional npm cache directory
+.npm
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing and coverage
+/coverage
+.nyc_output
+
+# Editor/IDE-specific files (optional)
+.vscode/
+.idea/
+.qwen
+.cursor
+.codex
+*.suo
+*.user
+*.casc
+*.zone.identifier
+
+/generated/prisma
