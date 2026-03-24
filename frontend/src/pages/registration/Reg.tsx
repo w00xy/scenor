@@ -7,8 +7,9 @@ import { AuthLink } from "../../components/auth_reg/AuthLink/AuthLink";
 import { Input } from "../../components/auth_reg/Input/Input";
 import { FieldSpacer } from "../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useRegister } from "../../hooks/useRegister";
+import {JSX} from "react";
 
-export function Reg() {
+export function Reg(): JSX.Element {
   const {
     username,
     setUsername,

@@ -7,8 +7,8 @@ import { AuthLink } from "../../components/auth_reg/AuthLink/AuthLink";
 import { Input } from "../../components/auth_reg/Input/Input";
 import { FieldSpacer } from "../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useLogin } from "../../hooks/useLogin";
-import { JSX } from "react/jsx-runtime";
 import React, { ChangeEvent } from "react";
+import {JSX} from "react";
 
 export function Auth(): JSX.Element {
   const { email, setEmail, password, setPassword, handleLogin } = useLogin();
