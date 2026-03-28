@@ -30,3 +30,13 @@ export class AuthServiceError extends Error {
     this.statusCode = statusCode;
   }
 }
+
+export interface User {
+  id: string;
+  email: string;
+  username: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  passwordHash: string;
+  role: string;
+}
