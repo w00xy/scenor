@@ -4,11 +4,13 @@ import cors from 'cors';
 import * as middlewares from './middlewares.js';
 import type MessageResponse from './interfaces/message-response.js';
 import routes from './routes/routes.js';
+import { setupSwagger } from './docs/swagger.js';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+setupSwagger(app);
 
 app.use('/api', routes);
 

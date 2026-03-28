@@ -26,6 +26,8 @@
     "express": "^5.2.1",
     "express-jwt": "^8.5.1",
     "jsonwebtoken": "^9.0.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
@@ -36,6 +38,8 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.3.1",
     "pg": "^8.20.0",
     "prisma": "^6.12.0"

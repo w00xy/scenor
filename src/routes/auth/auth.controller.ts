@@ -1,15 +1,36 @@
 import { Router, Request, Response, NextFunction } from "express";
+import type { Request as JWTRequest } from "express-jwt";
 import { createUser, updateUser, getCurrentUser, login,  } from "./auth.service";
 import auth from "./auth";
 
 const router = Router();
 
 /**
- * Create an user
- * @auth none
- * @route {POST} /users
- * @bodyparam user User
- * @returns user User
+ * @openapi
+ * /api/auth/users:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Register user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   password:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: User created
  */
 router.post('/users', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,11 +42,29 @@ router.post('/users', async (req: Request, res: Response, next: NextFunction) =>
 });
 
 /**
- * Login
- * @auth none
- * @route {POST} /users/login
- * @bodyparam user User
- * @returns user User
+ * @openapi
+ * /api/auth/users/login:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Login
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                   password:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Authenticated user with token
  */
 router.post('/users/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -37,14 +76,29 @@ router.post('/users/login', async (req: Request, res: Response, next: NextFuncti
 });
 
 /**
- * Get current user
- * @auth required
- * @route {GET} /user
- * @returns user User
+ * @openapi
+ * /api/auth/user:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Get current user
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/user', auth.required, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await getCurrentUser(req.auth?.user?.id);
+    const authReq = req as JWTRequest<{ id?: string }>;
+    const userId = authReq.auth?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await getCurrentUser(userId);
     res.json({ user });
   } catch (error) {
     next(error);
@@ -52,15 +106,45 @@ router.get('/user', auth.required, async (req: Request, res: Response, next: Nex
 });
 
 /**
- * Update user
- * @auth required
- * @route {PUT} /user
- * @bodyparam user User
- * @returns user User
+ * @openapi
+ * /api/auth/user:
+ *   put:
+ *     tags:
+ *       - Auth
+ *     summary: Update current user
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   password:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *       401:
+ *         description: Unauthorized
  */
 router.put('/user', auth.required, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await updateUser(req.body.user, req.auth?.user?.id);
+    const authReq = req as JWTRequest<{ id?: string }>;
+    const userId = authReq.auth?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = await updateUser(req.body.user, userId);
     res.json({ user });
   } catch (error) {
     next(error);
