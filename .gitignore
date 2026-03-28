@@ -1,33 +1,45 @@
-# Dependencies
+# Node modules
 node_modules/
-/dist
-/build
 
-# Optional npm cache directory
-.npm
+# Build output (TypeScript)
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Environment variables
 .env
-.env.local
+.env.*
+!.env.example
 
-# Logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
+# OS files
+.DS_Store
+Thumbs.db
 
-# Testing and coverage
-/coverage
-.nyc_output
-
-# Editor/IDE-specific files (optional)
+# IDE
 .vscode/
-.idea/
-.qwen
-.cursor
-.codex
-*.suo
-*.user
-*.casc
-*.zone.identifier
 
-/generated/prisma
+# TypeScript
+*.tsbuildinfo
+
+# Prisma
+prisma/generated/
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.tmp/
+
+# Docker
+docker-compose.override.yml
