@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch ./src/index.ts",
-    "test": "tsx --test tests/**/*.test.ts",
-    "studio:wsl": "prisma studio --hostname 0.0.0.0 --port 5555 --browser none"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -15,28 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/w00xy/scenor/issues"
   },
-  "homepage": "https://github.com/w00xy/scenor#readme",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
-    "express": "^5.2.1",
-    "express-jwt": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
-  },
-  "devDependencies": {
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^6.12.0",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/node": "^25.5.0",
-    "@types/pg": "^8.20.0",
-    "dotenv": "^17.3.1",
-    "pg": "^8.20.0",
-    "prisma": "^6.12.0"
-  }
+  "homepage": "https://github.com/w00xy/scenor#readme"
 }
