@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "predev": "npm run swagger:generate",
     "dev": "tsx watch ./src/index.ts",
+    "swagger:generate": "tsx ./src/docs/generate-swagger.ts",
     "test": "tsx --test tests/**/*.test.ts",
     "studio:wsl": "prisma studio --hostname 0.0.0.0 --port 5555 --browser none"
   },
@@ -26,6 +28,7 @@
     "express": "^5.2.1",
     "express-jwt": "^8.5.1",
     "jsonwebtoken": "^9.0.3",
+    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tsx": "^4.21.0",

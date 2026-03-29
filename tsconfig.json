@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "noImplicitAny"1: true,
+    "noImplicitAny": true,
     "outDir": "dist",
     "sourceMap": true,
     "esModuleInterop": true,
