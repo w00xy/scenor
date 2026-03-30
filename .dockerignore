@@ -1,0 +1,12 @@
+.git
+.gitignore
+**/node_modules
+**/dist
+**/build
+**/coverage
+**/.nyc_output
+**/.env
+**/.env.*
+backend/.secrets
+backend/.env.example
+backend/README.md

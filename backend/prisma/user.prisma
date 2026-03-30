@@ -1,0 +1,24 @@
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String?  @unique
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  projects          Project[]           @relation("ProjectOwner")
+  memberships       ProjectMember[]     @relation("ProjectMemberUser")
+  invitedMembers    ProjectMember[]     @relation("ProjectMemberInvitedBy")
+  createdWorkflows  Workflow[]          @relation("WorkflowCreator")
+  credentials       Credential[]
+  workflowShares    WorkflowShare[]     @relation("WorkflowShareCreatedBy")
+  startedExecutions WorkflowExecution[] @relation("ExecutionStartedBy")
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  SUPER_ADMIN
+}

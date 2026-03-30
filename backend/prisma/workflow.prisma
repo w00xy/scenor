@@ -1,0 +1,214 @@
+enum WorkflowStatus {
+  draft
+  active
+  inactive
+  archived
+}
+
+enum NodeCategory {
+  trigger
+  action
+  logic
+  data
+  integration
+}
+
+enum ShareAccessType {
+  view
+  comment
+  edit
+}
+
+enum TriggerType {
+  manual
+  webhook
+  schedule
+  system
+}
+
+enum ExecutionStatus {
+  queued
+  running
+  success
+  failed
+  cancelled
+}
+
+enum NodeExecutionStatus {
+  pending
+  running
+  success
+  failed
+  skipped
+}
+
+model Workflow {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String   @db.Uuid
+  createdBy   String?  @db.Uuid
+  name        String
+  description String?
+  status      String   @default("draft")
+  version     Int      @default(1)
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  project    Project             @relation(fields: [projectId], references: [id])
+  creator    User?               @relation("WorkflowCreator", fields: [createdBy], references: [id])
+  nodes      WorkflowNode[]
+  edges      WorkflowEdge[]
+  shares     WorkflowShare[]
+  executions WorkflowExecution[]
+
+  @@map("workflows")
+}
+
+model NodeType {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                String       @unique @db.VarChar(100)
+  displayName         String       @map("display_name") @db.VarChar(255)
+  category            NodeCategory
+  description         String?
+  icon                String?      @db.VarChar(255)
+  isTrigger           Boolean      @default(false) @map("is_trigger")
+  supportsCredentials Boolean      @default(false) @map("supports_credentials")
+  schemaJson          Json?        @map("schema_json")
+  defaultConfigJson   Json         @default("{}") @map("default_config_json")
+  isActive            Boolean      @default(true) @map("is_active")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  nodes WorkflowNode[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("node_types")
+}
+
+model Credential {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  type          String   @db.VarChar(100)
+  name          String   @db.VarChar(255)
+  encryptedData Json     @map("encrypted_data")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nodes WorkflowNode[]
+
+  @@index([userId])
+  @@index([type])
+  @@map("credentials")
+}
+
+model WorkflowNode {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId    String   @map("workflow_id") @db.Uuid
+  nodeTypeId    String?  @map("node_type_id") @db.Uuid
+  type          String   @db.VarChar(100)
+  name          String?  @db.VarChar(255)
+  label         String?  @db.VarChar(255)
+  posX          Float    @map("pos_x")
+  posY          Float    @map("pos_y")
+  configJson    Json     @default("{}") @map("config_json")
+  credentialsId String?  @map("credentials_id") @db.Uuid
+  notes         String?
+  isDisabled    Boolean  @default(false) @map("is_disabled")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  workflow      Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  nodeType      NodeType?          @relation(fields: [nodeTypeId], references: [id], onDelete: SetNull)
+  credentials   Credential?        @relation(fields: [credentialsId], references: [id], onDelete: SetNull)
+  sourceEdges   WorkflowEdge[]     @relation("SourceNode")
+  targetEdges   WorkflowEdge[]     @relation("TargetNode")
+  executionLogs ExecutionNodeLog[]
+
+  @@index([workflowId])
+  @@index([nodeTypeId])
+  @@index([credentialsId])
+  @@index([type])
+  @@map("workflow_nodes")
+}
+
+model WorkflowEdge {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId    String   @map("workflow_id") @db.Uuid
+  sourceNodeId  String   @map("source_node_id") @db.Uuid
+  targetNodeId  String   @map("target_node_id") @db.Uuid
+  sourceHandle  String?  @map("source_handle") @db.VarChar(100)
+  targetHandle  String?  @map("target_handle") @db.VarChar(100)
+  conditionType String?  @map("condition_type") @db.VarChar(50)
+  label         String?  @db.VarChar(255)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  workflow   Workflow     @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sourceNode WorkflowNode @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode WorkflowNode @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([sourceNodeId])
+  @@index([targetNodeId])
+  @@map("workflow_edges")
+}
+
+model WorkflowShare {
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId String          @map("workflow_id") @db.Uuid
+  token      String          @unique @db.VarChar(255)
+  accessType ShareAccessType @default(view) @map("access_type")
+  expiresAt  DateTime?       @map("expires_at")
+  createdBy  String?         @map("created_by") @db.Uuid
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  creator  User?    @relation("WorkflowShareCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([workflowId])
+  @@index([expiresAt])
+  @@map("workflow_shares")
+}
+
+model WorkflowExecution {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workflowId      String          @map("workflow_id") @db.Uuid
+  startedByUserId String?         @map("started_by_user_id") @db.Uuid
+  triggerType     TriggerType     @map("trigger_type")
+  status          ExecutionStatus @default(queued)
+  startedAt       DateTime?       @map("started_at")
+  finishedAt      DateTime?       @map("finished_at")
+  inputDataJson   Json?           @map("input_data_json")
+  outputDataJson  Json?           @map("output_data_json")
+  errorMessage    String?         @map("error_message")
+
+  workflow Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  starter  User?              @relation("ExecutionStartedBy", fields: [startedByUserId], references: [id], onDelete: SetNull)
+  logs     ExecutionNodeLog[]
+
+  @@index([workflowId])
+  @@index([startedByUserId])
+  @@index([status])
+  @@map("workflow_executions")
+}
+
+model ExecutionNodeLog {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  executionId  String              @map("execution_id") @db.Uuid
+  nodeId       String?             @map("node_id") @db.Uuid
+  status       NodeExecutionStatus
+  startedAt    DateTime?           @map("started_at")
+  finishedAt   DateTime?           @map("finished_at")
+  inputJson    Json?               @map("input_json")
+  outputJson   Json?               @map("output_json")
+  errorMessage String?             @map("error_message")
+
+  execution WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  node      WorkflowNode?     @relation(fields: [nodeId], references: [id], onDelete: SetNull)
+
+  @@index([executionId])
+  @@index([nodeId])
+  @@index([status])
+  @@map("execution_node_logs")
+}
