@@ -1,0 +1,53 @@
+@use "../../../../../styles/variables/_variables" as *;
+@use "../../../../../styles/mixins/_mixins" as *;
+
+.MM_overview_scen_component {
+  box-sizing: border-box;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: #272727;
+  border: 1px solid #424242;
+  border-radius: 5px;
+}
+
+.MM_overview_scen_component_left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  h1 {
+    @include text_add_14px;
+    color: $color-white;
+  }
+
+  p {
+    @include text_add_14px;
+    color: #CCCCCC;
+    font-size: 12px;
+  }
+}
+
+.MM_overview_scen_component_right{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    div{
+        display: flex;
+        align-items: center;
+        background-color: #171717;
+        border: 1px solid #424242;
+        min-width: 76px;
+        gap: 6px;
+        padding: 4.5px 8px;
+        box-sizing: border-box;
+        border-radius: 5px;
+        p {
+            @include text_add_14px;
+            font-size: 12px;
+            color: #CCCCCC;
+        }
+    }
+}

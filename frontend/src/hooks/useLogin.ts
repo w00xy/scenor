@@ -27,7 +27,7 @@ export function useLogin() {
 
       if (mockSuccess) {
         showFeedback("Успешный вход!", "success");
-        navigate("/overview_scen");
+        navigate("/overview");
       } else {
         showFeedback("Неверный Email или пароль", "error");
       }

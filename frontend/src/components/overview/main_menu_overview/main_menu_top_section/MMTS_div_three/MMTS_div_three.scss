@@ -1,0 +1,26 @@
+@use "../../../../../styles/variables/_variables" as *;
+
+.top-nav {
+  display: flex;
+  gap: 24px;
+
+  &__item {
+    font-family: $font-family;
+    padding: 8px 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #cccccc;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+
+    &:hover {
+      color: #ff6f5c;
+    }
+
+    &.active {
+      color: #ff6f5c;
+      border-bottom-color: #ff6f5c;
+    }
+  }
+}

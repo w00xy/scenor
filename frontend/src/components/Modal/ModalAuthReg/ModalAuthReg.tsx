@@ -1,5 +1,5 @@
-import React from 'react';
-import './ModalAuthReg.scss';
+import React from "react";
+import "./ModalAuthReg.scss";
 
 interface ModalProps {
   onClose: () => void;
@@ -15,9 +15,7 @@ export function Modal({ onClose, children }: ModalProps) {
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
-        {children}
-      </div>
+      <div className="modal-content">{children}</div>
     </div>
   );
 }

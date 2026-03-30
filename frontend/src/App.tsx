@@ -1,53 +1,27 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import { Overview_Scen } from "./pages/overview_scen/Overview_scen";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Auth } from "./pages/authorization/Auth";
 import { Reg } from "./pages/registration/Reg";
-import { Modal } from "./components/Modal/ModalAuthReg/ModalAuthReg";
+
+import { Overview } from "./pages/overview/Overview";
+import { Overview_scen } from "./components/overview/pages_overview/overview_scen/overview_scen";
+import { Overview_credentials } from "./components/overview/pages_overview/overview_credentials/overview_credentials";
+
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
-
-function MainLayout() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const isAuth = location.pathname === "/auth";
-  const isRegister = location.pathname === "/register";
-
-  if (location.pathname !== "/overview_scen" && !isAuth && !isRegister) {
-    navigate("/overview_scen", { replace: true });
-    return null;
-  }
-
-  const closeModal = () => {
-    navigate("/overview_scen");
-  };
-
-  return (
-    <>
-      <Overview_Scen />
-      {(isAuth || isRegister) && (
-        <Modal onClose={closeModal}>
-          {isAuth && <Auth />}
-          {isRegister && <Reg />}
-        </Modal>
-      )}
-    </>
-  );
-}
 
 export default function App() {
   return (
     <FieldFeedbackProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/overview_scen" replace />} />
-          <Route path="*" element={<MainLayout />} />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/register" element={<Reg />} />
+
+          <Route path="/overview_scen" element={<Overview />}>
+            <Route index element={<Overview_scen />} />
+            <Route path="overview_credentials" element={<Overview_credentials />} />
+          </Route>
+
         </Routes>
       </BrowserRouter>
     </FieldFeedbackProvider>
