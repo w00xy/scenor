@@ -1,4 +1,17 @@
-import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/users-create.dto.js';
 import { UpdateUserDto } from './dto/users-update.dto.js';
@@ -12,7 +25,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
   async register(@Body() data: CreateUserDto) {
@@ -47,7 +60,10 @@ export class UsersController {
   @Put(':id/update')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
-  async updateUser(@Param('id', new ParseUUIDPipe()) id: string, @Body() data: UpdateUserDto) {
+  async updateUser(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() data: UpdateUserDto,
+  ) {
     return this.usersService.updateUser(id, data);
   }
 

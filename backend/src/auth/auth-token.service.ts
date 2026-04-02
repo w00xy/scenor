@@ -67,7 +67,9 @@ export class AuthTokenService {
 
   private async verifyWithSecret(token: string, secret: string) {
     try {
-      return await this.jwtService.verifyAsync<JwtTokenPayload>(token, { secret });
+      return await this.jwtService.verifyAsync<JwtTokenPayload>(token, {
+        secret,
+      });
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
@@ -90,10 +92,12 @@ export class AuthTokenService {
   }
 
   private getAccessExpiresIn(): SignOptions['expiresIn'] {
-    return (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as SignOptions['expiresIn'];
+    return (process.env.JWT_ACCESS_EXPIRES_IN ??
+      '15m') as SignOptions['expiresIn'];
   }
 
   private getRefreshExpiresIn(): SignOptions['expiresIn'] {
-    return (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as SignOptions['expiresIn'];
+    return (process.env.JWT_REFRESH_EXPIRES_IN ??
+      '7d') as SignOptions['expiresIn'];
   }
 }

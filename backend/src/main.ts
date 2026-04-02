@@ -4,13 +4,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*' // only on dev
-  })
+    origin: '*', // only on dev
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

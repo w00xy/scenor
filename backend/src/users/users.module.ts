@@ -11,7 +11,14 @@ import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [DatabaseModule, JwtModule.register({})],
-  providers: [UsersService, UsersRepository, UsersUtils, AuthTokenService, AuthGuard, RolesGuard],
+  providers: [
+    UsersService,
+    UsersRepository,
+    UsersUtils,
+    AuthTokenService,
+    AuthGuard,
+    RolesGuard,
+  ],
   controllers: [UsersController],
   exports: [UsersService],
 })

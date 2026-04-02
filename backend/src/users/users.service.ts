@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from './users.repository.js';
 import { UsersUtils } from './users.utils.js';
 import { Prisma, User } from '@prisma/client';
@@ -28,7 +34,9 @@ export class UsersService {
     }
 
     if (missingFields.length > 0) {
-      throw new BadRequestException(`Missing required fields: ${missingFields.join(', ')}`);
+      throw new BadRequestException(
+        `Missing required fields: ${missingFields.join(', ')}`,
+      );
     }
 
     const normalizedName = data.name.trim();
@@ -55,10 +63,20 @@ export class UsersService {
     };
 
     try {
-      const createdUser = await this.usersRepository.create(newData);
-      return this.toPublicUser(createdUser);
+      const user = await this.usersRepository.create(newData);
+      const tokens = await this.authTokenService.generateTokens(
+      user.id,
+      user.role,
+    );
+      return {
+        ...tokens,
+        user: this.toPublicUser(user)
+      };
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('User already exists');
       }
       throw error;
@@ -86,12 +104,18 @@ export class UsersService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordCorrect = await this.usersUtils.comparePassword(password, user.passwordHash);
+    const isPasswordCorrect = await this.usersUtils.comparePassword(
+      password,
+      user.passwordHash,
+    );
     if (!isPasswordCorrect) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.authTokenService.generateTokens(user.id, user.role);
+    const tokens = await this.authTokenService.generateTokens(
+      user.id,
+      user.role,
+    );
 
     return {
       ...tokens,
@@ -116,10 +140,14 @@ export class UsersService {
 
   async getAllUsers(limit = 100, offset = 0) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-      throw new BadRequestException('limit must be an integer between 1 and 100');
+      throw new BadRequestException(
+        'limit must be an integer between 1 and 100',
+      );
     }
     if (!Number.isInteger(offset) || offset < 0) {
-      throw new BadRequestException('offset must be an integer greater than or equal to 0');
+      throw new BadRequestException(
+        'offset must be an integer greater than or equal to 0',
+      );
     }
 
     const users = await this.usersRepository.findAll(limit, offset);
@@ -145,14 +173,16 @@ export class UsersService {
     const normalizedEmail = data.email?.trim().toLowerCase();
 
     if (normalizedName) {
-      const userWithSameUsername = await this.usersRepository.findByUsername(normalizedName);
+      const userWithSameUsername =
+        await this.usersRepository.findByUsername(normalizedName);
       if (userWithSameUsername && userWithSameUsername.id !== id) {
         throw new ConflictException('User with this username already exists');
       }
     }
 
     if (normalizedEmail) {
-      const userWithSameEmail = await this.usersRepository.findByEmail(normalizedEmail);
+      const userWithSameEmail =
+        await this.usersRepository.findByEmail(normalizedEmail);
       if (userWithSameEmail && userWithSameEmail.id !== id) {
         throw new ConflictException('User with this email already exists');
       }
@@ -175,7 +205,10 @@ export class UsersService {
       });
       return this.toPublicUser(updatedUser);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('User already exists');
       }
       throw error;
