@@ -1,24 +1,22 @@
-import React, { JSX } from "react";
-import "./ARButton.scss";
+import React, { JSX } from 'react';
+import './ARButton.scss';
 
 interface ARButtonProps {
   text: string;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  type?: 'button' | 'submit';
 }
 
-export function ARButton({ text, onClick }: ARButtonProps): JSX.Element {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onClick?.(e);
+export function ARButton({ text, onClick, type = 'submit' }: ARButtonProps): JSX.Element {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (onClick) {
+      onClick(e);
+    }
   };
 
   return (
-    <div
-      className="btnAR"
-      onClick={handleClick}
-    >
+    <button className="btnAR" onClick={handleClick} type={type}>
       {text}
-    </div>
+    </button>
   );
 }

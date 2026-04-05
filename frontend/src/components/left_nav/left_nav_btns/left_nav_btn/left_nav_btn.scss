@@ -9,9 +9,15 @@
   @include left_menu_btn;
   text-decoration: none;
   transition: all 0.2s;
+  transition: background-color 0.2s;
 
   &.active {
     background-color: #2F2F2F;
+    border-radius: 6px;
+  }
+
+  &:hover {
+    background-color: #383838; 
     border-radius: 6px;
   }
 

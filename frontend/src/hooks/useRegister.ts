@@ -1,39 +1,42 @@
-import { useState } from "react";
-import { useFieldFeedbackContext } from "../context/FieldFeedbackContext";
-import { validateRegistrationForm } from "../utils/validation/registrationValidation";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
+import { authApi, setTokens } from '../services/api';
+import { validateRegistrationForm } from '../utils/validation/registrationValidation';
 
 export function useRegister() {
   const { showFeedback } = useFieldFeedbackContext();
+  const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent): Promise<boolean> => {
     e.preventDefault();
     e.stopPropagation();
 
     const validation = validateRegistrationForm(username, email, password);
-
     if (!validation.isValid) {
-      showFeedback(validation.message, "error");
-      return;
+      showFeedback(validation.message, 'error');
+      return false;
     }
 
+    setIsLoading(true);
     try {
-      // Имитация запроса к серверу
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      console.log("Данные для регистрации:", {
-        username: username.trim(),
-        email: email.trim(),
-        password,
-      });
-
-      showFeedback("Регистрация успешна! Теперь можете войти", "success");
-    } catch (error) {
-      console.error("Ошибка при регистрации:", error);
-      showFeedback("Ошибка сервера. Попробуйте позже", "error");
+      await authApi.register(username.trim(), email.trim(), password);
+      const loginData = await authApi.login({ email: email.trim(), password });
+      setTokens(loginData.accessToken, loginData.refreshToken);
+      showFeedback('Регистрация успешна!', 'success');
+      navigate('/overview/scenario', { replace: true });
+      return true;
+    } catch (error: any) {
+      console.error(error);
+      showFeedback(error.message || 'Ошибка регистрации', 'error');
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -45,5 +48,6 @@ export function useRegister() {
     password,
     setPassword,
     handleRegister,
+    isLoading,
   };
 }

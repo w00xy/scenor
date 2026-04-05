@@ -1,33 +1,35 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Overview_Scen } from '../pages/overview/Overview';
-import { Modal } from '../components/Modal/ModalAuthReg/ModalAuthReg';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Modal } from '../components/Modal/ModalAuthReg/Modal';
 import { Auth } from '../pages/authorization/Auth';
 import { Reg } from '../pages/registration/Reg';
+import Cookies from 'universal-cookie';
+import { Overview } from '../pages/overview/Overview'; // импортируем Overview
+
+const cookies = new Cookies();
 
 export function MainLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const token = cookies.get('accessToken');
 
   const isAuth = location.pathname === '/auth';
   const isRegister = location.pathname === '/register';
+  const isProtected = location.pathname.startsWith('/overview_scen') || location.pathname === '/profile';
 
-  useEffect(() => {
-    const knownPaths = ['/overview_scen', '/overview_credentials', '/auth', '/register'];
-    if (!knownPaths.includes(location.pathname)) {
-      navigate('/overview_scen', { replace: true });
-    }
-  }, [location.pathname, navigate]);
+  if (isProtected && !token) {
+    return <Navigate to="/auth" replace />;
+  }
+  if (token && (isAuth || isRegister)) {
+    return <Navigate to="/overview_scen" replace />;
+  }
 
-  const closeModal = () => {
-    navigate('/overview_scen');
-  };
+  const showModal = isAuth || isRegister;
 
   return (
     <>
-      <Outlet />
-      {(isAuth || isRegister) && (
-        <Modal onClose={closeModal}>
+      {/* Всегда рендерим Overview */}
+      <Overview />
+      {showModal && (
+        <Modal>
           {isAuth && <Auth />}
           {isRegister && <Reg />}
         </Modal>

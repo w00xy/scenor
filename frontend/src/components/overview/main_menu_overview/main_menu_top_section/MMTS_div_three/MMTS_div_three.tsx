@@ -3,8 +3,8 @@ import "./MMTS_div_three.scss";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
-  { label: "Сценарии", path: "" },
-  { label: "Учётные данные", path: "overview_credentials" },
+  { label: "Сценарии", path: "scenario" },
+  { label: "Учётные данные", path: "credentials" },
   { label: "История операций", path: "history" },        
   { label: "Таблица данных", path: "data-table" },
 ];
