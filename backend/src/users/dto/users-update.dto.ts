@@ -4,10 +4,18 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
 
 export class UpdateUserDto {
+  @ApiPropertyOptional({
+      example: '123e4567-e89b-12d3-a456-426614174000',
+      description: 'User ID',
+    })
+  @IsUUID()
+  id!: string;
+
   @ApiPropertyOptional({
     example: 'Alex Updated',
     description: 'User display name',
@@ -15,7 +23,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  name?: string;
+  username?: string;
 
   @ApiPropertyOptional({
     example: 'alex.updated@example.com',

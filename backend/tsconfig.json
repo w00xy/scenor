@@ -13,7 +13,6 @@
     "target": "es2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "types": ["node", "jest", "bcrypt"],
     "incremental": true,
     "skipLibCheck": true,

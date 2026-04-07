@@ -29,7 +29,7 @@ COPY --chown=node:node --from=builder /app/package*.json ./
 COPY --chown=node:node --from=builder /app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /app/dist ./dist
 COPY --chown=node:node --from=builder /app/prisma ./prisma
-COPY --chown=node:node backend/docker-entrypoint.sh ./docker-entrypoint.sh
+# COPY --chown=node:node backend/docker-entrypoint.sh ./docker-entrypoint.sh
 
 USER node
 

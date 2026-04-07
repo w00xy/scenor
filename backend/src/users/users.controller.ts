@@ -57,14 +57,13 @@ export class UsersController {
     return this.usersService.getUserById(id);
   }
 
-  @Put(':id/update')
+  @Put()
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   async updateUser(
-    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() data: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(id, data);
+    return this.usersService.updateUser(data);
   }
 
   @Delete(':id/delete')

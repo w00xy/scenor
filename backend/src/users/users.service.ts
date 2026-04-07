@@ -23,8 +23,8 @@ export class UsersService {
 
   async createUser(data: CreateUserDto) {
     const missingFields: string[] = [];
-    if (!data?.name?.trim()) {
-      missingFields.push('name');
+    if (!data?.username?.trim()) {
+      missingFields.push('username');
     }
     if (!data?.email?.trim()) {
       missingFields.push('email');
@@ -39,12 +39,12 @@ export class UsersService {
       );
     }
 
-    const normalizedName = data.name.trim();
+    const normalizedUserName = data.username.trim();
     const normalizedEmail = data.email.trim().toLowerCase();
 
     const [existingByEmail, existingByUsername] = await Promise.all([
       this.usersRepository.findByEmail(normalizedEmail),
-      this.usersRepository.findByUsername(normalizedName),
+      this.usersRepository.findByUsername(normalizedUserName),
     ]);
 
     if (existingByEmail) {
@@ -57,7 +57,7 @@ export class UsersService {
     const passwordHash = await this.usersUtils.hashPassword(data.password);
 
     const newData = {
-      name: normalizedName,
+      username: normalizedUserName,
       email: normalizedEmail,
       password: passwordHash,
     };
@@ -65,12 +65,12 @@ export class UsersService {
     try {
       const user = await this.usersRepository.create(newData);
       const tokens = await this.authTokenService.generateTokens(
-      user.id,
-      user.role,
-    );
+        user.id,
+        user.role,
+      );
       return {
         ...tokens,
-        user: this.toPublicUser(user)
+        user: this.toPublicUser(user),
       };
     } catch (error) {
       if (
@@ -163,19 +163,19 @@ export class UsersService {
     return this.toPublicUser(user);
   }
 
-  async updateUser(id: string, data: UpdateUserDto) {
-    const existingUser = await this.usersRepository.findOne(id);
+  async updateUser(data: UpdateUserDto) {
+    const existingUser = await this.usersRepository.findOne(data.id);
     if (!existingUser) {
       throw new NotFoundException('User not found');
     }
 
-    const normalizedName = data.name?.trim();
+    const normalizedUserName = data.username?.trim();
     const normalizedEmail = data.email?.trim().toLowerCase();
 
-    if (normalizedName) {
+    if (normalizedUserName) {
       const userWithSameUsername =
-        await this.usersRepository.findByUsername(normalizedName);
-      if (userWithSameUsername && userWithSameUsername.id !== id) {
+        await this.usersRepository.findByUsername(normalizedUserName);
+      if (userWithSameUsername && userWithSameUsername.id !== data.id) {
         throw new ConflictException('User with this username already exists');
       }
     }
@@ -183,7 +183,7 @@ export class UsersService {
     if (normalizedEmail) {
       const userWithSameEmail =
         await this.usersRepository.findByEmail(normalizedEmail);
-      if (userWithSameEmail && userWithSameEmail.id !== id) {
+      if (userWithSameEmail && userWithSameEmail.id !== data.id) {
         throw new ConflictException('User with this email already exists');
       }
     }
@@ -198,9 +198,9 @@ export class UsersService {
     }
 
     try {
-      const updatedUser = await this.usersRepository.update(id, {
+      const updatedUser = await this.usersRepository.update(data.id, {
         ...data,
-        ...(normalizedName ? { name: normalizedName } : {}),
+        ...(normalizedUserName ? { username: normalizedUserName } : {}),
         ...(normalizedEmail ? { email: normalizedEmail } : {}),
       });
       return this.toPublicUser(updatedUser);

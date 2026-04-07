@@ -105,7 +105,7 @@ describe('UsersService', () => {
       authTokenService.generateTokens.mockResolvedValue(tokens);
 
       const result = await service.createUser({
-        name: '  Alex  ',
+        username: '  Alex  ',
         email: '  ALEX@EXAMPLE.COM  ',
         password: 'strongpass123',
       });
@@ -133,14 +133,14 @@ describe('UsersService', () => {
     it('should throw BadRequestException when required fields are missing', async () => {
       await expect(
         service.createUser({
-          name: ' ',
+          username: ' ',
           email: '',
           password: ' ',
         }),
       ).rejects.toThrow(BadRequestException);
       await expect(
         service.createUser({
-          name: ' ',
+          username: ' ',
           email: '',
           password: ' ',
         }),
@@ -153,7 +153,7 @@ describe('UsersService', () => {
 
       await expect(
         service.createUser({
-          name: 'Alex',
+          username: 'Alex',
           email: 'alex@example.com',
           password: 'strongpass123',
         }),
@@ -286,7 +286,10 @@ describe('UsersService', () => {
       const result = await service.getAllUsers(2, 0);
 
       expect(usersRepository.findAll).toHaveBeenCalledWith(2, 0);
-      expect(result).toEqual([toPublicUser(firstUser), toPublicUser(secondUser)]);
+      expect(result).toEqual([
+        toPublicUser(firstUser),
+        toPublicUser(secondUser),
+      ]);
       expect(result[0]).not.toHaveProperty('passwordHash');
       expect(result[1]).not.toHaveProperty('passwordHash');
     });
@@ -338,7 +341,7 @@ describe('UsersService', () => {
       usersRepository.update.mockResolvedValue(updatedUser);
 
       const result = await service.updateUser(user.id, {
-        name: '  Alex Updated  ',
+        username: '  Alex Updated  ',
         email: '  ALEX.UPDATED@EXAMPLE.COM  ',
         password: 'newstrongpass123',
       });
@@ -363,7 +366,7 @@ describe('UsersService', () => {
 
       await expect(
         service.updateUser('9389f503-ba78-479e-9b7b-9f6755af20d3', {
-          name: 'New Name',
+          username: 'New Name',
         }),
       ).rejects.toThrow(NotFoundException);
     });

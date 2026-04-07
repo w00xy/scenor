@@ -79,7 +79,7 @@ describe('UsersController', () => {
       user: createPublicUser(),
     };
     const data = {
-      name: 'Alex',
+      username: 'Alex',
       email: 'alex@example.com',
       password: 'strongpass123',
     };
@@ -159,6 +159,7 @@ describe('UsersController', () => {
     });
     const id = '59c22156-6f13-495d-9b8a-8f47eec7d74c';
     const data = {
+      id: id,
       name: 'Alex Updated',
       email: 'alex.updated@example.com',
       password: 'newpass123',
@@ -166,7 +167,7 @@ describe('UsersController', () => {
 
     usersService.updateUser.mockResolvedValue(response);
 
-    const result = await controller.updateUser(id, data);
+    const result = await controller.updateUser(data);
 
     expect(usersService.updateUser).toHaveBeenCalledWith(id, data);
     expect(result).toEqual(response);
