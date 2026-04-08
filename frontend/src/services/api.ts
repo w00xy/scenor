@@ -61,4 +61,21 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }),
+    
+};
+
+export const userApi = {
+  getUser: (id: string) =>
+    request<{ id: string; username: string; email: string; lastname?: string; phone?: string; role: string; createdAt: string; updatedAt: string }>(
+      `/users/${id}`,
+      { method: 'GET' },
+      true
+    ),
+
+  updateUser: (id: string, data: { username?: string; email?: string; lastname?: string; phone?: string }) =>
+    request<{ id: string; username: string; email: string; lastname?: string; phone?: string }>(
+      `/users/${id}`,
+      { method: 'PATCH', body: JSON.stringify(data) },
+      true
+    ),
 };

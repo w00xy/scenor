@@ -1,0 +1,9 @@
+@use "./../../../../../styles/variables/variables" as *;
+
+.profile-settings__title_H2{
+    font-family: $font-family;
+    color: $color-white;
+    font-size: 18px;
+    padding: 44px 0px 22px;
+
+}

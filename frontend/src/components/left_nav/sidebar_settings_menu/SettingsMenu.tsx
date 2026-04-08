@@ -36,7 +36,7 @@ export function SettingsMenu({
   }, [onClose, ignoreRef]);
 
   const handlePersonal = () => {
-    navigate("/profile");
+    navigate("/settings/profile");
     onClose();
   };
 

@@ -4,9 +4,11 @@ import { Reg } from "./pages/registration/Reg"; // аналогично
 import { Overview } from "./pages/overview/Overview";
 import { Overview_scen } from "./components/overview/pages_overview/overview_scen/overview_scen";
 import { Overview_credentials } from "./components/overview/pages_overview/overview_credentials/overview_credentials";
-import { Profile } from "./pages/profile/Profile";
+import { SettingsLayout } from "./pages/settings/SettingsLayout";
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+
+import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
 
 export default function App() {
   return (
@@ -23,7 +25,10 @@ export default function App() {
               <Route path="scenario" element={<Overview_scen />} />
               <Route path="credentials" element={<Overview_credentials />} />
             </Route>
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<SettingsLayout />}>
+              <Route path="profile" element={<ProfileSettings/>} />
+            
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

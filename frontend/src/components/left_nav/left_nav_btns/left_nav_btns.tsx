@@ -17,7 +17,7 @@ export function LNav(): JSX.Element {
   return (
     <div className="LNav">
       <div className="group_btn">
-        <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview_scen" />
+        <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview" />
         <LNBtn
           icon={<PersonalSVG />}
           text="Личное"

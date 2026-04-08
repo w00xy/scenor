@@ -51,7 +51,7 @@ export function Auth(): JSX.Element {
         <FieldSpacer height={12} />
         <AuthLink
           text="Ещё нет аккаунта?"
-          linkText="Зерегистрироваться"
+          linkText="Зарегистрироваться"
           linkTo="/register" />
       </ARForm>
       </div>

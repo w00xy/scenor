@@ -4,8 +4,6 @@
   max-width: 240px;
   max-height: 100%;
 
-  // min-width: 40px;
-
   width: 220px;
   height: 100%;
   background: #212121;
@@ -20,5 +18,10 @@
     width: 40px;          
     padding: 25px 0 16px; 
     align-items: center;  
+  }
+
+  &--settings {
+    padding: 17px 17px 0px;
+    gap: 7px;
   }
 }
