@@ -15,4 +15,8 @@ describe('DatabaseService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should connect', () => {
+    expect(service.$connect()).resolves.not.toThrow();
+  });
 });

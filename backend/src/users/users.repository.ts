@@ -30,21 +30,24 @@ export class UsersRepository {
     });
   }
 
-  async create(data: { name: string; email: string, password: string }) {
+  async create(data: { username: string; email: string; password: string }) {
     return this.prisma.user.create({
       data: {
-        username: data.name,
+        username: data.username,
         email: data.email,
         passwordHash: data.password,
       },
     });
   }
 
-  async update(id: string, data: { name?: string; email?: string; password?: string }) {
+  async update(
+    id: string,
+    data: { username?: string; email?: string; password?: string },
+  ) {
     return this.prisma.user.update({
       where: { id },
       data: {
-        username: data.name,
+        username: data.username,
         email: data.email,
         passwordHash: data.password,
       },

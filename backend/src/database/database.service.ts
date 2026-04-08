@@ -4,7 +4,10 @@ import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class DatabaseService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
