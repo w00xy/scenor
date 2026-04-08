@@ -71,35 +71,35 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
       <div className="change-password-modal">
         <ARForm onSubmit={handleSubmit}>
           <ModeName text="Изменить пароль" />
-          <FieldSpacer height={32} />
-
+          <FieldSpacer height={20} />
+          
           <InputField>
             <Input
-              placeholder="Текущий пароль"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
             />
           </InputField>
-          <FieldSpacer height={16} />
+          <FieldSpacer height={20} />
 
           <InputField>
             <Input
-              placeholder="Новый пароль"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
             />
           </InputField>
           <div className="password-hint">8+ символов, как минимум 1 цифра и 1 буква</div>
-          <FieldSpacer height={16} />
+          {/* <FieldSpacer height={16} /> */}
 
           <InputField>
             <Input
-              placeholder="Подтвердите новый пароль"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
             />
           </InputField>
           <FieldSpacer height={24} />
