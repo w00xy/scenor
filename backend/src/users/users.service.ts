@@ -11,6 +11,7 @@ import { Prisma, User } from '@prisma/client';
 import { CreateUserDto } from './dto/users-create.dto.js';
 import { LoginUserDto } from './dto/users-login.dto.js';
 import { UpdateUserDto } from './dto/users-update.dto.js';
+import { ChangePasswordDto } from './dto/users-change-password.dto.js';
 import { AuthTokenService } from '../auth/auth-token.service.js';
 
 @Injectable()
@@ -223,6 +224,41 @@ export class UsersService {
 
     const deletedUser = await this.usersRepository.delete(id);
     return this.toPublicUser(deletedUser);
+  }
+
+  async changePassword(userId: string, data: ChangePasswordDto) {
+    const currentPassword = data.currentPassword?.trim();
+    const newPassword = data.newPassword?.trim();
+
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestException(
+        'Current password and new password are required',
+      );
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
+    }
+
+    const user = await this.usersRepository.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCurrentPasswordValid = await this.usersUtils.comparePassword(
+      currentPassword,
+      user.passwordHash,
+    );
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const passwordHash = await this.usersUtils.hashPassword(newPassword);
+    await this.usersRepository.update(userId, { password: passwordHash });
+
+    return { message: 'Password updated successfully' };
   }
 
   private toPublicUser(user: User): Omit<User, 'passwordHash'> {
