@@ -1,10 +1,14 @@
 import "./profile-settings.scss";
+import { JSX, useState } from "react";
+import { ChangePasswordModal } from "./profile-settings__modal/profile-settings__modal-сhange_password/profile-settings__modal-сhange_password";
 import { ProfileSettingsTitleH1 } from "./profile-settings__title/profile-settings__title_H1/profile-settings__title_H1";
 import { ProfileSettingsTitleH2 } from "./profile-settings__title/profile-settings__title_H2/profile-settings__title_H2";
 import { ProfileSettingsField } from "./profile-settings__field/profile-settings__field";
 import { useProfile } from "../../../hooks/useProfile";
 
-export function ProfileSettings() {
+export function ProfileSettings(): JSX.Element {
+  const [showPasswordModal, setShowPasswordModal ] = useState(false);
+
   const {
     name,
     setName,
@@ -57,7 +61,15 @@ export function ProfileSettings() {
 
       <ProfileSettingsTitleH2 text="Безопасность" />
       <div className="profile-settings__title_H3">Пароль</div>
-      <div className="profile-settings__label-link">Изменить пароль</div>
+      <div className="profile-settings__label-link" onClick={() => setShowPasswordModal(true)}>Изменить пароль</div>
+      {showPasswordModal && (
+        <ChangePasswordModal
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={() => {
+              
+          }}
+        />
+      )}
 
       <button
         className="profile-settings__button"

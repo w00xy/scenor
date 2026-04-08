@@ -48,7 +48,6 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
 
     setIsLoading(true);
     try {
-      // Имитация запроса – замените на реальный API
       await new Promise(resolve => setTimeout(resolve, 1000));
       showFeedback("Пароль успешно изменён", "success");
       onSuccess?.();
@@ -61,7 +60,6 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
     }
   };
 
-  // Закрытие по клику на оверлей (опционально)
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
