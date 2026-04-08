@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { Prisma, UserProfile } from '@prisma/client';
-import { UpdateProfileDto } from './dto/index.js';
+import { ProfileUpdateDto } from './dto/index.js';
 
 @Injectable()
 export class ProfilesService {
@@ -21,7 +21,7 @@ export class ProfilesService {
     return profile;
   }
 
-  async putProfile(data: UpdateProfileDto): Promise<UserProfile> {
+  async putProfile(data: ProfileUpdateDto): Promise<UserProfile> {
     const { userId, ...updateData } = data;
 
     return await this.prisma.userProfile.upsert({
