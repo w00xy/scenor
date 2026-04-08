@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { GetProfileDto, UpdateProfileDto } from './dto/index.js';
 import { UserProfile } from '@prisma/client';
 import { AuthGuard } from '../auth/auth.guard';
@@ -17,6 +17,7 @@ export class ProfilesController {
 
   @Put('me')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create profile or update existing profile' })
   async putProfile(@Body() data: UpdateProfileDto): Promise<UserProfile> {
     return await this.profilesService.putProfile(data);

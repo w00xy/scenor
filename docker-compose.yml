@@ -4,7 +4,7 @@ services:
     container_name: database
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - ./backend/${BACKEND_ENV_FILE:-.env}
     ports:
       - "5433:5432"
     volumes:
@@ -23,9 +23,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./backend/.env
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/base_name
+      - ./backend/${BACKEND_ENV_FILE:-.env}
     networks:
       - network
     ports:
@@ -37,7 +35,7 @@ volumes:
 
 secrets:
   backend_env:
-    file: ./backend/.env
+    file: ./backend/${BACKEND_ENV_FILE:-.env}
 
 networks:
   network:
