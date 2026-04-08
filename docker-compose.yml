@@ -9,25 +9,28 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
 
   app:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
       secrets:
         - backend_env
     container_name: backend
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       - db
     env_file:
       - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/base_name
+    networks:
+      - network
     ports:
       - "3000:3000"
-    command: >
-      sh -c "export DATABASE_URL=postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@db:5432/$${POSTGRES_DB}?schema=public
-      && npm run prisma:migrate:deploy
-      && npm run start:prod"
+
 
 volumes:
   postgres_data:
@@ -35,3 +38,7 @@ volumes:
 secrets:
   backend_env:
     file: ./backend/.env
+
+networks:
+  network:
+    driver: bridge

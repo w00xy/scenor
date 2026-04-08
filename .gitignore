@@ -29,6 +29,10 @@ backend/.env.development.local
 backend/.env.test.local
 backend/.env.production.local
 backend/.secrets/
+.env
+.env.prod
+backend/.env.prod
+backend/.env.dev
 
 node_modules
 frontend/node_modules
