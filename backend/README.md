@@ -8,6 +8,17 @@
 
 ## Environment
 
+You can use:
+
+- `.env` for local/dev
+- `.env.prod` for production-like config
+
+Default behavior:
+
+- if `NODE_ENV=prod` or `NODE_ENV=production`, app reads `.env.prod` (with fallback to `.env`)
+- otherwise app reads `.env`
+- you can force a specific file via `ENV_FILE=<file>`
+
 1. Create `.env` from template:
 
 ```bash
@@ -23,6 +34,19 @@ cp .env.example .env
 - `JWT_REFRESH_EXPIRES_IN`
 - `PORT`
 
+Optional run examples:
+
+```bash
+# Uses .env (default)
+npm run start:dev
+
+# Uses .env.prod
+NODE_ENV=prod npm run start:dev
+
+# Explicit file override (works for Prisma too)
+ENV_FILE=.env.prod npm run start:dev
+```
+
 ## Install and Run (Development)
 
 ```bash
@@ -35,6 +59,16 @@ npm run start:dev
 Backend will run on:
 
 `http://localhost:3000`
+
+For Docker Compose, switch env file like this:
+
+```bash
+# default: ./backend/.env
+docker compose up --build
+
+# use ./backend/.env.prod
+BACKEND_ENV_FILE=.env.prod docker compose up --build
+```
 
 ## Swagger
 
