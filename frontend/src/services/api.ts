@@ -1,7 +1,7 @@
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 async function request<T>(
   endpoint: string,

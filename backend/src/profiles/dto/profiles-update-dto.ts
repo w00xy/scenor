@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class UpdateProfileDto {
+export class ProfileUpdateDto {
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
     description: 'User ID',
@@ -21,7 +21,6 @@ export class UpdateProfileDto {
     description: 'First name',
   })
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(100)
   firstName?: string;
@@ -31,7 +30,6 @@ export class UpdateProfileDto {
     description: 'Last name',
   })
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(100)
   lastName?: string;
@@ -41,7 +39,6 @@ export class UpdateProfileDto {
     description: 'User bio',
   })
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(500)
   bio?: string;
@@ -51,7 +48,6 @@ export class UpdateProfileDto {
     description: 'Phone number',
   })
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   @MaxLength(32)
   phone?: string;
@@ -61,7 +57,6 @@ export class UpdateProfileDto {
     description: 'Avatar URL',
   })
   @IsOptional()
-  @IsNotEmpty()
   @IsUrl()
   @MaxLength(2048)
   avatarUrl?: string;

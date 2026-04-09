@@ -1,4 +1,4 @@
-import { GetProfileDto } from './getProfile';
-import { UpdateProfileDto } from './updateProfile';
+import { ProfileGetDto } from './profile-get-dto';
+import { ProfileUpdateDto } from './profiles-update-dto';
 
-export { GetProfileDto, UpdateProfileDto };
+export { ProfileGetDto, ProfileUpdateDto };

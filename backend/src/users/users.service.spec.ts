@@ -115,7 +115,7 @@ describe('UsersService', () => {
       );
       expect(usersRepository.findByUsername).toHaveBeenCalledWith('Alex');
       expect(usersRepository.create).toHaveBeenCalledWith({
-        name: 'Alex',
+        username: 'Alex',
         email: 'alex@example.com',
         password: 'new-hash',
       });
@@ -144,7 +144,7 @@ describe('UsersService', () => {
           email: '',
           password: ' ',
         }),
-      ).rejects.toThrow('Missing required fields: name, email, password');
+      ).rejects.toThrow('Missing required fields: username, email, password');
     });
 
     it('should throw ConflictException when user with same email exists', async () => {
@@ -340,7 +340,8 @@ describe('UsersService', () => {
       usersUtils.hashPassword.mockResolvedValue('updated-hash');
       usersRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUser(user.id, {
+      const result = await service.updateUser({
+        id: user.id,
         username: '  Alex Updated  ',
         email: '  ALEX.UPDATED@EXAMPLE.COM  ',
         password: 'newstrongpass123',
@@ -353,7 +354,8 @@ describe('UsersService', () => {
         'alex.updated@example.com',
       );
       expect(usersRepository.update).toHaveBeenCalledWith(user.id, {
-        name: 'Alex Updated',
+        id: user.id,
+        username: 'Alex Updated',
         email: 'alex.updated@example.com',
         password: 'updated-hash',
       });
@@ -365,7 +367,8 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateUser('9389f503-ba78-479e-9b7b-9f6755af20d3', {
+        service.updateUser({
+          id: '9389f503-ba78-479e-9b7b-9f6755af20d3',
           username: 'New Name',
         }),
       ).rejects.toThrow(NotFoundException);
