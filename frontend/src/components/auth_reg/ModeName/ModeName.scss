@@ -1,0 +1,11 @@
+@use "../../../styles/variables/_variables.scss" as *;
+
+
+.ModeName {
+  font-family: $font-family;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  color: #e5e7eb;
+  font-size: 24px;
+}

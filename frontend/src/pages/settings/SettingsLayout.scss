@@ -1,0 +1,12 @@
+.settings-layout{
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+}
+
+.settings-layout__content{
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: flex-start;
+}

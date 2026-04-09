@@ -1,0 +1,30 @@
+@use "../../../styles/variables/_variables.scss" as *;
+
+.inputAR {
+  width: 340px;
+  height: 25px;
+
+  font-family: $font-family;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  color: #9a9a9a;
+  font-size: 16px;
+  display: flex;
+}
+
+.inputAR input,
+button {
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #9a9a9a;
+  caret-color: $color-white;
+}

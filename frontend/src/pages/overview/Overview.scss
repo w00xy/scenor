@@ -1,0 +1,22 @@
+@use "../../styles/variables/_variables" as *;
+
+.overview {
+    display: flex;
+    max-height: 100vh;
+    height: 100vh;
+}
+
+.overview-locked {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.overview-blur {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+  height: 100%;
+  overflow: auto;
+  background-color: inherit; 
+}

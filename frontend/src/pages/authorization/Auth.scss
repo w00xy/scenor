@@ -1,0 +1,22 @@
+.auth-page {
+  height: 100vh;
+}
+
+.auth-page__blur {
+  filter: blur(4px);
+  pointer-events: none;
+  height: 100%;
+  overflow: auto;
+}
+
+.auth-page__form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: 90%;
+  max-width: 480px;
+  border-radius: 24px;
+  padding: 32px;
+}

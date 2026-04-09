@@ -1,0 +1,27 @@
+@use "./../../../styles/variables/variables";
+
+.left-menu__body {
+  max-width: 240px;
+  max-height: 100%;
+
+  width: 220px;
+  height: 100%;
+  background: #212121;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s; 
+  border-right: 1px solid #424242;
+  padding: 25px 16px 16px 16px;
+  box-sizing: border-box;
+
+  &.collapsed {
+    width: 40px;          
+    padding: 25px 0 16px; 
+    align-items: center;  
+  }
+
+  &--settings {
+    padding: 17px 17px 0px;
+    gap: 7px;
+  }
+}

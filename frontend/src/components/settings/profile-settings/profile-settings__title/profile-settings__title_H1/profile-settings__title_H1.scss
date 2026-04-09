@@ -1,0 +1,7 @@
+@use "./../../../../../styles//variables/variables" as *;
+
+.profile-settings__title{
+    font-family: $font-family;
+    color: $color-white;
+    font-size: 28px;
+}
