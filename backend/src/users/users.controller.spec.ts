@@ -160,7 +160,7 @@ describe('UsersController', () => {
     const id = '59c22156-6f13-495d-9b8a-8f47eec7d74c';
     const data = {
       id: id,
-      name: 'Alex Updated',
+      username: 'Alex Updated',
       email: 'alex.updated@example.com',
       password: 'newpass123',
     };
@@ -169,7 +169,7 @@ describe('UsersController', () => {
 
     const result = await controller.updateUser(data);
 
-    expect(usersService.updateUser).toHaveBeenCalledWith(id, data);
+    expect(usersService.updateUser).toHaveBeenCalledWith(data);
     expect(result).toEqual(response);
   });
 
