@@ -28,7 +28,9 @@ async function request<T>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `HTTP ${response.status}`);
+    const error = new Error(errorData.message || `HTTP ${response.status}`);
+    (error as any).status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -105,4 +107,29 @@ export const userApi = {
       lastname?: string;
       phone?: string;
     }>(`/users/${id}`, { method: "PATCH", body: JSON.stringify(data) }, true),
+};
+
+export const profileApi = {
+  getProfile: (userId: string) =>
+    request<{
+      userId: string;
+      firstName: string;
+      lastName: string;
+      bio?: string;
+      phone?: string;
+      avatarUrl?: string;
+    }>(`/profile/me?id=${userId}`, { method: 'GET' }, true),
+
+  updateProfile: (userId: string, data: { firstName?: string; lastName?: string; bio?: string; phone?: string; avatarUrl?: string }) =>
+    request<{
+      userId: string;
+      firstName: string;
+      lastName: string;
+      bio?: string;
+      phone?: string;
+      avatarUrl?: string;
+    }>(`/profile/me`, {
+      method: 'PUT',
+      body: JSON.stringify({ userId, ...data }),
+    }, true),
 };
