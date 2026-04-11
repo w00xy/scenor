@@ -1,7 +1,7 @@
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 async function request<T>(
   endpoint: string,
@@ -107,6 +107,16 @@ export const userApi = {
       lastname?: string;
       phone?: string;
     }>(`/users/${id}`, { method: "PATCH", body: JSON.stringify(data) }, true),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ success: boolean }>(
+      "/users/password",
+      {
+        method: "PUT",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      },
+      true,
+    ),
 };
 
 export const profileApi = {
@@ -118,9 +128,18 @@ export const profileApi = {
       bio?: string;
       phone?: string;
       avatarUrl?: string;
-    }>(`/profile/me?id=${userId}`, { method: 'GET' }, true),
+    }>(`/profile/me?id=${userId}`, { method: "GET" }, true),
 
-  updateProfile: (userId: string, data: { firstName?: string; lastName?: string; bio?: string; phone?: string; avatarUrl?: string }) =>
+  updateProfile: (
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      bio?: string;
+      phone?: string;
+      avatarUrl?: string;
+    },
+  ) =>
     request<{
       userId: string;
       firstName: string;
@@ -128,8 +147,12 @@ export const profileApi = {
       bio?: string;
       phone?: string;
       avatarUrl?: string;
-    }>(`/profile/me`, {
-      method: 'PUT',
-      body: JSON.stringify({ userId, ...data }),
-    }, true),
+    }>(
+      `/profile/me`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ userId, ...data }),
+      },
+      true,
+    ),
 };

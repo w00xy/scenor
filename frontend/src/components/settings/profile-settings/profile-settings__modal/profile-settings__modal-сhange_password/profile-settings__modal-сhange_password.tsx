@@ -7,6 +7,7 @@ import { Input } from "../../../../../components/auth_reg/Input/Input";
 import { FieldSpacer } from "../../../../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useState } from "react";
 import { useFieldFeedbackContext } from "../../../../../context/FieldFeedbackContext";
+import { userApi } from "../../../../../services/api"; // добавлен импорт
 
 interface ChangePasswordModalProps {
   onClose: () => void;
@@ -48,7 +49,7 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
 
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await userApi.changePassword(currentPassword, newPassword);
       showFeedback("Пароль успешно изменён", "success");
       onSuccess?.();
       onClose();
@@ -72,9 +73,10 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
         <ARForm onSubmit={handleSubmit}>
           <ModeName text="Изменить пароль" />
           <FieldSpacer height={20} />
-          
+
           <InputField>
             <Input
+              placeholder="Текущий пароль"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -85,6 +87,7 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
 
           <InputField>
             <Input
+              placeholder="Новый пароль"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -92,10 +95,10 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
             />
           </InputField>
           <div className="password-hint">8+ символов, как минимум 1 цифра и 1 буква</div>
-          {/* <FieldSpacer height={16} /> */}
 
           <InputField>
             <Input
+              placeholder="Подтвердите новый пароль"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
