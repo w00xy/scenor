@@ -1,21 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class ProfileUpdateDto {
-  @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    description: 'User ID',
-  })
-  @IsUUID()
-  userId!: string;
-
   @ApiPropertyOptional({
     example: 'Alex',
     description: 'First name',

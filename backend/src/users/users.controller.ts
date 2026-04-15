@@ -70,9 +70,15 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   async updateUser(
+    @Req() request: AuthenticatedRequest,
     @Body() data: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(data);
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.usersService.updateUser(userId, data);
   }
 
   @Delete(':id/delete')

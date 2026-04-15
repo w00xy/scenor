@@ -115,7 +115,7 @@ describe('UsersService', () => {
       );
       expect(usersRepository.findByUsername).toHaveBeenCalledWith('Alex');
       expect(usersRepository.create).toHaveBeenCalledWith({
-        name: 'Alex',
+        username: 'Alex',
         email: 'alex@example.com',
         password: 'new-hash',
       });
@@ -144,7 +144,7 @@ describe('UsersService', () => {
           email: '',
           password: ' ',
         }),
-      ).rejects.toThrow('Missing required fields: name, email, password');
+      ).rejects.toThrow('Missing required fields: username, email, password');
     });
 
     it('should throw ConflictException when user with same email exists', async () => {
@@ -353,7 +353,7 @@ describe('UsersService', () => {
         'alex.updated@example.com',
       );
       expect(usersRepository.update).toHaveBeenCalledWith(user.id, {
-        name: 'Alex Updated',
+        username: 'Alex Updated',
         email: 'alex.updated@example.com',
         password: 'updated-hash',
       });

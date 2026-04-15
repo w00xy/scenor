@@ -159,15 +159,15 @@ describe('UsersController', () => {
     });
     const id = '59c22156-6f13-495d-9b8a-8f47eec7d74c';
     const data = {
-      id: id,
-      name: 'Alex Updated',
+      username: 'Alex Updated',
       email: 'alex.updated@example.com',
       password: 'newpass123',
     };
+    const request = { user: { sub: id, role: Role.USER } } as any;
 
     usersService.updateUser.mockResolvedValue(response);
 
-    const result = await controller.updateUser(data);
+    const result = await controller.updateUser(request, data);
 
     expect(usersService.updateUser).toHaveBeenCalledWith(id, data);
     expect(result).toEqual(response);

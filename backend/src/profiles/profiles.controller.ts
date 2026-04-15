@@ -1,25 +1,54 @@
-import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
-import { ProfilesService } from './profiles.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Put,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { ProfileGetDto, ProfileUpdateDto } from './dto/index.js';
 import { UserProfile } from '@prisma/client';
-import { AuthGuard } from '../auth/auth.guard';
+import { ProfilesService } from './profiles.service.js';
+import { ProfileUpdateDto } from './dto/profiles-update-dto.js';
+import { AuthGuard } from '../auth/auth.guard.js';
+import { AuthTokenPayload } from '../auth/auth-token.service.js';
+
+type AuthenticatedRequest = Request & {
+  user?: AuthTokenPayload;
+};
 
 @Controller('profile')
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
   @Get('me')
-  @ApiOperation({ summary: 'Get profile by user ID' })
-  async getProfile(@Query() data: ProfileGetDto): Promise<UserProfile> {
-    return await this.profilesService.getProfile({ userId: data.id });
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get current user profile' })
+  async getProfile(@Req() request: AuthenticatedRequest): Promise<UserProfile> {
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return await this.profilesService.getProfileByUserId(userId);
   }
 
   @Put('me')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create profile or update existing profile' })
-  async putProfile(@Body() data: ProfileUpdateDto): Promise<UserProfile> {
-    return await this.profilesService.putProfile(data);
+  @ApiOperation({ summary: 'Create or update current user profile' })
+  async putProfile(
+    @Req() request: AuthenticatedRequest,
+    @Body() data: ProfileUpdateDto,
+  ): Promise<UserProfile> {
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return await this.profilesService.putProfile(userId, data);
   }
 }
