@@ -26,7 +26,7 @@ export class ProfilesController {
   @Get('me')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiOperation({ summary: 'Получить профиль авторизованного пользователя' })
   async getProfile(@Req() request: AuthenticatedRequest): Promise<UserProfile> {
     const userId = request.user?.sub;
     if (!userId) {
@@ -39,7 +39,7 @@ export class ProfilesController {
   @Put('me')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create or update current user profile' })
+  @ApiOperation({ summary: 'Создать или обновить профиль пользователя' })
   async putProfile(
     @Req() request: AuthenticatedRequest,
     @Body() data: ProfileUpdateDto,

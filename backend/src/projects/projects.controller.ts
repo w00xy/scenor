@@ -16,6 +16,7 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
 import { CreateProjectDto, UpdateProjectDto } from './dto/index.js';
 import { ProjectsService } from './projects.service.js';
+import { ApiOperation } from '@nestjs/swagger';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
@@ -28,6 +29,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Создать проект' })
   async createProject(
     @Req() request: AuthenticatedRequest,
     @Body() data: CreateProjectDto,
@@ -41,6 +43,7 @@ export class ProjectsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Получить мои проекты' })
   async getMyProjects(@Req() request: AuthenticatedRequest) {
     const userId = request.user?.sub;
     if (!userId) {
@@ -51,6 +54,7 @@ export class ProjectsController {
   }
 
   @Get(':projectId')
+  @ApiOperation({ summary: 'Получить проект по id' })
   async getProjectById(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
@@ -64,6 +68,7 @@ export class ProjectsController {
   }
 
   @Put(':projectId')
+  @ApiOperation({ summary: 'Обновить проект по id' })
   async updateProject(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
