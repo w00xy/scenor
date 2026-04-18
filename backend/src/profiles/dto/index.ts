@@ -1,4 +1,3 @@
-import { ProfileGetDto } from './profile-get-dto';
-import { ProfileUpdateDto } from './profiles-update-dto';
+import { ProfileUpdateDto } from './profiles-update-dto.js';
 
-export { ProfileGetDto, ProfileUpdateDto };
+export { ProfileUpdateDto };

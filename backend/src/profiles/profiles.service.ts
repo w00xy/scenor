@@ -1,17 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DatabaseService } from '../database/database.service';
-import { Prisma, UserProfile } from '@prisma/client';
-import { ProfileUpdateDto } from './dto/index.js';
+import { UserProfile } from '@prisma/client';
+import { DatabaseService } from '../database/database.service.js';
+import { ProfileUpdateDto } from './dto/profiles-update-dto.js';
 
 @Injectable()
 export class ProfilesService {
   constructor(private prisma: DatabaseService) {}
 
-  async getProfile(
-    userProfileWhereUniqueInput: Prisma.UserProfileWhereUniqueInput,
-  ): Promise<UserProfile> {
+  async getProfileByUserId(userId: string): Promise<UserProfile> {
     const profile = await this.prisma.userProfile.findUnique({
-      where: userProfileWhereUniqueInput,
+      where: { userId },
     });
 
     if (!profile) {
@@ -21,16 +19,17 @@ export class ProfilesService {
     return profile;
   }
 
-  async putProfile(data: ProfileUpdateDto): Promise<UserProfile> {
-    const { userId, ...updateData } = data;
-
+  async putProfile(
+    userId: string,
+    data: ProfileUpdateDto,
+  ): Promise<UserProfile> {
     return await this.prisma.userProfile.upsert({
       where: { userId },
       create: {
         userId,
-        ...updateData,
+        ...data,
       },
-      update: updateData,
+      update: data,
     });
   }
 }

@@ -25,7 +25,7 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { Role } from '@prisma/client';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
 
 type AuthenticatedRequest = Request & {
@@ -37,21 +37,25 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
+  @ApiOperation({summary: "Создать нового пользователя"})
   async register(@Body() data: CreateUserDto) {
     return this.usersService.createUser(data);
   }
 
   @Post('login')
+  @ApiOperation({summary: "Войти в аккаунт"})
   async login(@Body() data: LoginUserDto) {
     return this.usersService.loginUser(data);
   }
 
   @Post('refresh')
+  @ApiOperation({summary: "Обновить jwt токены"})
   async refresh(@Body() data: RefreshTokenDto) {
     return this.usersService.refreshTokens(data.refreshToken);
   }
 
   @Get('all')
+  @ApiOperation({summary: "Получить информацию о пользователях"})
   async getAllUsers(
     @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
@@ -61,6 +65,7 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
+  @ApiOperation({summary: "Получить информацию о пользователе по id"})
   @ApiBearerAuth('access-token')
   async getUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.getUserById(id);
@@ -68,14 +73,22 @@ export class UsersController {
 
   @Put()
   @UseGuards(AuthGuard)
+  @ApiOperation({summary: "Обновить информацию о пользователе"})
   @ApiBearerAuth('access-token')
   async updateUser(
+    @Req() request: AuthenticatedRequest,
     @Body() data: UpdateUserDto,
   ) {
-    return this.usersService.updateUser(data);
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.usersService.updateUser(userId, data);
   }
 
   @Delete(':id/delete')
+  @ApiOperation({summary: "Удалить пользователя для Администратора"})
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN)
   @ApiBearerAuth('access-token')
@@ -84,6 +97,7 @@ export class UsersController {
   }
 
   @Put('password')
+  @ApiOperation({summary: "Изменить пароль"})
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   async changePassword(

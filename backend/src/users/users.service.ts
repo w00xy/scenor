@@ -164,8 +164,8 @@ export class UsersService {
     return this.toPublicUser(user);
   }
 
-  async updateUser(data: UpdateUserDto) {
-    const existingUser = await this.usersRepository.findOne(data.id);
+  async updateUser(userId: string, data: UpdateUserDto) {
+    const existingUser = await this.usersRepository.findOne(userId);
     if (!existingUser) {
       throw new NotFoundException('User not found');
     }
@@ -176,7 +176,7 @@ export class UsersService {
     if (normalizedUserName) {
       const userWithSameUsername =
         await this.usersRepository.findByUsername(normalizedUserName);
-      if (userWithSameUsername && userWithSameUsername.id !== data.id) {
+      if (userWithSameUsername && userWithSameUsername.id !== userId) {
         throw new ConflictException('User with this username already exists');
       }
     }
@@ -184,23 +184,24 @@ export class UsersService {
     if (normalizedEmail) {
       const userWithSameEmail =
         await this.usersRepository.findByEmail(normalizedEmail);
-      if (userWithSameEmail && userWithSameEmail.id !== data.id) {
+      if (userWithSameEmail && userWithSameEmail.id !== userId) {
         throw new ConflictException('User with this email already exists');
       }
     }
 
-    if (data.password) {
-      const passwordHash = await this.usersUtils.hashPassword(data.password);
+    let updateData: UpdateUserDto = data;
+    if (updateData.password) {
+      const passwordHash = await this.usersUtils.hashPassword(updateData.password);
 
-      data = {
-        ...data,
+      updateData = {
+        ...updateData,
         password: passwordHash,
       };
     }
 
     try {
-      const updatedUser = await this.usersRepository.update(data.id, {
-        ...data,
+      const updatedUser = await this.usersRepository.update(userId, {
+        ...updateData,
         ...(normalizedUserName ? { username: normalizedUserName } : {}),
         ...(normalizedEmail ? { email: normalizedEmail } : {}),
       });
