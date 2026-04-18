@@ -28,7 +28,7 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Use access token from /users/login',
+        description: 'JWT Token from /users/login',
       },
       'access-token',
     )

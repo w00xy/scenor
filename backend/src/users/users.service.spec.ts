@@ -354,7 +354,6 @@ describe('UsersService', () => {
         'alex.updated@example.com',
       );
       expect(usersRepository.update).toHaveBeenCalledWith(user.id, {
-        id: user.id,
         username: 'Alex Updated',
         email: 'alex.updated@example.com',
         password: 'updated-hash',
