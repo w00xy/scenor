@@ -1,5 +1,4 @@
 import "./profile-settings__modal-сhange_password.scss";
-import { ARForm } from "../../../../../components/auth_reg/ARForm/ARForm";
 import { InputField } from "../../../../../components/auth_reg/InputField/InputField";
 import { ModeName } from "../../../../../components/auth_reg/ModeName/ModeName";
 import { ARButton } from "../../../../../components/auth_reg/ARButton/ARButton";
@@ -7,14 +6,18 @@ import { Input } from "../../../../../components/auth_reg/Input/Input";
 import { FieldSpacer } from "../../../../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useState } from "react";
 import { useFieldFeedbackContext } from "../../../../../context/FieldFeedbackContext";
-import { userApi } from "../../../../../services/api"; // добавлен импорт
+import CloseSVG from "../../../../../assets/MM_Vectors-pages/Close.svg?react";
+import { userApi } from "../../../../../services/api";
 
 interface ChangePasswordModalProps {
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalProps) {
+export function ChangePasswordModal({
+  onClose,
+  onSuccess,
+}: ChangePasswordModalProps) {
   const { showFeedback } = useFieldFeedbackContext();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -38,7 +41,10 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
     }
 
     if (!validatePassword(newPassword)) {
-      showFeedback("Новый пароль должен содержать минимум 8 символов, одну цифру и одну букву", "error");
+      showFeedback(
+        "Новый пароль должен содержать минимум 8 символов, одну цифру и одну букву",
+        "error",
+      );
       return;
     }
 
@@ -67,49 +73,70 @@ export function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalP
     }
   };
 
+  const handleCloseClick = () => {
+    onClose();
+  };
+
   return (
     <div className="change-password-overlay" onClick={handleOverlayClick}>
-      <div className="change-password-modal">
-        <ARForm onSubmit={handleSubmit}>
+      <form
+        className="change-password__form"
+        autoComplete="off"
+        onSubmit={handleSubmit}
+      >
+        <div className="change-password-modal__header">
           <ModeName text="Изменить пароль" />
-          <FieldSpacer height={20} />
+          <button
+            type="button"
+            onClick={handleCloseClick}
+          >
+            <CloseSVG />
+          </button>
+        </div>
 
-          <InputField>
-            <Input
-              placeholder="Текущий пароль"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </InputField>
-          <FieldSpacer height={20} />
+        <FieldSpacer height={20} />
 
-          <InputField>
-            <Input
-              placeholder="Новый пароль"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </InputField>
-          <div className="password-hint">8+ символов, как минимум 1 цифра и 1 буква</div>
+        <InputField>
+          <Input
+            placeholder="Текущий пароль"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+        </InputField>
+        <FieldSpacer height={20} />
 
-          <InputField>
-            <Input
-              placeholder="Подтвердите новый пароль"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-          </InputField>
-          <FieldSpacer height={24} />
+        <InputField>
+          <Input
+            placeholder="Новый пароль"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </InputField>
+        <div className="password-hint">
+          8+ символов, как минимум 1 цифра и 1 буква
+        </div>
 
-          <ARButton text={isLoading ? "Сохранение..." : "Сохранить"} type="submit" disabled={isLoading} />
-        </ARForm>
-      </div>
+        <InputField>
+          <Input
+            placeholder="Подтвердите новый пароль"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </InputField>
+        <FieldSpacer height={24} />
+
+        <ARButton
+          text={isLoading ? "Сохранение..." : "Сохранить"}
+          type="submit"
+          disabled={isLoading}
+        />
+      </form>
     </div>
   );
 }
