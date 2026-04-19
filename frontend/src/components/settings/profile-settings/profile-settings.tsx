@@ -1,13 +1,14 @@
 import "./profile-settings.scss";
 import { JSX, useState } from "react";
 import { ChangePasswordModal } from "./profile-settings__modal/profile-settings__modal-сhange_password/profile-settings__modal-сhange_password";
+import { ConfirmPasswordModal } from "./profile-settings__modal/profile-settings__modal-confirm_password/profile-settings__modal-confirm_password";
 import { ProfileSettingsTitleH1 } from "./profile-settings__title/profile-settings__title_H1/profile-settings__title_H1";
 import { ProfileSettingsTitleH2 } from "./profile-settings__title/profile-settings__title_H2/profile-settings__title_H2";
 import { ProfileSettingsField } from "./profile-settings__field/profile-settings__field";
 import { useProfile } from "../../../hooks/useProfile";
 
 export function ProfileSettings(): JSX.Element {
-  const [showPasswordModal, setShowPasswordModal ] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const {
     name,
@@ -21,6 +22,9 @@ export function ProfileSettings(): JSX.Element {
     handleSave,
     isLoading,
     canSave,
+    isPasswordModalOpen, 
+    setIsPasswordModalOpen, 
+    confirmPassword,
   } = useProfile();
 
   if (isLoading) {
@@ -61,13 +65,16 @@ export function ProfileSettings(): JSX.Element {
 
       <ProfileSettingsTitleH2 text="Безопасность" />
       <div className="profile-settings__title_H3">Пароль</div>
-      <div className="profile-settings__label-link" onClick={() => setShowPasswordModal(true)}>Изменить пароль</div>
+      <div
+        className="profile-settings__label-link"
+        onClick={() => setShowPasswordModal(true)}
+      >
+        Изменить пароль
+      </div>
       {showPasswordModal && (
         <ChangePasswordModal
           onClose={() => setShowPasswordModal(false)}
-          onSuccess={() => {
-              
-          }}
+          onSuccess={() => {}}
         />
       )}
 
@@ -75,10 +82,20 @@ export function ProfileSettings(): JSX.Element {
         className="profile-settings__button"
         onClick={handleSave}
         disabled={!canSave}
-        style={!canSave ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+        style={!canSave ? { opacity: 0.6, cursor: "not-allowed" } : {}}
       >
         Сохранить
       </button>
+
+      {isPasswordModalOpen && (
+        <ConfirmPasswordModal
+          onClose={() => {
+            setIsPasswordModalOpen(false);
+          }}
+          onConfirm={confirmPassword}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

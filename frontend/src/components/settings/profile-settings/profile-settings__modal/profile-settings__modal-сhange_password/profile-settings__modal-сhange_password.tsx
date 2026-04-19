@@ -94,8 +94,6 @@ export function ChangePasswordModal({
           </button>
         </div>
 
-        <FieldSpacer height={20} />
-
         <InputField>
           <Input
             placeholder="Текущий пароль"
@@ -105,7 +103,6 @@ export function ChangePasswordModal({
             autoComplete="current-password"
           />
         </InputField>
-        <FieldSpacer height={20} />
 
         <InputField>
           <Input
@@ -117,7 +114,7 @@ export function ChangePasswordModal({
           />
         </InputField>
         <div className="password-hint">
-          8+ символов, как минимум 1 цифра и 1 буква
+          8+ символов, минимум 1 цифра, 1 буква верхнего регистра, 1 спец символ.
         </div>
 
         <InputField>
@@ -129,7 +126,6 @@ export function ChangePasswordModal({
             autoComplete="new-password"
           />
         </InputField>
-        <FieldSpacer height={24} />
 
         <ARButton
           text={isLoading ? "Сохранение..." : "Сохранить"}

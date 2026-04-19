@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
 import { authApi, setTokens } from '../services/api';
-
+import { scheduleTokenRefresh } from "../services/tokenRefresher";
 export function useLogin() {
   const { showFeedback } = useFieldFeedbackContext();
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ export function useLogin() {
     try {
       const data = await authApi.login({ email: email.trim(), password });
       setTokens(data.accessToken, data.refreshToken);
+      scheduleTokenRefresh();
       showFeedback('Успешный вход!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;

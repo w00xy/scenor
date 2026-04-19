@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
 import { authApi, setTokens } from '../services/api';
 import { validateRegistrationForm } from '../utils/validation/registrationValidation';
-
+import { scheduleTokenRefresh } from "../services/tokenRefresher";
 export function useRegister() {
   const { showFeedback } = useFieldFeedbackContext();
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ export function useRegister() {
       await authApi.register(username.trim(), email.trim(), password);
       const loginData = await authApi.login({ email: email.trim(), password });
       setTokens(loginData.accessToken, loginData.refreshToken);
+      scheduleTokenRefresh();
       showFeedback('Регистрация успешна!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;

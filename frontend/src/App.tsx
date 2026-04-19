@@ -7,10 +7,18 @@ import { Overview_credentials } from "./components/overview/pages_overview/overv
 import { SettingsLayout } from "./pages/settings/SettingsLayout";
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-
+import { useEffect } from "react";
+import { getAccessToken } from "./services/api";
+import { scheduleTokenRefresh, stopTokenRefresh } from "./services/tokenRefresher";
 import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
 
 export default function App() {
+  useEffect(() => {
+    if (getAccessToken()) {
+      scheduleTokenRefresh();
+    }
+    return () => stopTokenRefresh();
+  }, []);
   return (
     <FieldFeedbackProvider>
       <BrowserRouter>
@@ -27,7 +35,6 @@ export default function App() {
             </Route>
             <Route path="/settings" element={<SettingsLayout />}>
               <Route path="profile" element={<ProfileSettings/>} />
-            
             </Route>
           </Route>
         </Routes>

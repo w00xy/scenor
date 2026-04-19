@@ -49,7 +49,7 @@ export function SettingsMenu({
   return (
     <div className={`settings-menu ${positionClass}`} ref={menuRef}>
       <button className="settings-menu__item" onClick={handlePersonal}>
-        Personal
+        Настройки профиля
       </button>
       <button className="settings-menu__item" onClick={handleLogout}>
         Выйти из аккаунта
