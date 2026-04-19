@@ -32,6 +32,8 @@ describe('UsersController', () => {
       getUserById: jest.fn(),
       updateUser: jest.fn(),
       deleteUser: jest.fn(),
+      changePassword: jest.fn(),
+      checkPassword: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -180,6 +182,19 @@ describe('UsersController', () => {
     const result = await controller.deleteUser(response.id);
 
     expect(usersService.deleteUser).toHaveBeenCalledWith(response.id);
+    expect(result).toEqual(response);
+  });
+
+  it('checkPassword should call usersService.checkPassword with user id and password', async () => {
+    const id = '69c0decd-6bfd-474d-b11d-66f1fd90cf32';
+    const request = { user: { sub: id, role: Role.USER } } as any;
+    const data = { password: 'strongpass123' };
+    const response = { ok: true };
+    usersService.checkPassword.mockResolvedValue(response);
+
+    const result = await controller.checkPassword(request, data);
+
+    expect(usersService.checkPassword).toHaveBeenCalledWith(id, data.password);
     expect(result).toEqual(response);
   });
 });
