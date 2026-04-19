@@ -340,8 +340,7 @@ describe('UsersService', () => {
       usersUtils.hashPassword.mockResolvedValue('updated-hash');
       usersRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUser({
-        id: user.id,
+      const result = await service.updateUser(user.id, {
         username: '  Alex Updated  ',
         email: '  ALEX.UPDATED@EXAMPLE.COM  ',
         password: 'newstrongpass123',
@@ -366,8 +365,7 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateUser({
-          id: '9389f503-ba78-479e-9b7b-9f6755af20d3',
+        service.updateUser('9389f503-ba78-479e-9b7b-9f6755af20d3', {
           username: 'New Name',
         }),
       ).rejects.toThrow(NotFoundException);
