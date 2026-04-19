@@ -262,6 +262,25 @@ export class UsersService {
     return { message: 'Password updated successfully' };
   }
 
+  async checkPassword(userId: string, password: string) {
+    const normalizedPassword = password?.trim();
+    if (!normalizedPassword) {
+      throw new BadRequestException('Password is required');
+    }
+
+    const user = await this.usersRepository.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await this.usersUtils.comparePassword(
+      normalizedPassword,
+      user.passwordHash,
+    );
+
+    return { ok: isPasswordValid };
+  }
+
   private toPublicUser(user: User): Omit<User, 'passwordHash'> {
     const { passwordHash, ...publicUser } = user;
     return publicUser;

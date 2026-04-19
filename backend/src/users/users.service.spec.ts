@@ -340,8 +340,7 @@ describe('UsersService', () => {
       usersUtils.hashPassword.mockResolvedValue('updated-hash');
       usersRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUser({
-        id: user.id,
+      const result = await service.updateUser(user.id, {
         username: '  Alex Updated  ',
         email: '  ALEX.UPDATED@EXAMPLE.COM  ',
         password: 'newstrongpass123',
@@ -366,8 +365,7 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateUser({
-          id: '9389f503-ba78-479e-9b7b-9f6755af20d3',
+        service.updateUser('9389f503-ba78-479e-9b7b-9f6755af20d3', {
           username: 'New Name',
         }),
       ).rejects.toThrow(NotFoundException);
@@ -393,6 +391,50 @@ describe('UsersService', () => {
 
       await expect(
         service.deleteUser('f8eb17aa-c986-4309-9f20-4f658ec859d0'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('checkPassword', () => {
+    it('should return ok true when password matches hash', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+      usersUtils.comparePassword.mockResolvedValue(true);
+
+      const result = await service.checkPassword(user.id, '  strongpass123  ');
+
+      expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      expect(usersUtils.comparePassword).toHaveBeenCalledWith(
+        'strongpass123',
+        user.passwordHash,
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should return ok false when password does not match hash', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+      usersUtils.comparePassword.mockResolvedValue(false);
+
+      const result = await service.checkPassword(user.id, 'wrongpass123');
+
+      expect(result).toEqual({ ok: false });
+    });
+
+    it('should throw BadRequestException when password is empty', async () => {
+      await expect(service.checkPassword('user-id', ' ')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.checkPassword('user-id', ' ')).rejects.toThrow(
+        'Password is required',
+      );
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.checkPassword('f8eb17aa-c986-4309-9f20-4f658ec859d0', 'password'),
       ).rejects.toThrow(NotFoundException);
     });
   });

@@ -21,6 +21,7 @@ import { UpdateUserDto } from './dto/users-update.dto.js';
 import { LoginUserDto } from './dto/users-login.dto.js';
 import { RefreshTokenDto } from './dto/users-refresh-token.dto.js';
 import { ChangePasswordDto } from './dto/users-change-password.dto.js';
+import { CheckPasswordDto } from './dto/users-check-password.dto.js';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
@@ -110,5 +111,21 @@ export class UsersController {
     }
 
     return this.usersService.changePassword(userId, data);
+  }
+
+  @Post('password')
+  @ApiOperation({summary: "Проверить полученный пароль от пользователя"})
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('access-token')
+  async checkPassword(
+    @Req() request: AuthenticatedRequest,
+    @Body() data: CheckPasswordDto,
+  ) {
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.usersService.checkPassword(userId, data.password);
   }
 }
