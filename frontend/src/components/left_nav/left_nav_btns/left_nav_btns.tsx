@@ -20,7 +20,7 @@ export function LNav(): JSX.Element {
         <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview" />
         <LNBtn
           icon={<LockSVG />}
-          text="Личное"
+          text="Личный"
           to="/personal"
         />
       </div>
