@@ -24,11 +24,16 @@ describe('UsersRepository', () => {
     repository = new UsersRepository(prisma as unknown as DatabaseService);
   });
 
-  it('creates user, personal project and owner membership in one transaction', async () => {
+  it('creates user, profile, personal project and owner membership in one transaction', async () => {
     const createdUser = createUserEntity();
     const tx = {
       user: {
         create: jest.fn().mockResolvedValue(createdUser),
+      },
+      userProfile: {
+        upsert: jest.fn().mockResolvedValue({
+          id: 'f6c2f857-f3e8-4235-a2bd-34d10c5989d6',
+        }),
       },
       project: {
         findFirst: jest.fn().mockResolvedValue(null),
@@ -57,6 +62,15 @@ describe('UsersRepository', () => {
         email: createdUser.email,
         passwordHash: 'hash',
       },
+    });
+    expect(tx.userProfile.upsert).toHaveBeenCalledWith({
+      where: {
+        userId: createdUser.id,
+      },
+      create: {
+        userId: createdUser.id,
+      },
+      update: {},
     });
     expect(tx.project.findFirst).toHaveBeenCalledWith({
       where: {
@@ -106,6 +120,11 @@ describe('UsersRepository', () => {
       user: {
         create: jest.fn().mockResolvedValue(createdUser),
       },
+      userProfile: {
+        upsert: jest.fn().mockResolvedValue({
+          id: '147670f7-c6ce-4575-80c0-c98d8a7c1d27',
+        }),
+      },
       project: {
         findFirst: jest.fn().mockResolvedValue(existingProject),
         create: jest.fn(),
@@ -125,6 +144,15 @@ describe('UsersRepository', () => {
       password: 'hash',
     });
 
+    expect(tx.userProfile.upsert).toHaveBeenCalledWith({
+      where: {
+        userId: createdUser.id,
+      },
+      create: {
+        userId: createdUser.id,
+      },
+      update: {},
+    });
     expect(tx.project.create).not.toHaveBeenCalled();
     expect(tx.projectMember.upsert).toHaveBeenCalledWith({
       where: {
@@ -144,10 +172,11 @@ describe('UsersRepository', () => {
     });
   });
 
-  it('rolls back registration when project membership creation fails', async () => {
+  it('rolls back registration when profile creation fails', async () => {
     const createdUser = createUserEntity();
     const persistedState = {
       users: 0,
+      profiles: 0,
       projects: 0,
       memberships: 0,
     };
@@ -155,6 +184,7 @@ describe('UsersRepository', () => {
     prisma.$transaction.mockImplementation(async (callback) => {
       const stagedState = {
         users: persistedState.users,
+        profiles: persistedState.profiles,
         projects: persistedState.projects,
         memberships: persistedState.memberships,
       };
@@ -164,6 +194,78 @@ describe('UsersRepository', () => {
           create: jest.fn().mockImplementation(async () => {
             stagedState.users += 1;
             return createdUser;
+          }),
+        },
+        userProfile: {
+          upsert: jest.fn().mockImplementation(async () => {
+            throw new Error('profile create failed');
+          }),
+        },
+        project: {
+          findFirst: jest.fn(),
+          create: jest.fn(),
+        },
+        projectMember: {
+          upsert: jest.fn(),
+        },
+      };
+
+      try {
+        const result = await callback(tx as any);
+        persistedState.users = stagedState.users;
+        persistedState.profiles = stagedState.profiles;
+        persistedState.projects = stagedState.projects;
+        persistedState.memberships = stagedState.memberships;
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    });
+
+    await expect(
+      repository.create({
+        username: createdUser.username!,
+        email: createdUser.email,
+        password: 'hash',
+      }),
+    ).rejects.toThrow('profile create failed');
+
+    expect(persistedState.users).toBe(0);
+    expect(persistedState.profiles).toBe(0);
+    expect(persistedState.projects).toBe(0);
+    expect(persistedState.memberships).toBe(0);
+  });
+
+  it('rolls back registration when project membership creation fails', async () => {
+    const createdUser = createUserEntity();
+    const persistedState = {
+      users: 0,
+      profiles: 0,
+      projects: 0,
+      memberships: 0,
+    };
+
+    prisma.$transaction.mockImplementation(async (callback) => {
+      const stagedState = {
+        users: persistedState.users,
+        profiles: persistedState.profiles,
+        projects: persistedState.projects,
+        memberships: persistedState.memberships,
+      };
+
+      const tx = {
+        user: {
+          create: jest.fn().mockImplementation(async () => {
+            stagedState.users += 1;
+            return createdUser;
+          }),
+        },
+        userProfile: {
+          upsert: jest.fn().mockImplementation(async () => {
+            stagedState.profiles += 1;
+            return {
+              id: 'd8fb72ea-3e95-4e80-a46a-862930a7bc22',
+            };
           }),
         },
         project: {
@@ -185,6 +287,7 @@ describe('UsersRepository', () => {
       try {
         const result = await callback(tx as any);
         persistedState.users = stagedState.users;
+        persistedState.profiles = stagedState.profiles;
         persistedState.projects = stagedState.projects;
         persistedState.memberships = stagedState.memberships;
         return result;
@@ -202,6 +305,7 @@ describe('UsersRepository', () => {
     ).rejects.toThrow('membership create failed');
 
     expect(persistedState.users).toBe(0);
+    expect(persistedState.profiles).toBe(0);
     expect(persistedState.projects).toBe(0);
     expect(persistedState.memberships).toBe(0);
   });

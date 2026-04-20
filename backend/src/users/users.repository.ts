@@ -41,9 +41,25 @@ export class UsersRepository {
         },
       });
 
+      await this.createUserProfileForUser(tx, user);
       await this.createPersonalProjectForUser(tx, user);
 
       return user;
+    });
+  }
+
+  private async createUserProfileForUser(
+    tx: Prisma.TransactionClient,
+    user: Pick<User, 'id'>,
+  ) {
+    await tx.userProfile.upsert({
+      where: {
+        userId: user.id,
+      },
+      create: {
+        userId: user.id,
+      },
+      update: {},
     });
   }
 
@@ -68,7 +84,7 @@ export class UsersRepository {
             ownerId: user.id,
             type: ProjectType.PERSONAL,
             name: 'Personal',
-            description: 'Default personal project',
+            description: '',
           },
           select: {
             id: true,
