@@ -4,20 +4,29 @@ enum ProjectMemberRole {
   VIEWER
 }
 
+enum ProjectType {
+  PERSONAL
+  TEAM
+}
+
 model Project {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  owner_id    String   @db.Uuid
+  ownerId     String   @map("owner_id") @db.Uuid
   name        String
   description String?  @db.VarChar(255)
   isArchived  Boolean  @default(false) @map("is_archived")
+  type        ProjectType @default(PERSONAL)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  owner User @relation("ProjectOwner", fields: [owner_id], references: [id])
+  owner User @relation("ProjectOwner", fields: [ownerId], references: [id])
 
-  members   ProjectMember[]
-  workflows Workflow[]
+  members     ProjectMember[]
+  credentials Credential[]
+  workflows   Workflow[]
 
+  @@index([ownerId])
+  @@index([type])
   @@map("projects")
 }
 
