@@ -11,7 +11,6 @@ model User {
   memberships       ProjectMember[]     @relation("ProjectMemberUser")
   invitedMembers    ProjectMember[]     @relation("ProjectMemberInvitedBy")
   createdWorkflows  Workflow[]          @relation("WorkflowCreator")
-  credentials       Credential[]
   workflowShares    WorkflowShare[]     @relation("WorkflowShareCreatedBy")
   startedExecutions WorkflowExecution[] @relation("ExecutionStartedBy")
 
@@ -22,7 +21,7 @@ model User {
 
 model UserProfile {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @db.Uuid @unique @map("user_id")
+  userId    String   @unique @map("user_id") @db.Uuid
   firstName String?  @map("first_name")
   lastName  String?  @map("last_name")
   bio       String?

@@ -192,7 +192,7 @@ export class ExecutionsService {
       );
     }
 
-    const triggerNodes = nodes.filter((node) => node.type === 'manual_trigger');
+    const triggerNodes = nodes.filter((node) => node.typeCode === 'manual_trigger');
     const startNodes =
       triggerNodes.length > 0
         ? triggerNodes
@@ -318,7 +318,7 @@ export class ExecutionsService {
   ): Promise<NodeExecutionResult> {
     const config = (node.configJson ?? {}) as Record<string, unknown>;
 
-    switch (node.type) {
+    switch (node.typeCode) {
       case 'manual_trigger':
         return { output: input };
       case 'set':
@@ -338,7 +338,7 @@ export class ExecutionsService {
       case 'db_select':
       case 'db_insert':
         throw new BadRequestException(
-          `Node "${node.type}" execution is not implemented yet`,
+          `Node "${node.typeCode}" execution is not implemented yet`,
         );
       default:
         return { output: input };
@@ -693,7 +693,7 @@ export class ExecutionsService {
     }
 
     const role =
-      workflow.project.owner_id === userId
+      workflow.project.ownerId === userId
         ? ProjectMemberRole.OWNER
         : workflow.project.members[0]?.role;
 

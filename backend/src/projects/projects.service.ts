@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ProjectMemberRole } from '@prisma/client';
+import { ProjectMemberRole, ProjectType } from '@prisma/client';
 import { DatabaseService } from '../database/database.service.js';
 import { CreateProjectDto, UpdateProjectDto } from './dto/index.js';
 
@@ -19,7 +19,8 @@ export class ProjectsService {
     return this.prisma.$transaction(async (tx) => {
       const project = await tx.project.create({
         data: {
-          owner_id: userId,
+          ownerId: userId,
+          type: ProjectType.TEAM,
           name,
           description: description || null,
         },
@@ -40,7 +41,7 @@ export class ProjectsService {
   async getMyProjects(userId: string) {
     const projects = await this.prisma.project.findMany({
       where: {
-        OR: [{ owner_id: userId }, { members: { some: { userId } } }],
+        OR: [{ ownerId: userId }, { members: { some: { userId } } }],
       },
       include: {
         members: {
@@ -54,7 +55,7 @@ export class ProjectsService {
 
     return projects.map((project) => {
       const accessRole =
-        project.owner_id === userId
+        project.ownerId === userId
           ? ProjectMemberRole.OWNER
           : project.members[0]?.role;
 
@@ -135,7 +136,7 @@ export class ProjectsService {
     }
 
     const role =
-      project.owner_id === userId
+      project.ownerId === userId
         ? ProjectMemberRole.OWNER
         : project.members[0]?.role;
 
@@ -146,4 +147,3 @@ export class ProjectsService {
     return { project, role };
   }
 }
-

@@ -43,16 +43,16 @@ enum NodeExecutionStatus {
 }
 
 model Workflow {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  projectId   String   @db.Uuid
-  createdBy   String?  @db.Uuid
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String         @db.Uuid
+  createdBy   String?        @db.Uuid
   name        String
   description String?
-  status      String   @default("draft")
-  version     Int      @default(1)
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  status      WorkflowStatus @default(draft)
+  version     Int            @default(1)
+  isPublic    Boolean        @default(false)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
 
   project    Project             @relation(fields: [projectId], references: [id])
   creator    User?               @relation("WorkflowCreator", fields: [createdBy], references: [id])
@@ -88,17 +88,17 @@ model NodeType {
 
 model Credential {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId        String   @map("user_id") @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
   type          String   @db.VarChar(100)
   name          String   @db.VarChar(255)
   encryptedData Json     @map("encrypted_data")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nodes WorkflowNode[]
+  project Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  nodes   WorkflowNode[]
 
-  @@index([userId])
+  @@index([projectId])
   @@index([type])
   @@map("credentials")
 }
@@ -107,7 +107,7 @@ model WorkflowNode {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workflowId    String   @map("workflow_id") @db.Uuid
   nodeTypeId    String?  @map("node_type_id") @db.Uuid
-  type          String   @db.VarChar(100)
+  typeCode      String   @db.VarChar(100)
   name          String?  @db.VarChar(255)
   label         String?  @db.VarChar(255)
   posX          Float    @map("pos_x")
@@ -129,7 +129,7 @@ model WorkflowNode {
   @@index([workflowId])
   @@index([nodeTypeId])
   @@index([credentialsId])
-  @@index([type])
+  @@index([typeCode])
   @@map("workflow_nodes")
 }
 
