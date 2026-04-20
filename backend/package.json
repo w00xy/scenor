@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prisma:generate": "prisma generate",
     "setup": "npm run prisma:generate && npm run prisma:migrate:dev && npm run build",
     "setup:deploy": "npm run prisma:generate && npm run prisma:migrate:deploy && npm run build",
     "build": "nest build",
