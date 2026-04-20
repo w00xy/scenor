@@ -149,14 +149,17 @@ export class WorkflowsService {
     workflowId: string,
     data: CreateWorkflowNodeDto,
   ) {
-    await this.requireWorkflowAccess(userId, workflowId, [
+    const { workflow } = await this.requireWorkflowAccess(userId, workflowId, [
       ProjectMemberRole.OWNER,
       ProjectMemberRole.EDITOR,
     ]);
 
     const normalizedType = data.type.trim();
     const nodeType = await this.resolveNodeType(normalizedType, data.nodeTypeId);
-    await this.validateCredentialOwnership(userId, data.credentialsId);
+    await this.validateCredentialProjectScope(
+      workflow.projectId,
+      data.credentialsId,
+    );
 
     const rawConfig =
       data.configJson ??
@@ -167,7 +170,7 @@ export class WorkflowsService {
       data: {
         workflowId,
         nodeTypeId: nodeType.id,
-        type: normalizedType,
+        typeCode: normalizedType,
         name: data.name?.trim() || null,
         label: data.label?.trim() || null,
         posX: data.posX,
@@ -186,7 +189,7 @@ export class WorkflowsService {
     nodeId: string,
     data: UpdateWorkflowNodeDto,
   ) {
-    await this.requireWorkflowAccess(userId, workflowId, [
+    const { workflow } = await this.requireWorkflowAccess(userId, workflowId, [
       ProjectMemberRole.OWNER,
       ProjectMemberRole.EDITOR,
     ]);
@@ -196,7 +199,7 @@ export class WorkflowsService {
     const updateData: Prisma.WorkflowNodeUncheckedUpdateInput = {};
 
     const nextType =
-      data.type !== undefined ? data.type.trim() : existingNode.type;
+      data.type !== undefined ? data.type.trim() : existingNode.typeCode;
     if (!nextType) {
       throw new BadRequestException('Node type cannot be empty');
     }
@@ -205,7 +208,7 @@ export class WorkflowsService {
     updateData.nodeTypeId = nextNodeType.id;
 
     if (data.type !== undefined) {
-      updateData.type = nextType;
+      updateData.typeCode = nextType;
     }
 
     if (data.name !== undefined) {
@@ -232,7 +235,10 @@ export class WorkflowsService {
     }
 
     if (data.credentialsId !== undefined) {
-      await this.validateCredentialOwnership(userId, data.credentialsId);
+      await this.validateCredentialProjectScope(
+        workflow.projectId,
+        data.credentialsId,
+      );
       updateData.credentialsId = data.credentialsId;
     }
 
@@ -383,20 +389,23 @@ export class WorkflowsService {
     return nodeType;
   }
 
-  private async validateCredentialOwnership(userId: string, credentialsId?: string) {
+  private async validateCredentialProjectScope(
+    projectId: string,
+    credentialsId?: string,
+  ) {
     if (!credentialsId) {
       return;
     }
 
     const credential = await this.prisma.credential.findUnique({
       where: { id: credentialsId },
-      select: { id: true, userId: true },
+      select: { id: true, projectId: true },
     });
     if (!credential) {
       throw new NotFoundException('Credential not found');
     }
-    if (credential.userId !== userId) {
-      throw new ForbiddenException('Cannot use credential of another user');
+    if (credential.projectId !== projectId) {
+      throw new ForbiddenException('Credential belongs to another project');
     }
   }
 
@@ -405,7 +414,7 @@ export class WorkflowsService {
       where: { id: nodeId, workflowId },
       select: {
         id: true,
-        type: true,
+        typeCode: true,
         configJson: true,
       },
     });
@@ -451,7 +460,7 @@ export class WorkflowsService {
     }
 
     const role =
-      project.owner_id === userId
+      project.ownerId === userId
         ? ProjectMemberRole.OWNER
         : project.members[0]?.role;
 
@@ -487,7 +496,7 @@ export class WorkflowsService {
     }
 
     const role =
-      workflow.project.owner_id === userId
+      workflow.project.ownerId === userId
         ? ProjectMemberRole.OWNER
         : workflow.project.members[0]?.role;
 

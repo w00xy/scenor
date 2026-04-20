@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, ProjectMemberRole, ProjectType, User } from '@prisma/client';
 import { DatabaseService } from '../database/database.service.js';
 
 @Injectable()
@@ -31,11 +32,79 @@ export class UsersRepository {
   }
 
   async create(data: { username: string; email: string; password: string }) {
-    return this.prisma.user.create({
-      data: {
-        username: data.username,
-        email: data.email,
-        passwordHash: data.password,
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          username: data.username,
+          email: data.email,
+          passwordHash: data.password,
+        },
+      });
+
+      await this.createUserProfileForUser(tx, user);
+      await this.createPersonalProjectForUser(tx, user);
+
+      return user;
+    });
+  }
+
+  private async createUserProfileForUser(
+    tx: Prisma.TransactionClient,
+    user: Pick<User, 'id'>,
+  ) {
+    await tx.userProfile.upsert({
+      where: {
+        userId: user.id,
+      },
+      create: {
+        userId: user.id,
+      },
+      update: {},
+    });
+  }
+
+  private async createPersonalProjectForUser(
+    tx: Prisma.TransactionClient,
+    user: Pick<User, 'id'>,
+  ) {
+    const existingPersonalProject = await tx.project.findFirst({
+      where: {
+        ownerId: user.id,
+        type: ProjectType.PERSONAL,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const personalProject = existingPersonalProject
+      ? existingPersonalProject
+      : await tx.project.create({
+          data: {
+            ownerId: user.id,
+            type: ProjectType.PERSONAL,
+            name: 'Personal',
+            description: '',
+          },
+          select: {
+            id: true,
+          },
+        });
+
+    await tx.projectMember.upsert({
+      where: {
+        projectId_userId: {
+          projectId: personalProject.id,
+          userId: user.id,
+        },
+      },
+      create: {
+        projectId: personalProject.id,
+        userId: user.id,
+        role: ProjectMemberRole.OWNER,
+      },
+      update: {
+        role: ProjectMemberRole.OWNER,
       },
     });
   }
