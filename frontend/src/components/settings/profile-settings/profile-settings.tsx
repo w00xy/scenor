@@ -7,14 +7,16 @@ import { ProfileSettingsTitleH2 } from "./profile-settings__title/profile-settin
 import { ProfileSettingsField } from "./profile-settings__field/profile-settings__field";
 import { useProfile } from "../../../hooks/useProfile";
 
+
+
 export function ProfileSettings(): JSX.Element {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const {
-    name,
-    setName,
-    lastname,
-    setLastname,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     email,
     setEmail,
     phone,
@@ -22,8 +24,8 @@ export function ProfileSettings(): JSX.Element {
     handleSave,
     isLoading,
     canSave,
-    isPasswordModalOpen, 
-    setIsPasswordModalOpen, 
+    isPasswordModalOpen,
+    setIsPasswordModalOpen,
     confirmPassword,
   } = useProfile();
 
@@ -40,13 +42,13 @@ export function ProfileSettings(): JSX.Element {
       <div className="profile-settings__group">
         <ProfileSettingsField
           text="Имя"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
         />
         <ProfileSettingsField
           text="Фамилия"
-          value={lastname}
-          onChange={(e) => setLastname(e.target.value)}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
         />
         <ProfileSettingsField
           text="Электронная почта"
@@ -67,7 +69,15 @@ export function ProfileSettings(): JSX.Element {
       <div className="profile-settings__title_H3">Пароль</div>
       <div
         className="profile-settings__label-link"
+        role="button"
+        tabIndex={0}
         onClick={() => setShowPasswordModal(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setShowPasswordModal(true);
+          }
+        }}
       >
         Изменить пароль
       </div>
@@ -89,9 +99,7 @@ export function ProfileSettings(): JSX.Element {
 
       {isPasswordModalOpen && (
         <ConfirmPasswordModal
-          onClose={() => {
-            setIsPasswordModalOpen(false);
-          }}
+          onClose={() => setIsPasswordModalOpen(false)}
           onConfirm={confirmPassword}
           isLoading={isLoading}
         />

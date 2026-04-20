@@ -1,41 +1,55 @@
 import { jwtDecode } from "jwt-decode";
 import { getAccessToken, refreshTokenFlow } from "./api";
 
-let refreshTimer: number | null = null; 
+const REFRESH_EARLY_MS = 60_000;
+const REFRESH_RETRY_MS = 30_000;
+const MIN_REFRESH_DELAY_MS = 1_000;
+
+let refreshTimer: number | null = null;
 
 export function scheduleTokenRefresh() {
-  console.log("[scheduleTokenRefresh] called");
-  if (refreshTimer) clearTimeout(refreshTimer);
+  stopTokenRefresh();
+
   const token = getAccessToken();
   if (!token) {
-    console.log("[scheduleTokenRefresh] no token, exit");
+    void refreshTokenFlow().then((success) => {
+      if (success) {
+        scheduleTokenRefresh();
+      } else {
+        refreshTimer = setTimeout(scheduleTokenRefresh, REFRESH_RETRY_MS);
+      }
+    });
     return;
   }
+
   try {
     const decoded = jwtDecode<{ exp: number }>(token);
-    console.log("[scheduleTokenRefresh] decoded exp:", decoded.exp);
-    const expiresInMs = decoded.exp * 1000 - Date.now();
-    console.log("[scheduleTokenRefresh] expires in ms:", expiresInMs);
-    const refreshMs = expiresInMs - 60_000;
-    if (refreshMs > 0) {
-      console.log(`[scheduleTokenRefresh] will refresh in ${refreshMs / 1000} seconds`);
-      refreshTimer = setTimeout(async () => {
-        console.log("[scheduleTokenRefresh] timer fired, refreshing");
-        const success = await refreshTokenFlow();
-        if (success) {
-          scheduleTokenRefresh();
-        } else {
-          refreshTimer = setTimeout(scheduleTokenRefresh, 5 * 60_000);
-        }
-      }, refreshMs);
-    } else {
-      console.log("[scheduleTokenRefresh] token already expired or expiring soon, refreshing now");
-      refreshTokenFlow().then(success => {
-        if (success) scheduleTokenRefresh();
-      });
+    if (!decoded?.exp) {
+      refreshTimer = setTimeout(scheduleTokenRefresh, REFRESH_RETRY_MS);
+      return;
     }
-  } catch (e) {
-    console.error("Token decode error", e);
+
+    const refreshInMs = decoded.exp * 1000 - Date.now() - REFRESH_EARLY_MS;
+    const delay = Math.max(refreshInMs, MIN_REFRESH_DELAY_MS);
+
+    refreshTimer = setTimeout(async () => {
+      const success = await refreshTokenFlow();
+      if (success) {
+        scheduleTokenRefresh();
+      } else {
+        refreshTimer = setTimeout(scheduleTokenRefresh, REFRESH_RETRY_MS);
+      }
+    }, delay);
+  } catch (error) {
+    console.error("Token decode error:", error);
+    refreshTimer = setTimeout(async () => {
+      const success = await refreshTokenFlow();
+      if (success) {
+        scheduleTokenRefresh();
+      } else {
+        refreshTimer = setTimeout(scheduleTokenRefresh, REFRESH_RETRY_MS);
+      }
+    }, MIN_REFRESH_DELAY_MS);
   }
 }
 

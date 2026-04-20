@@ -1,0 +1,88 @@
+@use "../../../styles/variables/_variables" as *;
+
+.create-menu,
+.create-submenu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 252px;
+  background: #2c2c2c;
+  border: 1px solid #424242;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 3px 0;
+  z-index: 1000;
+}
+
+.create-menu {
+  min-height: 113px;
+
+  &--bottom {
+    left: 160%;
+  }
+
+  &--right {
+    top: 10%;
+    left: 115%;
+  }
+}
+
+.create-submenu {
+  min-height: 76px;
+  top: 0;
+  left: calc(100% + 6px);
+}
+
+.create-menu__item {
+  width: 252px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #3a3a3a;
+  }
+
+  &:active {
+    background: #4d4d4d;
+  }
+
+  &.active {
+    background: #4d4d4d;
+  }
+}
+
+.create-menu__item-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.create-menu__label {
+  font-family: $font-family;
+  font-size: 14px;
+}
+
+.create-menu__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+
+  svg path {
+    fill: #fff;
+  }
+
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}

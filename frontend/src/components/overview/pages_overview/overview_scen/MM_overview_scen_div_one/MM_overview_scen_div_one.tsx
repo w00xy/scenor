@@ -7,22 +7,35 @@ interface MM_overview_scen_div_oneProps {
   placeholder: string;
   sortBy: string;
   onSortChange: (value: string) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export function MM_overview_scen_div_one({
   placeholder,
   sortBy,
   onSortChange,
+  searchValue = "",
+  onSearchChange,
 }: MM_overview_scen_div_oneProps): JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onSortChange(event.target.value);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange?.(event.target.value);
   };
 
   return (
     <div className="MM_overview_scen_div_one">
       <div className="MM_input_wrapper">
         <MM_SearchSVG />
-        <input type="text" placeholder={placeholder} />
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
       </div>
 
       <select value={sortBy} onChange={handleChange}>

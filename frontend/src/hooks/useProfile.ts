@@ -1,189 +1,208 @@
-// src/hooks/useProfile.ts
-import { useState, useEffect } from 'react';
-import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
-import Cookies from 'universal-cookie';
-import { jwtDecode } from 'jwt-decode';
-import { profileApi, userApi } from '../services/api';
+import { useState, useEffect } from "react";
+import { useFieldFeedbackContext } from "../context/FieldFeedbackContext";
+import Cookies from "universal-cookie";
+import { jwtDecode } from "jwt-decode";
+import { profileApi, userApi } from "../services/api";
 
 const cookies = new Cookies();
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
 
-const updateProfileStub = async (data: any) => {
-  console.log('[Заглушка] Обновление профиля (firstName, lastName, phone):', data);
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return { success: true };
-};
+interface ProfileFormValues {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
 
-const updateEmailStub = async (email: string, password: string) => {
-  console.log('[Заглушка] Обновление email:', email, 'с паролем:', password);
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return { success: true };
-};
+type ProfileUpdateData = Partial<Pick<ProfileFormValues, "firstName" | "lastName" | "phone">>;
+
+interface ApiError {
+  message?: string;
+  status?: number;
+}
 
 export function useProfile() {
   const { showFeedback } = useFieldFeedbackContext();
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [originalFirstName, setOriginalFirstName] = useState('');
-  const [originalLastName, setOriginalLastName] = useState('');
-  const [originalEmail, setOriginalEmail] = useState('');
-  const [originalPhone, setOriginalPhone] = useState('');
+  const [originalValues, setOriginalValues] = useState<ProfileFormValues>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [formValues, setFormValues] = useState<ProfileFormValues>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [pendingProfileUpdate, setPendingProfileUpdate] = useState<any>(null);
+  const [pendingProfileUpdate, setPendingProfileUpdate] =
+    useState<ProfileUpdateData | null>(null);
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePhone = (phone: string) => !phone || /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/.test(phone);
+  const setFirstName = (firstName: string) =>
+    setFormValues((prev) => ({ ...prev, firstName }));
+  const setLastName = (lastName: string) =>
+    setFormValues((prev) => ({ ...prev, lastName }));
+  const setEmail = (email: string) =>
+    setFormValues((prev) => ({ ...prev, email }));
+  const setPhone = (phone: string) =>
+    setFormValues((prev) => ({ ...prev, phone }));
 
-  const hasChanges = () =>
-    firstName !== originalFirstName ||
-    lastName !== originalLastName ||
-    email !== originalEmail ||
-    phone !== originalPhone;
+  const validateEmail = (email: string) => EMAIL_REGEX.test(email);
+  const validatePhone = (phone: string) => !phone || PHONE_REGEX.test(phone);
 
-  const isValid = () => validateEmail(email) && validatePhone(phone);
-  const canSave = hasChanges() && isValid();
+  const hasChanges =
+    formValues.firstName !== originalValues.firstName ||
+    formValues.lastName !== originalValues.lastName ||
+    formValues.email !== originalValues.email ||
+    formValues.phone !== originalValues.phone;
+  const isValid =
+    validateEmail(formValues.email) && validatePhone(formValues.phone);
+  const isBusy = isLoading || isSaving;
+  const canSave = hasChanges && isValid && !isBusy && !!userId;
 
-  useEffect(() => {
-    const token = cookies.get('accessToken');
-    if (token) {
-      try {
-        const decoded = jwtDecode<{ sub: string }>(token);
-        setUserId(decoded.sub);
-        loadData(decoded.sub);
-      } catch (error) {
-        console.error(error);
-        showFeedback('Ошибка загрузки профиля', 'error');
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(false);
+  const syncProfileFields = (firstName = "", lastName = "", phone = "") => {
+    setOriginalValues((prev) => ({ ...prev, firstName, lastName, phone }));
+    setFormValues((prev) => ({ ...prev, firstName, lastName, phone }));
+  };
+
+  const buildProfileUpdate = (): ProfileUpdateData => {
+    const update: ProfileUpdateData = {};
+    if (formValues.firstName !== originalValues.firstName) {
+      update.firstName = formValues.firstName;
     }
-  }, []);
+    if (formValues.lastName !== originalValues.lastName) {
+      update.lastName = formValues.lastName;
+    }
+    if (formValues.phone !== originalValues.phone) {
+      update.phone = formValues.phone;
+    }
+    return update;
+  };
+
+  const applyProfileUpdate = async (profileUpdate: ProfileUpdateData) => {
+    if (Object.keys(profileUpdate).length === 0) {
+      return;
+    }
+    try {
+      await profileApi.updateProfile(profileUpdate);
+      setOriginalValues((prev) => ({ ...prev, ...profileUpdate }));
+      showFeedback("Данные профиля обновлены", "success");
+    } catch (error) {
+      const apiError = error as ApiError;
+      showFeedback(apiError.message || "Ошибка сохранения профиля", "error");
+    }
+  };
 
   const loadData = async (id: string) => {
     try {
       const profile = await profileApi.getProfile(id);
-      setOriginalFirstName(profile.firstName || '');
-      setOriginalLastName(profile.lastName || '');
-      setOriginalPhone(profile.phone || '');
-      setFirstName(profile.firstName || '');
-      setLastName(profile.lastName || '');
-      setPhone(profile.phone || '');
-    } catch (error: any) {
-      if (error.status === 404 || error.message?.includes('404')) {
-        setOriginalFirstName('');
-        setOriginalLastName('');
-        setOriginalPhone('');
-        setFirstName('');
-        setLastName('');
-        setPhone('');
+      syncProfileFields(
+        profile.firstName || "",
+        profile.lastName || "",
+        profile.phone || "",
+      );
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError.status === 404 || apiError.message?.includes("404")) {
+        syncProfileFields("", "", "");
       } else {
         console.error(error);
-        showFeedback(error.message || 'Не удалось загрузить профиль', 'error');
+        showFeedback(apiError.message || "Не удалось загрузить профиль", "error");
       }
     }
 
     try {
       const user = await userApi.getUser(id);
-      setOriginalEmail(user.email);
-      setEmail(user.email);
-    } catch (error: any) {
+      setOriginalValues((prev) => ({ ...prev, email: user.email }));
+      setFormValues((prev) => ({ ...prev, email: user.email }));
+    } catch (error) {
+      const apiError = error as ApiError;
       console.error(error);
-      showFeedback(error.message || 'Не удалось загрузить email', 'error');
+      showFeedback(apiError.message || "Не удалось загрузить email", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Сохранение только полей профиля (без email)
-  const performProfileUpdate = async (profileUpdate: any) => {
-    if (Object.keys(profileUpdate).length === 0) return;
-    try {
-      // Здесь должен быть реальный вызов profileApi.updateProfile (но он не принимает email)
-      // Пока используем заглушку
-      await updateProfileStub(profileUpdate);
-      if (profileUpdate.firstName !== undefined) setOriginalFirstName(profileUpdate.firstName);
-      if (profileUpdate.lastName !== undefined) setOriginalLastName(profileUpdate.lastName);
-      if (profileUpdate.phone !== undefined) setOriginalPhone(profileUpdate.phone);
-      showFeedback('Данные профиля обновлены', 'success');
-    } catch (error: any) {
-      showFeedback(error.message || 'Ошибка сохранения профиля', 'error');
-    }
-  };
-
-  // Сохранение email (с паролем) – заглушка
-  const performEmailUpdate = async (newEmail: string, password: string) => {
-    try {
-      // Здесь будет реальный вызов userApi.updateUser или profileApi.updateProfile (когда добавят email)
-      await updateEmailStub(newEmail, password);
-      setOriginalEmail(newEmail);
-      showFeedback('Email успешно обновлён', 'success');
-    } catch (error: any) {
-      showFeedback(error.message || 'Неверный пароль или ошибка обновления', 'error');
-      throw error;
-    }
-  };
-
-  const handleSave = () => {
-    if (!canSave) return;
-    if (!userId) return;
-
-    const profileUpdate: any = {};
-    if (firstName !== originalFirstName) profileUpdate.firstName = firstName;
-    if (lastName !== originalLastName) profileUpdate.lastName = lastName;
-    if (phone !== originalPhone) profileUpdate.phone = phone;
-
-    // Если email не менялся – сохраняем только профиль
-    if (email === originalEmail) {
-      performProfileUpdate(profileUpdate);
+  useEffect(() => {
+    const token = cookies.get("accessToken");
+    if (!token) {
+      setIsLoading(false);
       return;
     }
 
-    // Если email изменился – запоминаем изменения профиля и открываем модалку
+    try {
+      const decoded = jwtDecode<{ sub: string }>(token);
+      setUserId(decoded.sub);
+      loadData(decoded.sub);
+    } catch (error) {
+      console.error(error);
+      showFeedback("Ошибка загрузки профиля", "error");
+      setIsLoading(false);
+    }
+  }, [showFeedback]);
+
+  const handleSave = async () => {
+    if (!canSave) return;
+    if (!userId) return;
+
+    const profileUpdate = buildProfileUpdate();
+
+    if (formValues.email === originalValues.email) {
+      setIsSaving(true);
+      await applyProfileUpdate(profileUpdate);
+      setIsSaving(false);
+      return;
+    }
+
     setPendingProfileUpdate(profileUpdate);
     setIsPasswordModalOpen(true);
   };
 
   const confirmPassword = async (password: string) => {
+    if (!userId) {
+      showFeedback("Пользователь не найден", "error");
+      return;
+    }
+
     setIsPasswordModalOpen(false);
     setIsSaving(true);
     try {
-      // 1. Обновляем email (с проверкой пароля)
-      await performEmailUpdate(email, password);
-      // 2. Обновляем остальные поля профиля (если есть)
-      if (pendingProfileUpdate && Object.keys(pendingProfileUpdate).length > 0) {
-        await updateProfileStub(pendingProfileUpdate);
-        if (pendingProfileUpdate.firstName !== undefined) setOriginalFirstName(pendingProfileUpdate.firstName);
-        if (pendingProfileUpdate.lastName !== undefined) setOriginalLastName(pendingProfileUpdate.lastName);
-        if (pendingProfileUpdate.phone !== undefined) setOriginalPhone(pendingProfileUpdate.phone);
-        showFeedback('Данные профиля обновлены', 'success');
+      await userApi.verifyPassword(password);
+      await userApi.updateUser(userId, { email: formValues.email });
+      setOriginalValues((prev) => ({ ...prev, email: formValues.email }));
+      showFeedback("Email успешно обновлён", "success");
+
+      if (pendingProfileUpdate) {
+        await applyProfileUpdate(pendingProfileUpdate);
       }
     } catch (error) {
-
+      const apiError = error as ApiError;
+      showFeedback(apiError.message || "Неверный пароль или ошибка", "error");
     } finally {
       setIsSaving(false);
       setPendingProfileUpdate(null);
     }
   };
-
   return {
-    name: firstName,
-    setName: setFirstName,
-    lastname: lastName,
-    setLastname: setLastName,
-    email,
+    firstName: formValues.firstName,
+    setFirstName,
+    lastName: formValues.lastName,
+    setLastName,
+    email: formValues.email,
     setEmail,
-    phone,
+    phone: formValues.phone,
     setPhone,
     handleSave,
-    isLoading: isLoading || isSaving,
+    isLoading: isBusy,
     canSave,
     isPasswordModalOpen,
     setIsPasswordModalOpen,

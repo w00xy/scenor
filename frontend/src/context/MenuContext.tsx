@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface MenuContextType {
   collapsed: boolean;
@@ -6,10 +6,27 @@ interface MenuContextType {
 }
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
+const MENU_COLLAPSED_STORAGE_KEY = "scenor.menu.collapsed";
 
-export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleMenu = () => setCollapsed(prev => !prev);
+export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.localStorage.getItem(MENU_COLLAPSED_STORAGE_KEY) === "true";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      MENU_COLLAPSED_STORAGE_KEY,
+      String(collapsed),
+    );
+  }, [collapsed]);
+
+  const toggleMenu = () => setCollapsed((prev) => !prev);
 
   return (
     <MenuContext.Provider value={{ collapsed, toggleMenu }}>
@@ -20,6 +37,6 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useMenu = () => {
   const context = useContext(MenuContext);
-  if (!context) throw new Error('useMenu must be used within MenuProvider');
+  if (!context) throw new Error("useMenu must be used within MenuProvider");
   return context;
 };

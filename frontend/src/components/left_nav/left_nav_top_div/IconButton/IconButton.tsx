@@ -6,9 +6,10 @@ interface IconButtonProps {
   icon: React.ReactNode;
   to?: string; // опциональный
   onClick?: () => void; // опциональный
+  buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export function IconButton({ icon, to, onClick }: IconButtonProps) {
+export function IconButton({ icon, to, onClick, buttonRef }: IconButtonProps) {
   const navigate = useNavigate();
   const handleClick = () => {
     if (onClick) {
@@ -18,7 +19,12 @@ export function IconButton({ icon, to, onClick }: IconButtonProps) {
     }
   };
   return (
-    <button className="icon-button__top" onClick={handleClick}>
+    <button
+      ref={buttonRef}
+      type="button"
+      className="icon-button__top"
+      onClick={handleClick}
+    >
       {icon}
     </button>
   );

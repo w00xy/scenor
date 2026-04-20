@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearTokens } from "../../../services/api";
+import ProfileIcon from "../../../assets/settings_sidebar/Profile.svg?react";
+import OpenDoorIcon from "../../../assets/settings_sidebar/OpenDoor.svg?react";
 import "./SettingsMenu.scss";
 
 interface SettingsMenuProps {
@@ -49,10 +51,12 @@ export function SettingsMenu({
   return (
     <div className={`settings-menu ${positionClass}`} ref={menuRef}>
       <button className="settings-menu__item" onClick={handlePersonal}>
-        Настройки профиля
+        <ProfileIcon className="settings-menu__icon" />
+        <span>Профиль</span>
       </button>
       <button className="settings-menu__item" onClick={handleLogout}>
-        Выйти из аккаунта
+        <OpenDoorIcon className="settings-menu__icon" />
+        <span>Выйти из аккаунта</span>
       </button>
     </div>
   );

@@ -1,20 +1,29 @@
-// src/components/auth_reg/FieldFeedback/FieldFeedback.jsx
 import { useEffect, useState } from "react";
 import "./FieldFeedback.css";
 
-export function FieldFeedback({ message, type = "error", onClose }) {
+type FeedbackType = "error" | "success" | "warning";
+
+interface FieldFeedbackProps {
+  message: string;
+  type?: FeedbackType;
+  onClose: () => void;
+}
+
+export function FieldFeedback({
+  message,
+  type = "error",
+  onClose,
+}: FieldFeedbackProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (message) {
-      // Сначала скрываем
       setIsVisible(false);
-      
-      // Показываем с анимацией
+
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, 50);
-      
+
       return () => clearTimeout(timer);
     }
   }, [message]);
@@ -22,7 +31,7 @@ export function FieldFeedback({ message, type = "error", onClose }) {
   if (!message) return null;
 
   const getIcon = () => {
-    switch(type) {
+    switch (type) {
       case "error":
         return "⚠️";
       case "success":
@@ -35,11 +44,15 @@ export function FieldFeedback({ message, type = "error", onClose }) {
   };
 
   return (
-    <div className={`field-feedback-toast field-feedback-toast-${type} ${isVisible ? 'visible' : ''}`}>
+    <div
+      className={`field-feedback-toast field-feedback-toast-${type} ${isVisible ? "visible" : ""}`}
+    >
       <div className="field-feedback-toast-content">
         <span className="field-feedback-toast-icon">{getIcon()}</span>
         <span className="field-feedback-toast-message">{message}</span>
-        <button className="field-feedback-toast-close" onClick={onClose}>×</button>
+        <button className="field-feedback-toast-close" onClick={onClose}>
+          ×
+        </button>
       </div>
     </div>
   );
