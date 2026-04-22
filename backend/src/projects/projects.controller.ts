@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -81,5 +82,20 @@ export class ProjectsController {
 
     return this.projectsService.updateProject(userId, projectId, data);
   }
+
+  @Delete(':projectId')
+  @ApiOperation({ summary: 'Удалить проект по id' })
+  async deleteProject(
+    @Req() request: AuthenticatedRequest,
+    @Param('projectId', new ParseUUIDPipe()) projectId: string,
+  ) {
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.projectsService.deleteProject(userId, projectId);
+  }
+
 }
 
