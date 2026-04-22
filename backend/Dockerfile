@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM node:20 AS build
 
 WORKDIR /app
@@ -8,7 +9,8 @@ RUN apt-get update \
 # Установка зависимостей
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 
 # Применяем миграции и билдим приложение
 COPY . .

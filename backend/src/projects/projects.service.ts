@@ -115,6 +115,16 @@ export class ProjectsService {
     });
   }
 
+  async deleteProject(userId: string, projectId: string) {
+    await this.requireProjectAccess(userId, projectId, [
+      ProjectMemberRole.OWNER,
+    ]);
+    
+    return this.prisma.project.delete({
+      where: { id: projectId },
+    });
+  }
+
   private async requireProjectAccess(
     userId: string,
     projectId: string,
