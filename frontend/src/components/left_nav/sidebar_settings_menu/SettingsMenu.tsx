@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
+import { useProjects } from "../../../context/ProjectsContext";
 import { clearTokens } from "../../../services/api";
 import ProfileIcon from "../../../assets/settings_sidebar/Profile.svg?react";
 import OpenDoorIcon from "../../../assets/settings_sidebar/OpenDoor.svg?react";
@@ -17,6 +19,8 @@ export function SettingsMenu({
   ignoreRef,
 }: SettingsMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const { clearCurrentUser } = useCurrentUser();
+  const { clearProjects } = useProjects();
   const navigate = useNavigate();
   const positionClass = collapsed
     ? "settings-menu--right"
@@ -44,6 +48,8 @@ export function SettingsMenu({
 
   const handleLogout = () => {
     clearTokens();
+    clearCurrentUser();
+    clearProjects();
     navigate("/auth", { replace: true });
     onClose();
   };

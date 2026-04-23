@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProjects } from "../../../context/ProjectsContext";
 import VectorTwoIcon from "../../../assets/MM_Vectors-pages/Vector_Two.svg?react";
 import { CreateMenuItem } from "./CreateMenuItem";
 import { CreateSubMenu } from "./CreateSubMenu";
@@ -22,6 +23,7 @@ export function CreateMenu({
   const [openSubmenu, setOpenSubmenu] = useState<
     "scenarios" | "credentials" | null
   >(null);
+  const { personalProjectId } = useProjects();
   const navigate = useNavigate();
   const positionClass = collapsed
     ? "create-menu--right"
@@ -58,7 +60,11 @@ export function CreateMenu({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [ignoreRef, onClose]);
   const handleProjects = () => {
-    navigate("/personal");
+    if (!personalProjectId) {
+      return;
+    }
+
+    navigate(`/projects/${personalProjectId}/scenario`);
     onClose();
   };
 

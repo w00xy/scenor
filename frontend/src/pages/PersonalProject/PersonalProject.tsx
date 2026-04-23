@@ -1,16 +1,31 @@
 import { JSX } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
 import { HorRule } from "../../components/left_nav/left_nav_hr/HorRule";
 import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
 import { MainMenuBody } from "../../components/overview/main_menu_overview/MainMenuBody/MainMenuBody";
 import { MMTS_div_three } from "../../components/overview/main_menu_overview/main_menu_top_section/MMTS_div_three/MMTS_div_three";
+import { useProjects } from "../../context/ProjectsContext";
 import "./PersonalProject.scss";
 
 export function PersonalProject(): JSX.Element {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { projectId } = useParams<{ projectId: string }>();
+  const { isLoading, personalProjectId } = useProjects();
+
+  if (isLoading) {
+    return <div className="personal-project">Загрузка проекта...</div>;
+  }
+
+  if (!personalProjectId) {
+    return <Navigate to="/overview/scenario" replace />;
+  }
+
+  if (projectId !== personalProjectId) {
+    return <Navigate to={`/projects/${personalProjectId}/scenario`} replace />;
+  }
 
   const getActionText = () => {
     if (pathname.endsWith("/credentials")) return "Добавить данные";
@@ -40,7 +55,7 @@ export function PersonalProject(): JSX.Element {
             <button
               type="button"
               className="personal-project__action"
-              onClick={() => navigate("/personal/scenario")}
+              onClick={() => navigate(`/projects/${personalProjectId}/scenario`)}
             >
               {getActionText()}
             </button>

@@ -1,5 +1,6 @@
 import React, { JSX, useState, useRef } from "react";
 import { useMenu } from "../../../context/MenuContext";
+import { useProjects } from "../../../context/ProjectsContext";
 import "./left_nav_btns.scss";
 import { LNBtn } from "./left_nav_btn/left_nav_btn";
 import { SettingsMenu } from "../sidebar_settings_menu/SettingsMenu";
@@ -11,6 +12,7 @@ import ReviewSVG from "../../../assets/Review.svg?react";
 
 export function LNav(): JSX.Element {
   const { collapsed } = useMenu();
+  const { personalProjectId } = useProjects();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -18,11 +20,13 @@ export function LNav(): JSX.Element {
     <div className="LNav">
       <div className="group_btn">
         <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview" />
-        <LNBtn
-          icon={<LockSVG />}
-          text="Личный"
-          to="/personal"
-        />
+        {personalProjectId && (
+          <LNBtn
+            icon={<LockSVG />}
+            text="Личный"
+            to={`/projects/${personalProjectId}`}
+          />
+        )}
       </div>
       <div className="group_btn">
         <LNBtn icon={<TemplateSVG />} text="Шаблоны" to="/templates" />

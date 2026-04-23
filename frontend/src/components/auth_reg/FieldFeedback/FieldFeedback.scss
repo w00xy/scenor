@@ -1,31 +1,33 @@
-/* src/components/auth_reg/FieldFeedback/FieldFeedback.css */
 .field-feedback-toast {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 18px;
+  bottom: 18px;
   z-index: 9999;
   min-width: 320px;
   max-width: 400px;
-  animation: slideDown 0.3s ease;
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   font-family: "Inter", sans-serif;
+  opacity: 0;
+  transform: translateX(120%);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
 .field-feedback-toast-error {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2B2B2B;
   color: white;
 }
 
 .field-feedback-toast-success {
-  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-  color: #333;
+  background: #2B2B2B;
+  color: white;
 }
 
 .field-feedback-toast-warning {
-  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-  color: #333;
+  background: #2B2B2B;
+  color: white;
 }
 
 .field-feedback-toast-content {
@@ -73,19 +75,6 @@
   transform: scale(1.1);
 }
 
-@keyframes slideDown {
-  from {
-    top: -100px;
-    opacity: 0;
-    transform: translateX(-50%) scale(0.9);
-  }
-  to {
-    top: 20px;
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
 @keyframes popIn {
   0% {
     transform: scale(0);
@@ -98,12 +87,13 @@
   }
 }
 
-/* Для мобильных устройств */
 @media (max-width: 480px) {
   .field-feedback-toast {
-    min-width: 90%;
-    max-width: 90%;
-    top: 10px;
+    min-width: auto;
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 12px;
   }
 
   .field-feedback-toast-content {
@@ -115,17 +105,7 @@
   }
 }
 
-/* Добавьте в конец файла FieldFeedback.css */
-.field-feedback-toast {
-  /* существующие стили */
-  opacity: 0;
-  transform: translateX(-50%) scale(0.9);
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
 .field-feedback-toast.visible {
   opacity: 1;
-  transform: translateX(-50%) scale(1);
+  transform: translateX(0);
 }

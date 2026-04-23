@@ -114,7 +114,6 @@ export function useProfile() {
       if (apiError.status === 404 || apiError.message?.includes("404")) {
         syncProfileFields("", "", "");
       } else {
-        console.error(error);
         showFeedback(apiError.message || "Не удалось загрузить профиль", "error");
       }
     }
@@ -125,7 +124,6 @@ export function useProfile() {
       setFormValues((prev) => ({ ...prev, email: user.email }));
     } catch (error) {
       const apiError = error as ApiError;
-      console.error(error);
       showFeedback(apiError.message || "Не удалось загрузить email", "error");
     } finally {
       setIsLoading(false);
@@ -144,7 +142,6 @@ export function useProfile() {
       setUserId(decoded.sub);
       loadData(decoded.sub);
     } catch (error) {
-      console.error(error);
       showFeedback("Ошибка загрузки профиля", "error");
       setIsLoading(false);
     }

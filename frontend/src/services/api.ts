@@ -2,7 +2,6 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-const RETRY_STATUS_UNAUTHORIZED = 401;
 
 class ApiError extends Error {
   status?: number;
@@ -13,8 +12,6 @@ class ApiError extends Error {
     this.status = status;
   }
 }
-
-let refreshPromise: Promise<boolean> | null = null;
 
 const parseJsonSafe = async (response: Response): Promise<any> => {
   if (response.status === 204) {
@@ -34,7 +31,7 @@ const sendRequest = async (
   if (requireAuth) {
     const token = cookies.get("accessToken");
     if (!token) {
-      throw new ApiError("No access token", RETRY_STATUS_UNAUTHORIZED);
+      throw new ApiError("No access token", 401);
     }
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -51,34 +48,7 @@ async function request<T>(
   options: RequestInit = {},
   requireAuth: boolean = false,
 ): Promise<T> {
-  const execute = async (): Promise<Response> =>
-    sendRequest(endpoint, options, requireAuth);
-
-  let response: Response;
-  try {
-    response = await execute();
-  } catch (error) {
-    if (
-      requireAuth &&
-      error instanceof ApiError &&
-      error.status === RETRY_STATUS_UNAUTHORIZED
-    ) {
-      const refreshed = await refreshTokenFlow();
-      if (!refreshed) {
-        throw error;
-      }
-      response = await execute();
-    } else {
-      throw error;
-    }
-  }
-
-  if (requireAuth && response.status === RETRY_STATUS_UNAUTHORIZED) {
-    const refreshed = await refreshTokenFlow();
-    if (refreshed) {
-      response = await execute();
-    }
-  }
+  const response = await sendRequest(endpoint, options, requireAuth);
 
   if (!response.ok) {
     const errorData = await parseJsonSafe(response);
@@ -105,50 +75,6 @@ export const clearTokens = () => {
   cookies.remove("refreshToken", { path: "/" });
 };
 
-export async function refreshTokenFlow(): Promise<boolean> {
-  if (refreshPromise) {
-    return refreshPromise;
-  }
-
-  refreshPromise = (async () => {
-    const refreshToken = cookies.get("refreshToken");
-    if (!refreshToken) {
-      clearTokens();
-      return false;
-    }
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        clearTokens();
-        return false;
-      }
-
-      const data = await parseJsonSafe(response);
-      if (!data?.accessToken || !data?.refreshToken) {
-        clearTokens();
-        return false;
-      }
-
-      setTokens(data.accessToken, data.refreshToken);
-      return true;
-    } catch (error) {
-      console.error("[refreshTokenFlow] error:", error);
-      return false;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
 export const getAccessToken = () => cookies.get("accessToken");
 
 export const authApi = {
@@ -166,11 +92,6 @@ export const authApi = {
       "/users/login",
       { method: "POST", body: JSON.stringify(credentials) },
     ),
-  refresh: (refreshToken: string) =>
-    request<{ accessToken: string; refreshToken: string }>("/users/refresh", {
-      method: "POST",
-      body: JSON.stringify({ refreshToken }),
-    }),
 };
 
 export const userApi = {
@@ -239,4 +160,22 @@ export const profileApi = {
       phone?: string;
       avatarUrl?: string;
     }>(`/profile/me`, { method: "PUT", body: JSON.stringify(data) }, true),
+};
+
+export const projectApi = {
+  getProjects: () =>
+    request<
+      Array<{
+        id: string;
+        ownerId: string;
+        name: string;
+        description: string;
+        isArchived: boolean;
+        type: string;
+        createdAt: string;
+        updatedAt: string;
+        members: Array<{ role: string }>;
+        accessRole: string;
+      }>
+    >("/projects", { method: "GET" }, true),
 };

@@ -5,12 +5,11 @@ import { Overview } from "./pages/overview/Overview";
 import { Overview_scen } from "./components/overview/pages_overview/overview_scen/overview_scen";
 import { Overview_credentials } from "./components/overview/pages_overview/overview_credentials/overview_credentials";
 import { SettingsLayout } from "./pages/settings/SettingsLayout";
+import { CurrentUserProvider } from "./context/CurrentUserContext";
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
 import { MenuProvider } from "./context/MenuContext";
+import { ProjectsProvider } from "./context/ProjectsContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { useEffect } from "react";
-import { getAccessToken } from "./services/api";
-import { scheduleTokenRefresh, stopTokenRefresh } from "./services/tokenRefresher";
 import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
 import { PersonalProject } from "./pages/PersonalProject/PersonalProject";
 import { PersonalScenariosPage } from "./pages/PersonalProject/personal-pages/PersonalScenariosPage";
@@ -19,43 +18,41 @@ import { PersonalHistoryPage } from "./pages/PersonalProject/personal-pages/Pers
 import { PersonalDataTablePage } from "./pages/PersonalProject/personal-pages/PersonalDataTablePage";
 
 export default function App() {
-  useEffect(() => {
-    if (getAccessToken()) {
-      scheduleTokenRefresh();
-    }
-    return () => stopTokenRefresh();
-  }, []);
   return (
     <FieldFeedbackProvider>
       <MenuProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/auth" replace />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/register" element={<Reg />} />
+        <CurrentUserProvider>
+          <ProjectsProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Navigate to="/auth" replace />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/register" element={<Reg />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route path="/overview" element={<Overview />}>
-                <Route index element={<Navigate to="scenario" replace />} />
-                <Route path="scenario" element={<Overview_scen />} />
-                <Route path="credentials" element={<Overview_credentials />} />
-              </Route>
-              <Route path="/personal" element={<PersonalProject />}>
-                <Route index element={<Navigate to="scenario" replace />} />
-                <Route path="scenario" element={<PersonalScenariosPage />} />
-                <Route
-                  path="credentials"
-                  element={<PersonalCredentialsPage />}
-                />
-                <Route path="history" element={<PersonalHistoryPage />} />
-                <Route path="data-table" element={<PersonalDataTablePage />} />
-              </Route>
-              <Route path="/settings" element={<SettingsLayout />}>
-                <Route path="profile" element={<ProfileSettings />} />
-              </Route>
-            </Route>
-          </Routes>
-        </BrowserRouter>
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/overview" element={<Overview />}>
+                    <Route index element={<Navigate to="scenario" replace />} />
+                    <Route path="scenario" element={<Overview_scen />} />
+                    <Route path="credentials" element={<Overview_credentials />} />
+                  </Route>
+                  <Route path="/projects/:projectId" element={<PersonalProject />}>
+                    <Route index element={<Navigate to="scenario" replace />} />
+                    <Route path="scenario" element={<PersonalScenariosPage />} />
+                    <Route
+                      path="credentials"
+                      element={<PersonalCredentialsPage />}
+                    />
+                    <Route path="history" element={<PersonalHistoryPage />} />
+                    <Route path="data-table" element={<PersonalDataTablePage />} />
+                  </Route>
+                  <Route path="/settings" element={<SettingsLayout />}>
+                    <Route path="profile" element={<ProfileSettings />} />
+                  </Route>
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </ProjectsProvider>
+        </CurrentUserProvider>
       </MenuProvider>
     </FieldFeedbackProvider>
   );

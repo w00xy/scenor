@@ -60,7 +60,6 @@ export function ChangePasswordModal({
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      console.error(error);
       showFeedback(error.message || "Ошибка смены пароля", "error");
     } finally {
       setIsLoading(false);

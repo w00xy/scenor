@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./FieldFeedback.css";
+import "./FieldFeedback.scss";
 
 type FeedbackType = "error" | "success" | "warning";
 
@@ -35,7 +35,7 @@ export function FieldFeedback({
       case "error":
         return "⚠️";
       case "success":
-        return "✅";
+        return "✓";
       case "warning":
         return "⚠️";
       default:

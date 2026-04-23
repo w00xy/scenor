@@ -1,14 +1,17 @@
 import { JSX } from "react";
+import { ProjectEmptyState } from "../../../components/project_empty_state/ProjectEmptyState";
+import { useCurrentUsername } from "../../../hooks/useCurrentUsername";
 import "../PersonalProject.scss";
 
 export function PersonalDataTablePage(): JSX.Element {
+  const username = useCurrentUsername();
+
   return (
-    <section className="personal-page">
-      <h2 className="personal-page__title">Таблица данных</h2>
-      <p className="personal-page__text">
-        Раздел для личных таблиц и наборов данных, которые используются в
-        сценариях.
-      </p>
-    </section>
+    <ProjectEmptyState
+      title={`${username},`}
+      subtitle="давайте настроим таблицу данных"
+      description="Используйте таблицы данных для сохранения результатов выполнения, обмена данными между рабочими процессами и отслеживания метрик для оценки."
+      actionText="Создать первую таблицу данных"
+    />
   );
 }
