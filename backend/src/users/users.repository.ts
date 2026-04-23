@@ -83,7 +83,7 @@ export class UsersRepository {
           data: {
             ownerId: user.id,
             type: ProjectType.PERSONAL,
-            name: 'Personal',
+            name: 'Личный',
             description: '',
           },
           select: {

@@ -10,3 +10,8 @@
 backend/.secrets
 backend/.env.example
 backend/README.md
+node_modules
+dist
+.git
+.env
+*.log
