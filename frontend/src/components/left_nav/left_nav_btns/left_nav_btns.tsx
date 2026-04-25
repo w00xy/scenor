@@ -12,20 +12,37 @@ import ReviewSVG from "../../../assets/Review.svg?react";
 
 export function LNav(): JSX.Element {
   const { collapsed } = useMenu();
-  const { personalProjectId } = useProjects();
+  const { personalProjectId, teamProjects } = useProjects();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="LNav">
-      <div className="group_btn">
-        <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview" />
-        {personalProjectId && (
-          <LNBtn
-            icon={<LockSVG />}
-            text="Личный"
-            to={`/projects/${personalProjectId}`}
-          />
+      <div className="LNav__top">
+        <div className="group_btn">
+          <LNBtn icon={<ReviewSVG />} text="Обзор" to="/overview" />
+          {personalProjectId && (
+            <LNBtn
+              icon={<LockSVG />}
+              text="Личный"
+              to={`/projects/${personalProjectId}`}
+            />
+          )}
+        </div>
+        {teamProjects.length > 0 && (
+          <div className="group_btn">
+            {!collapsed && <p className="group_btn__label">Проекты</p>}
+            {[...teamProjects]
+              .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+              .map((project) => (
+                <LNBtn
+                  key={project.id}
+                  icon={<LockSVG />}
+                  text={project.name}
+                  to={`/projects/${project.id}`}
+                />
+              ))}
+          </div>
         )}
       </div>
       <div className="group_btn">

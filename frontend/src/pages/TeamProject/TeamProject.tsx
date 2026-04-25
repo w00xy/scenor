@@ -7,61 +7,59 @@ import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
 import { MainMenuBody } from "../../components/overview/main_menu_overview/MainMenuBody/MainMenuBody";
 import { MMTS_div_three } from "../../components/overview/main_menu_overview/main_menu_top_section/MMTS_div_three/MMTS_div_three";
 import { useProjects } from "../../context/ProjectsContext";
-import "./PersonalProject.scss";
+import "./TeamProject.scss";
 
-export function PersonalProject(): JSX.Element {
+export function TeamProject(): JSX.Element {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
-  const { isLoading, personalProjectId } = useProjects();
+  const { isLoading, teamProjects } = useProjects();
 
   if (isLoading) {
-    return <div className="personal-project">Загрузка проекта...</div>;
+    return <div className="team-project">Загрузка проекта...</div>;
   }
 
-  if (!personalProjectId) {
+  const currentProject = teamProjects.find((p) => p.id === projectId);
+
+  if (!currentProject) {
     return <Navigate to="/overview/scenario" replace />;
-  }
-
-  if (projectId !== personalProjectId) {
-    return <Navigate to={`/projects/${personalProjectId}/scenario`} replace />;
   }
 
   const getActionText = () => {
     if (pathname.endsWith("/credentials")) return "Добавить данные";
-    if (pathname.endsWith("/history")) return "Новая операция";
+    if (pathname.endsWith("/history")) return "Создать сценарий";
     if (pathname.endsWith("/data-table")) return "Создать таблицу";
+    if (pathname.endsWith("/settings")) return "";
     return "Создать сценарий";
   };
 
   return (
-    <div className="personal-project">
+    <div className="team-project">
       <LNBody>
         <LNTDiv />
         <HorRule />
         <LNav />
       </LNBody>
 
-      <div className="personal-project__main">
+      <div className="team-project__main">
         <MainMenuBody>
-          <div className="personal-project__header">
-            <div className="personal-project__copy">
-              <p className="personal-project__title">Личный проект</p>
-              <p className="personal-project__subtitle">
-                Ваши личные сценарии, учётные данные и история операций.
-              </p>
+          <div className="team-project__header">
+            <div className="team-project__copy">
+              <p className="team-project__title">{currentProject.name}</p>
             </div>
-            <button
-              type="button"
-              className="personal-project__action"
-              onClick={() => navigate(`/projects/${personalProjectId}/scenario`)}
-            >
-              {getActionText()}
-            </button>
+            {!pathname.endsWith("/settings") && (
+              <button
+                type="button"
+                className="team-project__action"
+                onClick={() => navigate(`/projects/${projectId}/scenario`)}
+              >
+                {getActionText()}
+              </button>
+            )}
           </div>
 
-          <MMTS_div_three projectId={personalProjectId || undefined} />
-          <div className="personal-project__content">
+          <MMTS_div_three projectId={projectId} />
+          <div className="team-project__content">
             <Outlet />
           </div>
         </MainMenuBody>

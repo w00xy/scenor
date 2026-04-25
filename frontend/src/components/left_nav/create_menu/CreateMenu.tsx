@@ -23,7 +23,7 @@ export function CreateMenu({
   const [openSubmenu, setOpenSubmenu] = useState<
     "scenarios" | "credentials" | null
   >(null);
-  const { personalProjectId } = useProjects();
+  const { personalProjectId, createProject, teamProjects } = useProjects();
   const navigate = useNavigate();
   const positionClass = collapsed
     ? "create-menu--right"
@@ -59,13 +59,22 @@ export function CreateMenu({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [ignoreRef, onClose]);
-  const handleProjects = () => {
-    if (!personalProjectId) {
-      return;
-    }
+  const handleProjects = async () => {
+    try {
+      const projectNumbers = teamProjects
+        .map((p) => {
+          const match = p.name.match(/^Проект №(\d+)$/);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter((num) => num > 0);
 
-    navigate(`/projects/${personalProjectId}/scenario`);
-    onClose();
+      const nextNumber = projectNumbers.length > 0 ? Math.max(...projectNumbers) + 1 : 1;
+      const newProject = await createProject(`Проект №${nextNumber}`, "");
+      navigate(`/projects/${newProject.id}`);
+      onClose();
+    } catch (error) {
+      console.error("Failed to create project:", error);
+    }
   };
 
   return (
@@ -96,7 +105,7 @@ export function CreateMenu({
             }
           />
         </div>
-        <CreateMenuItem label="Проекты" onClick={handleProjects} />
+        <CreateMenuItem label="Проект" onClick={handleProjects} />
       {openSubmenu === "scenarios" && (
         <CreateSubMenu
           title="Сценарии"

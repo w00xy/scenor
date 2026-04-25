@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Auth } from "./pages/authorization/Auth"; // новая страница с блюром и формой
-import { Reg } from "./pages/registration/Reg"; // аналогично
+import { Auth } from "./pages/authorization/Auth"; 
+import { Reg } from "./pages/registration/Reg"; 
 import { Overview } from "./pages/overview/Overview";
 import { Overview_scen } from "./components/overview/pages_overview/overview_scen/overview_scen";
 import { Overview_credentials } from "./components/overview/pages_overview/overview_credentials/overview_credentials";
@@ -11,11 +11,9 @@ import { MenuProvider } from "./context/MenuContext";
 import { ProjectsProvider } from "./context/ProjectsContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
-import { PersonalProject } from "./pages/PersonalProject/PersonalProject";
-import { PersonalScenariosPage } from "./pages/PersonalProject/personal-pages/PersonalScenariosPage";
-import { PersonalCredentialsPage } from "./pages/PersonalProject/personal-pages/PersonalCredentialsPage";
-import { PersonalHistoryPage } from "./pages/PersonalProject/personal-pages/PersonalHistoryPage";
-import { PersonalDataTablePage } from "./pages/PersonalProject/personal-pages/PersonalDataTablePage";
+import { ProjectRouter } from "./pages/ProjectRouter";
+import { ProjectPageRouter } from "./pages/ProjectPageRouter";
+import { TeamProjectSettingsPage } from "./pages/TeamProject/team-pages/TeamProjectSettingsPage";
 
 export default function App() {
   return (
@@ -35,15 +33,13 @@ export default function App() {
                     <Route path="scenario" element={<Overview_scen />} />
                     <Route path="credentials" element={<Overview_credentials />} />
                   </Route>
-                  <Route path="/projects/:projectId" element={<PersonalProject />}>
+                  <Route path="/projects/:projectId" element={<ProjectRouter />}>
                     <Route index element={<Navigate to="scenario" replace />} />
-                    <Route path="scenario" element={<PersonalScenariosPage />} />
-                    <Route
-                      path="credentials"
-                      element={<PersonalCredentialsPage />}
-                    />
-                    <Route path="history" element={<PersonalHistoryPage />} />
-                    <Route path="data-table" element={<PersonalDataTablePage />} />
+                    <Route path="scenario" element={<ProjectPageRouter pageType="scenario" />} />
+                    <Route path="credentials" element={<ProjectPageRouter pageType="credentials" />} />
+                    <Route path="history" element={<ProjectPageRouter pageType="history" />} />
+                    <Route path="data-table" element={<ProjectPageRouter pageType="data-table" />} />
+                    <Route path="settings" element={<TeamProjectSettingsPage />} />
                   </Route>
                   <Route path="/settings" element={<SettingsLayout />}>
                     <Route path="profile" element={<ProfileSettings />} />

@@ -178,4 +178,60 @@ export const projectApi = {
         accessRole: string;
       }>
     >("/projects", { method: "GET" }, true),
+
+  getProject: (projectId: string) =>
+    request<{
+      id: string;
+      ownerId: string;
+      name: string;
+      description: string | null;
+      isArchived: boolean;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+      members: Array<{ role: string }>;
+      accessRole: string;
+    }>(`/projects/${projectId}`, { method: "GET" }, true),
+
+  createProject: (data: { name: string; description: string }) =>
+    request<{
+      id: string;
+      ownerId: string;
+      name: string;
+      description: string | null;
+      isArchived: boolean;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+      members: Array<{ role: string }>;
+      accessRole: string;
+    }>("/projects", { method: "POST", body: JSON.stringify(data) }, true),
+
+  updateProject: (projectId: string, data: { name?: string; description?: string }) =>
+    request<{
+      id: string;
+      ownerId: string;
+      name: string;
+      description: string | null;
+      isArchived: boolean;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+      members: Array<{ role: string }>;
+      accessRole: string;
+    }>(`/projects/${projectId}`, { method: "PUT", body: JSON.stringify(data) }, true),
+
+  deleteProject: (projectId: string) =>
+    request<{
+      id: string;
+      ownerId: string;
+      name: string;
+      description: string | null;
+      isArchived: boolean;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+      members: Array<{ role: string }>;
+      accessRole: string;
+    }>(`/projects/${projectId}`, { method: "DELETE" }, true),
 };

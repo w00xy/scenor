@@ -1,9 +1,8 @@
 import { JSX } from "react";
-import { ProjectEmptyState } from "../../../components/project_empty_state/ProjectEmptyState";
-import { useCurrentUsername } from "../../../hooks/useCurrentUsername";
-import "../PersonalProject.scss";
+import { ProjectEmptyState } from "./project_empty_state/ProjectEmptyState";
+import { useCurrentUsername } from "../../hooks/useCurrentUsername";
 
-export function PersonalCredentialsPage(): JSX.Element {
+export function ProjectCredentialsPageComponent(): JSX.Element {
   const username = useCurrentUsername();
 
   return (

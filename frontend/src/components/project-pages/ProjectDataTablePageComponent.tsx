@@ -1,9 +1,8 @@
 import { JSX } from "react";
-import { ProjectEmptyState } from "../../../components/project_empty_state/ProjectEmptyState";
-import { useCurrentUsername } from "../../../hooks/useCurrentUsername";
-import "../PersonalProject.scss";
+import { ProjectEmptyState } from "./project_empty_state/ProjectEmptyState";
+import { useCurrentUsername } from "../../hooks/useCurrentUsername";
 
-export function PersonalDataTablePage(): JSX.Element {
+export function ProjectDataTablePageComponent(): JSX.Element {
   const username = useCurrentUsername();
 
   return (
