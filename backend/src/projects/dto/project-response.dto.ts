@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProjectRole } from '@prisma/client';
 
 export class ProjectResponseDto {
   @ApiProperty({
