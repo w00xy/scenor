@@ -25,6 +25,11 @@ backend/.tmp/
 backend/pids/
 backend/generated/prisma/
 
+# Frontend artifacts
+frontend/dist/
+frontend/build/
+frontend/coverage/
+
 # Env files
 backend/.env
 backend/.env.local
