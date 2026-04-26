@@ -1,53 +1,101 @@
-import { JSX, useState, useMemo } from "react";
+import { JSX, useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./overview_scen.scss";
 import { MM_overview_scen_div_one } from "./MM_overview_scen_div_one/MM_overview_scen_div_one";
 import { MM_overview_scen_component } from "./MM_overview_scen_component/MM_overview_scen_component";
 import { MM_overview_scen_div_two } from "./MM_overview_scen_div_two/MM_overview_scen_div_two";
+import { useProjects } from "../../../../context/ProjectsContext";
+import { useWorkflows, Workflow } from "../../../../context/WorkflowsContext";
 
-// Тип для сценария
-interface Scene {
-  name: string;
-  last_update: string;
-  data_created: string;
-  user: string;
+interface WorkflowWithProject extends Workflow {
+  projectName: string;
 }
 
-// Данные сценариев
-const scenes: Scene[] = [
-  {
-    name: "Cценарий генерации видео veo3",
-    last_update: "5 часов",
-    data_created: "23 Июля",
-    user: "w00xy",
-  },
-  {
-    name: "My workwlow",
-    last_update: "1 час",
-    data_created: "02 Марта",
-    user: "l0yzi",
-  },
-];
-
 export function Overview_scen(): JSX.Element {
+  const navigate = useNavigate();
+  const { projects } = useProjects();
+  const { getProjectWorkflows } = useWorkflows();
   const [sortBy, setSortBy] = useState<string>("");
+  const [allWorkflows, setAllWorkflows] = useState<WorkflowWithProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const sortScenes = (a: Scene, b: Scene) => {
+  useEffect(() => {
+    const loadAllWorkflows = async () => {
+      if (projects.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const workflowsPromises = projects.map(async (project) => {
+          try {
+            const workflows = await getProjectWorkflows(project.id);
+            return workflows.map((workflow) => ({
+              ...workflow,
+              projectName: project.name,
+            }));
+          } catch (error) {
+            console.error(`Failed to load workflows for project ${project.id}:`, error);
+            return [];
+          }
+        });
+
+        const workflowsArrays = await Promise.all(workflowsPromises);
+        const flatWorkflows = workflowsArrays.flat();
+        setAllWorkflows(flatWorkflows);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadAllWorkflows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects.length]);
+
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffHours < 1) return "менее часа";
+    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "час" : "часов"}`;
+    return `${diffDays} ${diffDays === 1 ? "день" : "дней"}`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const months = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
+    return `${date.getDate()} ${months[date.getMonth()]}`;
+  };
+
+  const sortWorkflows = (a: WorkflowWithProject, b: WorkflowWithProject) => {
     switch (sortBy) {
       case "Name":
         return a.name.localeCompare(b.name);
       case "Creation date":
-        return a.data_created.localeCompare(b.data_created);
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       case "Update date":
-        return a.last_update.localeCompare(b.last_update);
+        return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
       default:
         return 0;
     }
   };
 
-  const sortedScenes = useMemo(() => {
-    if (!sortBy) return scenes;
-    return [...scenes].sort(sortScenes);
-  }, [sortBy]);
+  const sortedWorkflows = useMemo(() => {
+    if (!sortBy) return allWorkflows;
+    return [...allWorkflows].sort(sortWorkflows);
+  }, [sortBy, allWorkflows]);
+
+  if (isLoading) {
+    return (
+      <div className="MM_overview_scen">
+        <div>Загрузка сценариев...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="MM_overview_scen">
@@ -56,16 +104,21 @@ export function Overview_scen(): JSX.Element {
         sortBy={sortBy}
         onSortChange={setSortBy}
       />
-      {sortedScenes.map((scene, idx) => (
-        <MM_overview_scen_component
-          key={idx}
-          name={scene.name}
-          last_update={scene.last_update}
-          data_created={scene.data_created}
-          user={scene.user}
-        />
+      {sortedWorkflows.map((workflow) => (
+        <div
+          key={workflow.id}
+          onClick={() => navigate(`/projects/${workflow.projectId}/workflows/${workflow.id}`)}
+          style={{ cursor: "pointer" }}
+        >
+          <MM_overview_scen_component
+            name={workflow.name}
+            last_update={formatTimeAgo(workflow.updatedAt)}
+            data_created={formatDate(workflow.createdAt)}
+            projectName={workflow.projectName}
+          />
+        </div>
       ))}
-      <MM_overview_scen_div_two count="2" current_page="1" />
+      <MM_overview_scen_div_two count={sortedWorkflows.length.toString()} current_page="1" />
     </div>
   );
 }

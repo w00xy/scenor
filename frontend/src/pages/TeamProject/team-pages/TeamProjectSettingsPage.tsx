@@ -77,7 +77,7 @@ export function TeamProjectSettingsPage(): JSX.Element {
         </button>
       </div>
 
-      <ProfileSettingsTitleH2 text="Информация о проекте" />
+      <div className="team-project-settings__h1">Информация о проекте</div>
 
       <div className="team-project-settings__group">
         <ProfileSettingsField
@@ -92,7 +92,7 @@ export function TeamProjectSettingsPage(): JSX.Element {
         />
       </div>
 
-      <ProfileSettingsTitleH2 text="Участники проекта" />
+      <div className="team-project-settings__h1">Участники проекта</div>
       <div className="team-project-settings__group">
         <ProfileSettingsField
           text="Участники"
@@ -102,7 +102,7 @@ export function TeamProjectSettingsPage(): JSX.Element {
         />
       </div>
 
-      <ProfileSettingsTitleH2 text="Опасная зона" />
+      <div className="team-project-settings__h1">Опасная зона</div> 
       <button
         className="team-project-settings__button team-project-settings__button--danger"
         onClick={handleDelete}

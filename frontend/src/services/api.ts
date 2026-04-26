@@ -235,3 +235,172 @@ export const projectApi = {
       accessRole: string;
     }>(`/projects/${projectId}`, { method: "DELETE" }, true),
 };
+
+export const workflowApi = {
+  createWorkflow: (projectId: string, data: {
+    name: string;
+    description?: string;
+    status?: string;
+    isPublic?: boolean;
+  }) =>
+    request<{
+      id: string;
+      projectId: string;
+      createdBy: string;
+      name: string;
+      description: string | null;
+      status: string;
+      version: number;
+      isPublic: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>(`/projects/${projectId}/workflows`, { method: "POST", body: JSON.stringify(data) }, true),
+
+  getWorkflow: (workflowId: string) =>
+    request<{
+      id: string;
+      projectId: string;
+      createdBy: string;
+      name: string;
+      description: string | null;
+      status: string;
+      version: number;
+      isPublic: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>(`/workflows/${workflowId}`, { method: "GET" }, true),
+
+  updateWorkflow: (workflowId: string, data: {
+    name?: string;
+    description?: string;
+    status?: string;
+    isPublic?: boolean;
+  }) =>
+    request<{
+      id: string;
+      projectId: string;
+      createdBy: string;
+      name: string;
+      description: string | null;
+      status: string;
+      version: number;
+      isPublic: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>(`/workflows/${workflowId}`, { method: "PUT", body: JSON.stringify(data) }, true),
+
+  deleteWorkflow: (workflowId: string) =>
+    request<void>(`/workflows/${workflowId}`, { method: "DELETE" }, true),
+
+  getProjectWorkflows: (projectId: string) =>
+    request<Array<{
+      id: string;
+      projectId: string;
+      createdBy: string;
+      name: string;
+      description: string | null;
+      status: string;
+      version: number;
+      isPublic: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>>(`/projects/${projectId}/workflows`, { method: "GET" }, true),
+
+  // Nodes API
+  getWorkflowGraph: (workflowId: string) =>
+    request<{
+      nodes: Array<{
+        id: string;
+        workflowId: string;
+        nodeTypeId: string | null;
+        typeCode: string;
+        name: string | null;
+        label: string | null;
+        posX: number;
+        posY: number;
+        configJson: any;
+        credentialsId: string | null;
+        notes: string | null;
+        isDisabled: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+      edges: Array<{
+        id: string;
+        workflowId: string;
+        sourceNodeId: string;
+        targetNodeId: string;
+        sourceHandle: string | null;
+        targetHandle: string | null;
+        conditionType: string | null;
+        label: string | null;
+        createdAt: string;
+      }>;
+    }>(`/workflows/${workflowId}/graph`, { method: "GET" }, true),
+
+  createNode: (workflowId: string, data: {
+    typeCode: string;
+    name?: string;
+    label?: string;
+    posX: number;
+    posY: number;
+    configJson?: any;
+  }) =>
+    request<{
+      id: string;
+      workflowId: string;
+      typeCode: string;
+      name: string | null;
+      label: string | null;
+      posX: number;
+      posY: number;
+      configJson: any;
+      createdAt: string;
+      updatedAt: string;
+    }>(`/workflows/${workflowId}/nodes`, { method: "POST", body: JSON.stringify(data) }, true),
+
+  updateNode: (workflowId: string, nodeId: string, data: {
+    name?: string;
+    label?: string;
+    posX?: number;
+    posY?: number;
+    configJson?: any;
+    isDisabled?: boolean;
+  }) =>
+    request<{
+      id: string;
+      workflowId: string;
+      typeCode: string;
+      name: string | null;
+      label: string | null;
+      posX: number;
+      posY: number;
+      configJson: any;
+      isDisabled: boolean;
+      updatedAt: string;
+    }>(`/workflows/${workflowId}/nodes/${nodeId}`, { method: "PUT", body: JSON.stringify(data) }, true),
+
+  deleteNode: (workflowId: string, nodeId: string) =>
+    request<void>(`/workflows/${workflowId}/nodes/${nodeId}`, { method: "DELETE" }, true),
+
+  createEdge: (workflowId: string, data: {
+    sourceNodeId: string;
+    targetNodeId: string;
+    sourceHandle?: string;
+    targetHandle?: string;
+    label?: string;
+  }) =>
+    request<{
+      id: string;
+      workflowId: string;
+      sourceNodeId: string;
+      targetNodeId: string;
+      sourceHandle: string | null;
+      targetHandle: string | null;
+      label: string | null;
+      createdAt: string;
+    }>(`/workflows/${workflowId}/edges`, { method: "POST", body: JSON.stringify(data) }, true),
+
+  deleteEdge: (workflowId: string, edgeId: string) =>
+    request<void>(`/workflows/${workflowId}/edges/${edgeId}`, { method: "DELETE" }, true),
+};

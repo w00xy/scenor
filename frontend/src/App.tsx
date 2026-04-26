@@ -9,11 +9,13 @@ import { CurrentUserProvider } from "./context/CurrentUserContext";
 import { FieldFeedbackProvider } from "./context/FieldFeedbackContext";
 import { MenuProvider } from "./context/MenuContext";
 import { ProjectsProvider } from "./context/ProjectsContext";
+import { WorkflowsProvider } from "./context/WorkflowsContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
 import { ProjectRouter } from "./pages/ProjectRouter";
 import { ProjectPageRouter } from "./pages/ProjectPageRouter";
 import { TeamProjectSettingsPage } from "./pages/TeamProject/team-pages/TeamProjectSettingsPage";
+import { WorkflowEditor } from "./pages/WorkflowEditor/WorkflowEditor";
 
 export default function App() {
   return (
@@ -21,32 +23,35 @@ export default function App() {
       <MenuProvider>
         <CurrentUserProvider>
           <ProjectsProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Navigate to="/auth" replace />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/register" element={<Reg />} />
+            <WorkflowsProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/auth" replace />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/register" element={<Reg />} />
 
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/overview" element={<Overview />}>
-                    <Route index element={<Navigate to="scenario" replace />} />
-                    <Route path="scenario" element={<Overview_scen />} />
-                    <Route path="credentials" element={<Overview_credentials />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/overview" element={<Overview />}>
+                      <Route index element={<Navigate to="scenario" replace />} />
+                      <Route path="scenario" element={<Overview_scen />} />
+                      <Route path="credentials" element={<Overview_credentials />} />
+                    </Route>
+                    <Route path="/projects/:projectId" element={<ProjectRouter />}>
+                      <Route index element={<Navigate to="scenario" replace />} />
+                      <Route path="scenario" element={<ProjectPageRouter pageType="scenario" />} />
+                      <Route path="credentials" element={<ProjectPageRouter pageType="credentials" />} />
+                      <Route path="history" element={<ProjectPageRouter pageType="history" />} />
+                      <Route path="data-table" element={<ProjectPageRouter pageType="data-table" />} />
+                      <Route path="settings" element={<TeamProjectSettingsPage />} />
+                    </Route>
+                    <Route path="/projects/:projectId/workflows/:workflowId" element={<WorkflowEditor />} />
+                    <Route path="/settings" element={<SettingsLayout />}>
+                      <Route path="profile" element={<ProfileSettings />} />
+                    </Route>
                   </Route>
-                  <Route path="/projects/:projectId" element={<ProjectRouter />}>
-                    <Route index element={<Navigate to="scenario" replace />} />
-                    <Route path="scenario" element={<ProjectPageRouter pageType="scenario" />} />
-                    <Route path="credentials" element={<ProjectPageRouter pageType="credentials" />} />
-                    <Route path="history" element={<ProjectPageRouter pageType="history" />} />
-                    <Route path="data-table" element={<ProjectPageRouter pageType="data-table" />} />
-                    <Route path="settings" element={<TeamProjectSettingsPage />} />
-                  </Route>
-                  <Route path="/settings" element={<SettingsLayout />}>
-                    <Route path="profile" element={<ProfileSettings />} />
-                  </Route>
-                </Route>
-              </Routes>
-            </BrowserRouter>
+                </Routes>
+              </BrowserRouter>
+            </WorkflowsProvider>
           </ProjectsProvider>
         </CurrentUserProvider>
       </MenuProvider>

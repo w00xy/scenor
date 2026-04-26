@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
@@ -7,6 +7,7 @@ import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
 import { MainMenuBody } from "../../components/overview/main_menu_overview/MainMenuBody/MainMenuBody";
 import { MMTS_div_three } from "../../components/overview/main_menu_overview/main_menu_top_section/MMTS_div_three/MMTS_div_three";
 import { useProjects } from "../../context/ProjectsContext";
+import { useWorkflows } from "../../context/WorkflowsContext";
 import "./TeamProject.scss";
 
 export function TeamProject(): JSX.Element {
@@ -14,6 +15,8 @@ export function TeamProject(): JSX.Element {
   const { pathname } = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const { isLoading, teamProjects } = useProjects();
+  const { createWorkflow } = useWorkflows();
+  const [isCreating, setIsCreating] = useState(false);
 
   if (isLoading) {
     return <div className="team-project">Загрузка проекта...</div>;
@@ -31,6 +34,26 @@ export function TeamProject(): JSX.Element {
     if (pathname.endsWith("/data-table")) return "Создать таблицу";
     if (pathname.endsWith("/settings")) return "";
     return "Создать сценарий";
+  };
+
+  const handleCreateScenario = async () => {
+    if (!projectId || isCreating) return;
+
+    setIsCreating(true);
+    try {
+      const workflow = await createWorkflow(projectId, {
+        name: "Сценарий №1",
+        description: "",
+        status: "draft",
+        isPublic: false,
+      });
+      navigate(`/projects/${projectId}/workflows/${workflow.id}`);
+    } catch (error) {
+      console.error("Failed to create workflow:", error);
+      alert("Не удалось создать сценарий");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -51,9 +74,10 @@ export function TeamProject(): JSX.Element {
               <button
                 type="button"
                 className="team-project__action"
-                onClick={() => navigate(`/projects/${projectId}/scenario`)}
+                onClick={pathname.endsWith("/scenario") ? handleCreateScenario : () => navigate(`/projects/${projectId}/scenario`)}
+                disabled={isCreating}
               >
-                {getActionText()}
+                {isCreating ? "Создание..." : getActionText()}
               </button>
             )}
           </div>

@@ -7,14 +7,14 @@ interface MM_overview_scen_componentProps {
   name: string;
   last_update: string;
   data_created: string;
-  user: string;
+  projectName: string;
 }
 
 export function MM_overview_scen_component({
   name,
   last_update,
   data_created,
-  user,
+  projectName,
 }: MM_overview_scen_componentProps): JSX.Element {
   return (
     <div className="MM_overview_scen_component">
@@ -27,7 +27,7 @@ export function MM_overview_scen_component({
       <div className="MM_overview_scen_component_right">
         <div>
             <PersonalGray />
-            <p>{user}</p>
+            <p>{projectName}</p>
         </div>
         <MM_DotsSVG />
       </div>

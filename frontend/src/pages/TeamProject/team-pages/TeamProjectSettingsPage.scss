@@ -2,20 +2,25 @@
 
 .team-project-settings {
   width: 100%;
-  max-width: 800px;
+  max-width: 1280px;
+
+  &__h1{
+    font-family: $font-family;
+    color: $color-white;
+    font-size: 18px;
+    padding: 22px 0px 16px
+  }
 
   &__actions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
-    margin-bottom: 32px;
   }
 
   &__group {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 10px;
   }
 
   &__button {
@@ -56,7 +61,6 @@
     &--danger {
       background: #d32f2f;
       color: #fff;
-      margin-top: 16px;
 
       &:hover:not(:disabled) {
         background: #b71c1c;

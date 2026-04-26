@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
@@ -7,6 +7,7 @@ import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
 import { MainMenuBody } from "../../components/overview/main_menu_overview/MainMenuBody/MainMenuBody";
 import { MMTS_div_three } from "../../components/overview/main_menu_overview/main_menu_top_section/MMTS_div_three/MMTS_div_three";
 import { useProjects } from "../../context/ProjectsContext";
+import { useWorkflows } from "../../context/WorkflowsContext";
 import "./PersonalProject.scss";
 
 export function PersonalProject(): JSX.Element {
@@ -14,6 +15,8 @@ export function PersonalProject(): JSX.Element {
   const { pathname } = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const { isLoading, personalProjectId } = useProjects();
+  const { createWorkflow } = useWorkflows();
+  const [isCreating, setIsCreating] = useState(false);
 
   if (isLoading) {
     return <div className="personal-project">Загрузка проекта...</div>;
@@ -32,6 +35,26 @@ export function PersonalProject(): JSX.Element {
     if (pathname.endsWith("/history")) return "Новая операция";
     if (pathname.endsWith("/data-table")) return "Создать таблицу";
     return "Создать сценарий";
+  };
+
+  const handleCreateScenario = async () => {
+    if (!personalProjectId || isCreating) return;
+
+    setIsCreating(true);
+    try {
+      const workflow = await createWorkflow(personalProjectId, {
+        name: "Сценарий №1",
+        description: "",
+        status: "draft",
+        isPublic: false,
+      });
+      navigate(`/projects/${personalProjectId}/workflows/${workflow.id}`);
+    } catch (error) {
+      console.error("Failed to create workflow:", error);
+      alert("Не удалось создать сценарий");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -54,9 +77,10 @@ export function PersonalProject(): JSX.Element {
             <button
               type="button"
               className="personal-project__action"
-              onClick={() => navigate(`/projects/${personalProjectId}/scenario`)}
+              onClick={pathname.endsWith("/scenario") ? handleCreateScenario : () => navigate(`/projects/${personalProjectId}/scenario`)}
+              disabled={isCreating}
             >
-              {getActionText()}
+              {isCreating ? "Создание..." : getActionText()}
             </button>
           </div>
 
