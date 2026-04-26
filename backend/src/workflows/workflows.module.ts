@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from '../auth/auth.guard.js';
-import { AuthTokenService } from '../auth/auth-token.service.js';
+import { AuthModule } from '../auth/auth.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { WorkflowsController } from './workflows.controller.js';
 import { WorkflowsService } from './workflows.service.js';
 
 @Module({
-  imports: [DatabaseModule, JwtModule.register({})],
+  imports: [DatabaseModule, AuthModule],
   controllers: [WorkflowsController],
-  providers: [WorkflowsService, AuthGuard, AuthTokenService],
+  providers: [WorkflowsService],
   exports: [WorkflowsService],
 })
 export class WorkflowsModule {}

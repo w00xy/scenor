@@ -9,6 +9,8 @@ import { ProjectsModule } from './projects/projects.module.js';
 import { WorkflowsModule } from './workflows/workflows.module.js';
 import { NodeTypesModule } from './node-types/node-types.module.js';
 import { ExecutionsModule } from './executions/executions.module.js';
+import { CredentialsModule } from './credentials/credentials.module.js';
+import { WorkflowSharesModule } from './workflow-shares/workflow-shares.module.js';
 import { getEnvFilePaths, validateEnv } from './config/env.config.js';
 
 @Module({
@@ -25,6 +27,8 @@ import { getEnvFilePaths, validateEnv } from './config/env.config.js';
     WorkflowsModule,
     NodeTypesModule,
     ExecutionsModule,
+    CredentialsModule,
+    WorkflowSharesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
