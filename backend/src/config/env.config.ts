@@ -6,6 +6,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  CREDENTIALS_ENCRYPTION_KEY: z.string().length(64, 'CREDENTIALS_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   HOSTNAME: z.string().default('127.0.0.1'),
   NODE_ENV: z.string().optional(),

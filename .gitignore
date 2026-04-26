@@ -5,6 +5,7 @@
 .codex
 .playwright
 .kilo
+.claude
 
 # Git internals and tooling
 *.log

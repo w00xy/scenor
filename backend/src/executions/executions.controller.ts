@@ -12,7 +12,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
@@ -23,6 +23,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
+@ApiTags('Выполнение Workflow')
 @Controller('workflows/:workflowId/executions')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')
@@ -30,6 +31,7 @@ export class ExecutionsController {
   constructor(private readonly executionsService: ExecutionsService) {}
 
   @Post('manual')
+  @ApiOperation({ summary: 'Запустить workflow вручную' })
   async runManual(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -44,6 +46,7 @@ export class ExecutionsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Получить список выполнений workflow' })
   async listExecutions(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -60,6 +63,7 @@ export class ExecutionsController {
   }
 
   @Get(':executionId')
+  @ApiOperation({ summary: 'Получить детали выполнения workflow' })
   async getExecution(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -74,6 +78,7 @@ export class ExecutionsController {
   }
 
   @Get(':executionId/logs')
+  @ApiOperation({ summary: 'Получить логи выполнения узлов workflow' })
   async getExecutionLogs(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,

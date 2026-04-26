@@ -11,18 +11,18 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
 import { CreateProjectDto, UpdateProjectDto } from './dto/index.js';
 import { ProjectsService } from './projects.service.js';
-import { ApiOperation } from '@nestjs/swagger';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
+@ApiTags('Проекты')
 @Controller('projects')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')

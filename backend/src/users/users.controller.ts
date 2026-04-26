@@ -26,37 +26,46 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { RolesGuard } from '../auth/roles.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { Role } from '@prisma/client';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
+@ApiTags('Пользователи')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
   @ApiOperation({summary: "Создать нового пользователя"})
+  @ApiResponse({ status: 201, description: 'Пользователь успешно создан' })
+  @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
+  @ApiResponse({ status: 409, description: 'Conflict - пользователь с таким email уже существует' })
   async register(@Body() data: CreateUserDto) {
     return this.usersService.createUser(data);
   }
 
   @Post('login')
   @ApiOperation({summary: "Войти в аккаунт"})
+  @ApiResponse({ status: 200, description: 'Успешная авторизация, возвращает access и refresh токены' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - неверный email или пароль' })
   async login(@Body() data: LoginUserDto) {
     return this.usersService.loginUser(data);
   }
 
   @Post('refresh')
   @ApiOperation({summary: "Обновить jwt токены"})
+  @ApiResponse({ status: 200, description: 'Токены успешно обновлены' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - невалидный refresh токен' })
   async refresh(@Body() data: RefreshTokenDto) {
     return this.usersService.refreshTokens(data.refreshToken);
   }
 
   @Get('all')
   @ApiOperation({summary: "Получить информацию о пользователях"})
+  @ApiResponse({ status: 200, description: 'Список пользователей успешно получен' })
   async getAllUsers(
     @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
@@ -68,6 +77,9 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiOperation({summary: "Получить информацию о пользователе по id"})
   @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Информация о пользователе успешно получена' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 404, description: 'Not Found - пользователь не найден' })
   async getUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.getUserById(id);
   }
@@ -76,6 +88,9 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @ApiOperation({summary: "Обновить информацию о пользователе"})
   @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Информация о пользователе успешно обновлена' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 404, description: 'Not Found - пользователь не найден' })
   async updateUser(
     @Req() request: AuthenticatedRequest,
     @Body() data: UpdateUserDto,
@@ -93,6 +108,10 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN)
   @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Пользователь успешно удалён' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - недостаточно прав (требуется роль SUPER_ADMIN)' })
+  @ApiResponse({ status: 404, description: 'Not Found - пользователь не найден' })
   async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.usersService.deleteUser(id);
   }
@@ -101,6 +120,8 @@ export class UsersController {
   @ApiOperation({summary: "Изменить пароль"})
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Пароль успешно изменён' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация или неверный старый пароль' })
   async changePassword(
     @Req() request: AuthenticatedRequest,
     @Body() data: ChangePasswordDto,
@@ -117,6 +138,8 @@ export class UsersController {
   @ApiOperation({summary: "Проверить полученный пароль от пользователя"})
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Пароль проверен, возвращает результат проверки' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   async checkPassword(
     @Req() request: AuthenticatedRequest,
     @Body() data: CheckPasswordDto,

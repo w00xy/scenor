@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { ProfilesService } from './profiles.service.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { ProfilesController } from './profiles.controller.js';
-import { AuthTokenService } from '../auth/auth-token.service.js';
-import { AuthGuard } from '../auth/auth.guard.js';
+import { AuthModule } from '../auth/auth.module.js';
 
 @Module({
-  imports: [DatabaseModule, JwtModule.register({})],
-  providers: [ProfilesService, AuthTokenService, AuthGuard],
+  imports: [DatabaseModule, AuthModule],
+  providers: [ProfilesService],
   controllers: [ProfilesController],
   exports: [ProfilesService],
 })

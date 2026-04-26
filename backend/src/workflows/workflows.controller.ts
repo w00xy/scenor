@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
@@ -29,6 +29,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
+@ApiTags('Workflow')
 @Controller()
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')
@@ -36,6 +37,7 @@ export class WorkflowsController {
   constructor(private readonly workflowsService: WorkflowsService) {}
 
   @Post('projects/:projectId/workflows')
+  @ApiOperation({ summary: 'Создать новый workflow в проекте' })
   async createWorkflow(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
@@ -46,6 +48,7 @@ export class WorkflowsController {
   }
 
   @Get('projects/:projectId/workflows')
+  @ApiOperation({ summary: 'Получить список всех workflow в проекте' })
   async listWorkflowsByProject(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
@@ -55,6 +58,7 @@ export class WorkflowsController {
   }
 
   @Get('workflows/:workflowId')
+  @ApiOperation({ summary: 'Получить workflow по ID' })
   async getWorkflowById(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -64,6 +68,7 @@ export class WorkflowsController {
   }
 
   @Put('workflows/:workflowId')
+  @ApiOperation({ summary: 'Обновить workflow' })
   async updateWorkflow(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -74,6 +79,7 @@ export class WorkflowsController {
   }
 
   @Delete('workflows/:workflowId')
+  @ApiOperation({ summary: 'Удалить workflow' })
   async deleteWorkflow(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -83,6 +89,7 @@ export class WorkflowsController {
   }
 
   @Get('workflows/:workflowId/graph')
+  @ApiOperation({ summary: 'Получить граф workflow (узлы и связи)' })
   async getWorkflowGraph(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -92,6 +99,7 @@ export class WorkflowsController {
   }
 
   @Post('workflows/:workflowId/nodes')
+  @ApiOperation({ summary: 'Создать узел в workflow' })
   async createNode(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -102,6 +110,7 @@ export class WorkflowsController {
   }
 
   @Put('workflows/:workflowId/nodes/:nodeId')
+  @ApiOperation({ summary: 'Обновить узел в workflow' })
   async updateNode(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -113,6 +122,7 @@ export class WorkflowsController {
   }
 
   @Delete('workflows/:workflowId/nodes/:nodeId')
+  @ApiOperation({ summary: 'Удалить узел из workflow' })
   async deleteNode(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -123,6 +133,7 @@ export class WorkflowsController {
   }
 
   @Post('workflows/:workflowId/edges')
+  @ApiOperation({ summary: 'Создать связь между узлами в workflow' })
   async createEdge(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -133,6 +144,7 @@ export class WorkflowsController {
   }
 
   @Put('workflows/:workflowId/edges/:edgeId')
+  @ApiOperation({ summary: 'Обновить связь между узлами' })
   async updateEdge(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -144,6 +156,7 @@ export class WorkflowsController {
   }
 
   @Delete('workflows/:workflowId/edges/:edgeId')
+  @ApiOperation({ summary: 'Удалить связь между узлами' })
   async deleteEdge(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,

@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from '../auth/auth.guard.js';
-import { AuthTokenService } from '../auth/auth-token.service.js';
+import { AuthModule } from '../auth/auth.module.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { ExecutionsController } from './executions.controller.js';
 import { ExecutionsService } from './executions.service.js';
 
 @Module({
-  imports: [DatabaseModule, JwtModule.register({})],
+  imports: [DatabaseModule, AuthModule],
   controllers: [ExecutionsController],
-  providers: [ExecutionsService, AuthTokenService, AuthGuard],
+  providers: [ExecutionsService],
   exports: [ExecutionsService],
 })
 export class ExecutionsModule {}

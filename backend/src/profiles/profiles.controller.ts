@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserProfile } from '@prisma/client';
 import { ProfilesService } from './profiles.service.js';
 import { ProfileUpdateDto } from './dto/profiles-update-dto.js';
@@ -19,6 +19,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
+@ApiTags('Профили')
 @Controller('profile')
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
