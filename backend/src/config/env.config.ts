@@ -10,6 +10,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   HOSTNAME: z.string().default('127.0.0.1'),
   NODE_ENV: z.string().optional(),
+  ADMIN_EMAIL: z.string().email('ADMIN_EMAIL must be a valid email').default('admin@scenor.local'),
+  ADMIN_USERNAME: z.string().min(3, 'ADMIN_USERNAME must be at least 3 characters').default('admin'),
+  ADMIN_PASSWORD: z.string().min(6, 'ADMIN_PASSWORD must be at least 6 characters').default('admin123'),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

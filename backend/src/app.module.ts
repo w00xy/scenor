@@ -12,6 +12,7 @@ import { ExecutionsModule } from './executions/executions.module.js';
 import { CredentialsModule } from './credentials/credentials.module.js';
 import { WorkflowSharesModule } from './workflow-shares/workflow-shares.module.js';
 import { getEnvFilePaths, validateEnv } from './config/env.config.js';
+import { InitializationModule } from './initialization/initialization.module.js';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { getEnvFilePaths, validateEnv } from './config/env.config.js';
     ExecutionsModule,
     CredentialsModule,
     WorkflowSharesModule,
+    InitializationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

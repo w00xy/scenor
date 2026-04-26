@@ -24,7 +24,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
-@ApiTags('Общий доступ к Workflow')
+@ApiTags('Workflow Shares')
 @Controller()
 export class WorkflowSharesController {
   constructor(private readonly workflowSharesService: WorkflowSharesService) {}

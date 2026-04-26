@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ProjectType, ProjectMemberRole } from '@prisma/client';
 
 export class ProjectResponseDto {
   @ApiProperty({
@@ -27,6 +28,19 @@ export class ProjectResponseDto {
   ownerId!: string;
 
   @ApiProperty({
+    enum: ProjectType,
+    example: ProjectType.TEAM,
+    description: 'Тип проекта',
+  })
+  type!: ProjectType;
+
+  @ApiProperty({
+    example: false,
+    description: 'Архивирован ли проект',
+  })
+  isArchived!: boolean;
+
+  @ApiProperty({
     example: '2024-01-15T10:30:00.000Z',
     description: 'Дата создания проекта',
   })
@@ -37,4 +51,12 @@ export class ProjectResponseDto {
     description: 'Дата последнего обновления',
   })
   updatedAt!: Date;
+
+  @ApiProperty({
+    enum: ProjectMemberRole,
+    example: ProjectMemberRole.OWNER,
+    description: 'Роль пользователя в проекте (только для списка проектов)',
+    required: false,
+  })
+  accessRole?: ProjectMemberRole;
 }

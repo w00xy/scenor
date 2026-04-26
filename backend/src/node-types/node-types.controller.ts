@@ -8,7 +8,7 @@ import { NodeTypesService } from './node-types.service.js';
 import { NodeTypesListResponseDto } from './dto/node-types-list-response.dto.js';
 import { SeedNodeTypesResponseDto } from './dto/seed-node-types-response.dto.js';
 
-@ApiTags('Типы узлов')
+@ApiTags('Node Types')
 @Controller('node-types')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')
