@@ -1,0 +1,32 @@
+.trigger-node {
+  width: 95px;
+  height: 80px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 20px 6px 6px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  position: relative;
+  outline: none !important;
+
+  &__content {
+    text-align: center;
+    word-break: break-word;
+  }
+
+  &.selected {
+    border-color: #FF4B33;
+    box-shadow: 0 0 0 2px rgba(255, 75, 51, 0.3);
+    outline: none !important;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+  }
+}

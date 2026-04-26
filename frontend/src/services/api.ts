@@ -339,7 +339,7 @@ export const workflowApi = {
     }>(`/workflows/${workflowId}/graph`, { method: "GET" }, true),
 
   createNode: (workflowId: string, data: {
-    typeCode: string;
+    type: string;
     name?: string;
     label?: string;
     posX: number;

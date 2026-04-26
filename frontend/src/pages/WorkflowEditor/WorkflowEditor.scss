@@ -12,35 +12,157 @@
     flex-direction: column;
     overflow: hidden;
     height: 100%;
-
-    // Переопределяем стили MainMenuBody для workflow editor
-    .MainMenuBody {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      flex: 1;
-    }
   }
 
   &__header {
-    padding: 24px 32px;
-    border-bottom: 1px solid #2a2a2a;
+    height: 70px;
+    background: #212121;
+    border-bottom: 1px solid #424242;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    flex-shrink: 0;
+    justify-content: space-between;
+  }
+
+  &__title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: $font-family;
+    font-size: 16px;
+  }
+
+  &__dots-button {
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__project-name {
+    color: #999;
+    font-weight: 400;
+  }
+
+  &__separator {
+    color: #666;
+  }
+
+  &__workflow-name {
+    color: $color-white;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__name-input {
+    background: #2a2a2a;
+    border: 1px solid #FF4B33;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: $color-white;
+    font-family: $font-family;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    min-width: 200px;
+
+    &:focus {
+      border-color: #FF4B33;
+    }
   }
 
   &__title {
     font-family: $font-family;
-    font-size: 24px;
-    font-weight: 600;
-    color: $color-white;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
     margin: 0;
+  }
+
+  &__workspace {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__add-node-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    background: #FF4B33;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #db5442;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__palette-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 101;
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
   }
 
   &__canvas {
     flex: 1;
     position: relative;
-    background: #1a1a1a;
+    background: #0f0f0f;
     overflow: hidden;
-    min-height: 0; // Важно для flex-контейнеров
+    min-height: 0;
     height: 100%;
   }
 

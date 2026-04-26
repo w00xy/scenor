@@ -7,6 +7,7 @@ interface CreateMenuItemProps {
   onClick: () => void;
   active?: boolean;
   rotated?: boolean;
+  disabled?: boolean;
 }
 
 export function CreateMenuItem({
@@ -15,12 +16,14 @@ export function CreateMenuItem({
   onClick,
   active = false,
   rotated = false,
+  disabled = false,
 }: CreateMenuItemProps) {
   return (
     <button
       type="button"
       className={`create-menu__item ${active ? "active" : ""}`}
       onClick={onClick}
+      disabled={disabled}
     >
       <div className="create-menu__item-content">
         <span className="create-menu__label">{label}</span>

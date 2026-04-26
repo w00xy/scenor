@@ -15,7 +15,7 @@ export function PersonalProject(): JSX.Element {
   const { pathname } = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const { isLoading, personalProjectId } = useProjects();
-  const { createWorkflow } = useWorkflows();
+  const { createWorkflow, getProjectWorkflows } = useWorkflows();
   const [isCreating, setIsCreating] = useState(false);
 
   if (isLoading) {
@@ -42,8 +42,12 @@ export function PersonalProject(): JSX.Element {
 
     setIsCreating(true);
     try {
+      // Получаем текущие workflow для определения номера
+      const existingWorkflows = await getProjectWorkflows(personalProjectId);
+      const workflowNumber = existingWorkflows.length + 1;
+      
       const workflow = await createWorkflow(personalProjectId, {
-        name: "Сценарий №1",
+        name: `Сценарий №${workflowNumber}`,
         description: "",
         status: "draft",
         isPublic: false,

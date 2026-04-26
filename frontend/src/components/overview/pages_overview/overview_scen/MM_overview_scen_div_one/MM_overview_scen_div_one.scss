@@ -20,6 +20,8 @@
     @include text_add_14px;
     color: $color-text-add;
     font-size: 12px;
+    pointer-events: auto;
+    user-select: text;
   }
 
   select {

@@ -15,7 +15,7 @@ export function TeamProject(): JSX.Element {
   const { pathname } = useLocation();
   const { projectId } = useParams<{ projectId: string }>();
   const { isLoading, teamProjects } = useProjects();
-  const { createWorkflow } = useWorkflows();
+  const { createWorkflow, getProjectWorkflows } = useWorkflows();
   const [isCreating, setIsCreating] = useState(false);
 
   if (isLoading) {
@@ -41,8 +41,12 @@ export function TeamProject(): JSX.Element {
 
     setIsCreating(true);
     try {
+      // Получаем текущие workflow для определения номера
+      const existingWorkflows = await getProjectWorkflows(projectId);
+      const workflowNumber = existingWorkflows.length + 1;
+      
       const workflow = await createWorkflow(projectId, {
-        name: "Сценарий №1",
+        name: `Сценарий №${workflowNumber}`,
         description: "",
         status: "draft",
         isPublic: false,

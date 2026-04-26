@@ -7,6 +7,9 @@ import { useProjects } from "../../context/ProjectsContext";
 import { MM_overview_scen_component } from "../overview/pages_overview/overview_scen/MM_overview_scen_component/MM_overview_scen_component";
 import { MM_overview_scen_div_one } from "../overview/pages_overview/overview_scen/MM_overview_scen_div_one/MM_overview_scen_div_one";
 import { MM_overview_scen_div_two } from "../overview/pages_overview/overview_scen/MM_overview_scen_div_two/MM_overview_scen_div_two";
+import { workflowApi } from "../../services/api";
+
+const ITEMS_PER_PAGE = 5;
 
 export function ProjectScenariosPageComponent(): JSX.Element {
   const username = useCurrentUsername();
@@ -18,6 +21,7 @@ export function ProjectScenariosPageComponent(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const currentProject = projects.find((p) => p.id === projectId);
 
@@ -89,6 +93,32 @@ export function ProjectScenariosPageComponent(): JSX.Element {
     return result;
   }, [workflows, searchValue, sortBy]);
 
+  // Пагинация
+  const totalPages = Math.ceil(filteredAndSortedWorkflows.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedWorkflows = filteredAndSortedWorkflows.slice(startIndex, endIndex);
+
+  // Сброс на первую страницу при изменении фильтров
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, sortBy]);
+
+  const handleDeleteWorkflow = async (workflowId: string) => {
+    if (!confirm("Вы уверены, что хотите удалить этот сценарий?")) {
+      return;
+    }
+
+    try {
+      await workflowApi.deleteWorkflow(workflowId);
+      // Обновляем список после удаления
+      setWorkflows((prev) => prev.filter((w) => w.id !== workflowId));
+    } catch (error) {
+      console.error("Failed to delete workflow:", error);
+      alert("Не удалось удалить сценарий");
+    }
+  };
+
   if (isLoading) {
     return (
       <section className="personal-scenarios">
@@ -119,21 +149,25 @@ export function ProjectScenariosPageComponent(): JSX.Element {
         searchValue={searchValue}
         onSearchChange={setSearchValue}
       />
-      {filteredAndSortedWorkflows.map((workflow) => (
-        <div
-          key={workflow.id}
-          onClick={() => navigate(`/projects/${projectId}/workflows/${workflow.id}`)}
-          style={{ cursor: "pointer" }}
-        >
+      {paginatedWorkflows.map((workflow) => (
+        <div key={workflow.id}>
           <MM_overview_scen_component
             name={workflow.name}
             last_update={formatTimeAgo(workflow.updatedAt)}
             data_created={formatDate(workflow.createdAt)}
             projectName={currentProject?.name || "Проект"}
+            workflowId={workflow.id}
+            onOpen={() => navigate(`/projects/${projectId}/workflows/${workflow.id}`)}
+            onDelete={() => handleDeleteWorkflow(workflow.id)}
           />
         </div>
       ))}
-      <MM_overview_scen_div_two count={filteredAndSortedWorkflows.length.toString()} current_page="1" />
+      <MM_overview_scen_div_two 
+        count={filteredAndSortedWorkflows.length} 
+        currentPage={currentPage}
+        totalPages={totalPages || 1}
+        onPageChange={setCurrentPage}
+      />
     </section>
   );
 }

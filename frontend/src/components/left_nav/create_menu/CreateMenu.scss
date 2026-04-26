@@ -30,6 +30,28 @@
   min-height: 76px;
   top: 0;
   left: calc(100% + 6px);
+  animation: slideInFromTop 0.2s ease-out;
+
+  &__header {
+    padding: 12px 12px 8px 12px;
+    font-family: $font-family;
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .create-menu__item {
@@ -45,16 +67,21 @@
   text-align: left;
   transition: background-color 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #3a3a3a;
   }
 
-  &:active {
+  &:active:not(:disabled) {
     background: #4d4d4d;
   }
 
   &.active {
     background: #4d4d4d;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

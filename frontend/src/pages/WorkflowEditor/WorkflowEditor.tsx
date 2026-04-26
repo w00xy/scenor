@@ -1,15 +1,18 @@
-import { JSX, useEffect, useState, useCallback } from "react";
+import { JSX, useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
 import { HorRule } from "../../components/left_nav/left_nav_hr/HorRule";
 import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
-import { MainMenuBody } from "../../components/overview/main_menu_overview/MainMenuBody/MainMenuBody";
 import { FlowCanvas } from "../../components/workflow/FlowCanvas/FlowCanvas";
+import { NodesPalette } from "../../components/workflow/NodesPalette/NodesPalette";
+import { WorkflowActionsMenu } from "../../components/overview/pages_overview/overview_scen/MM_overview_scen_component/WorkflowActionsMenu";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
 import { Node, Edge } from "reactflow";
+import PlusSVG from "../../assets/MM_Vectors-pages/Plus.svg?react";
+import MM_DotsSVG from "../../assets/MM_DotsSVG.svg?react";
 import "./WorkflowEditor.scss";
 
 export function WorkflowEditor(): JSX.Element {
@@ -23,6 +26,12 @@ export function WorkflowEditor(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [workflowName, setWorkflowName] = useState("");
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const dotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadWorkflow = async () => {
@@ -36,6 +45,7 @@ export function WorkflowEditor(): JSX.Element {
         setIsLoading(true);
         const loadedWorkflow = await getWorkflow(workflowId);
         setWorkflow(loadedWorkflow);
+        setWorkflowName(loadedWorkflow.name);
 
         // Загружаем граф workflow (nodes и edges)
         try {
@@ -114,6 +124,107 @@ export function WorkflowEditor(): JSX.Element {
     // TODO: Реализовать сохранение изменений edges
   }, [workflowId]);
 
+  const handleSaveWorkflowName = useCallback(async () => {
+    if (!workflowId || !workflowName.trim()) return;
+
+    try {
+      await workflowApi.updateWorkflow(workflowId, { name: workflowName });
+      setWorkflow((prev: any) => ({ ...prev, name: workflowName }));
+      setIsEditingName(false);
+    } catch (error) {
+      console.error("Failed to update workflow name:", error);
+      alert("Не удалось обновить название");
+    }
+  }, [workflowId, workflowName]);
+
+  const handleCancelEdit = useCallback(() => {
+    setWorkflowName(workflow?.name || "");
+    setIsEditingName(false);
+  }, [workflow]);
+
+  const handleAddNode = useCallback(async (typeCode: string) => {
+    if (!workflowId) return;
+
+    // Определяем тип узла (триггер или обычный)
+    const isTriggerNode = typeCode === 'manual_trigger' || typeCode === 'webhook_trigger';
+
+    // Умное позиционирование
+    let posX = 250;
+    let posY = 250;
+
+    if (nodes.length === 0) {
+      // Первый нод - в центре canvas
+      posX = 250;
+      posY = 250;
+    } else {
+      // Находим самый правый нод
+      const rightmostNode = nodes.reduce((max, node) => 
+        node.position.x > max.position.x ? node : max
+      , nodes[0]);
+
+      // Размещаем справа от самого правого нода
+      posX = rightmostNode.position.x + 200;
+      
+      // Y позиция - средняя по всем нодам
+      const avgY = nodes.reduce((sum, node) => sum + node.position.y, 0) / nodes.length;
+      posY = avgY;
+    }
+
+    const nodeId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const flowNode: Node = {
+      id: nodeId,
+      type: isTriggerNode ? "triggerNode" : "default",
+      position: { 
+        x: posX, 
+        y: posY 
+      },
+      data: {
+        label: typeCode,
+        typeCode: typeCode,
+        configJson: {},
+      },
+    };
+
+    setNodes((prevNodes) => [...prevNodes, flowNode]);
+  }, [workflowId, setNodes, nodes]);
+
+  const handleDotsClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (dotsRef.current) {
+      const rect = dotsRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 110,
+      });
+    }
+    
+    setShowActionsMenu(!showActionsMenu);
+  };
+
+  const handleDeleteWorkflow = async () => {
+    if (!workflowId || !workflow) return;
+
+    if (!confirm(`Вы уверены, что хотите удалить сценарий "${workflow.name}"?`)) {
+      return;
+    }
+
+    try {
+      await workflowApi.deleteWorkflow(workflowId);
+      navigate(`/projects/${projectId || workflow.projectId}/scenario`);
+    } catch (error) {
+      console.error("Failed to delete workflow:", error);
+      alert("Не удалось удалить сценарий");
+    } finally {
+      setShowActionsMenu(false);
+    }
+  };
+
+  const handleShareWorkflow = () => {
+    alert("Функция 'Поделиться' пока не реализована");
+    setShowActionsMenu(false);
+  };
+
   if (isLoading) {
     return (
       <div className="workflow-editor">
@@ -163,14 +274,82 @@ export function WorkflowEditor(): JSX.Element {
       </LNBody>
 
       <div className="workflow-editor__main">
-        <MainMenuBody>
-          <div className="workflow-editor__header">
-            <h1 className="workflow-editor__title">
-              {project?.name || "Проект"} / {workflow.name}
-            </h1>
+        <div className="workflow-editor__header">
+          <div className="workflow-editor__title-wrapper">
+            <span className="workflow-editor__project-name">
+              {project?.name || "Проект"}
+            </span>
+            <span className="workflow-editor__separator"> / </span>
+            {isEditingName ? (
+              <input
+                type="text"
+                className="workflow-editor__name-input"
+                value={workflowName}
+                onChange={(e) => setWorkflowName(e.target.value)}
+                onBlur={handleSaveWorkflowName}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveWorkflowName();
+                  if (e.key === "Escape") handleCancelEdit();
+                }}
+                autoFocus
+              />
+            ) : (
+              <span
+                className="workflow-editor__workflow-name"
+                onClick={() => setIsEditingName(true)}
+                title="Нажмите для редактирования"
+              >
+                {workflow.name}
+              </span>
+            )}
           </div>
+          <div 
+            ref={dotsRef} 
+            onClick={handleDotsClick} 
+            className="workflow-editor__dots-button"
+          >
+            <MM_DotsSVG />
+          </div>
+        </div>
 
-          <div className="workflow-editor__canvas">
+        {showActionsMenu && (
+          <WorkflowActionsMenu
+            onOpen={() => {
+              setShowActionsMenu(false);
+            }}
+            onShare={handleShareWorkflow}
+            onDelete={handleDeleteWorkflow}
+            onClose={() => setShowActionsMenu(false)}
+            position={menuPosition}
+          />
+        )}
+
+        <div className="workflow-editor__workspace">
+          {!isPaletteOpen && (
+            <button
+              className="workflow-editor__add-node-btn"
+              onClick={() => setIsPaletteOpen(true)}
+              title="Добавить узел"
+            >
+              <PlusSVG />
+            </button>
+          )}
+
+          {isPaletteOpen && (
+            <div className="workflow-editor__palette-wrapper">
+              <NodesPalette 
+                onAddNode={(typeCode) => {
+                  handleAddNode(typeCode);
+                  setIsPaletteOpen(false);
+                }} 
+              />
+            </div>
+          )}
+
+          <div 
+            className="workflow-editor__canvas"
+            onClick={() => isPaletteOpen && setIsPaletteOpen(false)}
+          >
             <FlowCanvas
               workflowId={workflowId || ""}
               initialNodes={nodes}
@@ -179,7 +358,7 @@ export function WorkflowEditor(): JSX.Element {
               onEdgesChange={handleEdgesChange}
             />
           </div>
-        </MainMenuBody>
+        </div>
       </div>
     </div>
   );

@@ -116,6 +116,7 @@ export function CreateMenu({
             scenariosButtonRef,
             credentialsButtonRef,
           ]}
+          parentRef={scenariosButtonRef}
         />
       )}
 
@@ -129,6 +130,7 @@ export function CreateMenu({
             scenariosButtonRef,
             credentialsButtonRef,
           ]}
+          parentRef={credentialsButtonRef}
         />
       )}
     </div>
