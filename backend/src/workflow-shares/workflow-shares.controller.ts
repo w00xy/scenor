@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
@@ -29,6 +29,10 @@ export class WorkflowSharesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Создать ссылку для общего доступа к workflow' })
+  @ApiResponse({ status: 201, description: 'Ссылка для общего доступа успешно создана' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет прав на создание ссылки для workflow' })
+  @ApiResponse({ status: 404, description: 'Not Found - workflow не найден' })
   async createShare(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId') workflowId: string,
@@ -45,6 +49,10 @@ export class WorkflowSharesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Получить список всех ссылок общего доступа для workflow' })
+  @ApiResponse({ status: 200, description: 'Список ссылок общего доступа успешно получен' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
+  @ApiResponse({ status: 404, description: 'Not Found - workflow не найден' })
   async listShares(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId') workflowId: string,
@@ -58,6 +66,8 @@ export class WorkflowSharesController {
 
   @Get('shares/:token')
   @ApiOperation({ summary: 'Получить workflow по токену общего доступа (публичный доступ)' })
+  @ApiResponse({ status: 200, description: 'Workflow успешно получен по токену' })
+  @ApiResponse({ status: 404, description: 'Not Found - ссылка не найдена или истекла' })
   async getWorkflowByToken(@Param('token') token: string) {
     return this.workflowSharesService.getWorkflowByToken(token);
   }
@@ -66,6 +76,10 @@ export class WorkflowSharesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Удалить ссылку общего доступа' })
+  @ApiResponse({ status: 200, description: 'Ссылка общего доступа успешно удалена' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет прав на удаление ссылки' })
+  @ApiResponse({ status: 404, description: 'Not Found - ссылка не найдена' })
   async deleteShare(
     @Req() request: AuthenticatedRequest,
     @Param('shareId') shareId: string,

@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
@@ -31,6 +31,9 @@ export class ProjectsController {
 
   @Post()
   @ApiOperation({ summary: 'Создать проект' })
+  @ApiResponse({ status: 201, description: 'Проект успешно создан' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
   async createProject(
     @Req() request: AuthenticatedRequest,
     @Body() data: CreateProjectDto,
@@ -45,6 +48,8 @@ export class ProjectsController {
 
   @Get()
   @ApiOperation({ summary: 'Получить мои проекты' })
+  @ApiResponse({ status: 200, description: 'Список проектов успешно получен' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   async getMyProjects(@Req() request: AuthenticatedRequest) {
     const userId = request.user?.sub;
     if (!userId) {
@@ -56,6 +61,10 @@ export class ProjectsController {
 
   @Get(':projectId')
   @ApiOperation({ summary: 'Получить проект по id' })
+  @ApiResponse({ status: 200, description: 'Проект успешно получен' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к проекту' })
+  @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
   async getProjectById(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
@@ -70,6 +79,10 @@ export class ProjectsController {
 
   @Put(':projectId')
   @ApiOperation({ summary: 'Обновить проект по id' })
+  @ApiResponse({ status: 200, description: 'Проект успешно обновлён' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет прав на редактирование проекта' })
+  @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
   async updateProject(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
@@ -85,6 +98,10 @@ export class ProjectsController {
 
   @Delete(':projectId')
   @ApiOperation({ summary: 'Удалить проект по id' })
+  @ApiResponse({ status: 200, description: 'Проект успешно удалён' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({ status: 403, description: 'Forbidden - нет прав на удаление проекта' })
+  @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
   async deleteProject(
     @Req() request: AuthenticatedRequest,
     @Param('projectId', new ParseUUIDPipe()) projectId: string,
