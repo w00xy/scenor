@@ -14,6 +14,7 @@ import { ProfilesService } from './profiles.service.js';
 import { ProfileUpdateDto } from './dto/profiles-update-dto.js';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
+import { ProfileResponseDto } from './dto/profile-response.dto.js';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
@@ -28,7 +29,7 @@ export class ProfilesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Получить профиль авторизованного пользователя' })
-  @ApiResponse({ status: 200, description: 'Профиль успешно получен' })
+  @ApiResponse({ status: 200, description: 'Профиль успешно получен', type: ProfileResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 404, description: 'Not Found - профиль не найден' })
   async getProfile(@Req() request: AuthenticatedRequest): Promise<UserProfile> {
@@ -44,7 +45,7 @@ export class ProfilesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Создать или обновить профиль пользователя' })
-  @ApiResponse({ status: 200, description: 'Профиль успешно создан или обновлён' })
+  @ApiResponse({ status: 200, description: 'Профиль успешно создан или обновлён', type: ProfileResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
   async putProfile(

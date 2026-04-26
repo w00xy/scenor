@@ -17,6 +17,9 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
 import { CreateProjectDto, UpdateProjectDto } from './dto/index.js';
 import { ProjectsService } from './projects.service.js';
+import { ProjectResponseDto } from './dto/project-response.dto.js';
+import { ProjectsListResponseDto } from './dto/projects-list-response.dto.js';
+import { DeleteProjectResponseDto } from './dto/delete-project-response.dto.js';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
@@ -31,7 +34,7 @@ export class ProjectsController {
 
   @Post()
   @ApiOperation({ summary: 'Создать проект' })
-  @ApiResponse({ status: 201, description: 'Проект успешно создан' })
+  @ApiResponse({ status: 201, description: 'Проект успешно создан', type: ProjectResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
   async createProject(
@@ -48,7 +51,7 @@ export class ProjectsController {
 
   @Get()
   @ApiOperation({ summary: 'Получить мои проекты' })
-  @ApiResponse({ status: 200, description: 'Список проектов успешно получен' })
+  @ApiResponse({ status: 200, description: 'Список проектов успешно получен', type: ProjectsListResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   async getMyProjects(@Req() request: AuthenticatedRequest) {
     const userId = request.user?.sub;
@@ -61,7 +64,7 @@ export class ProjectsController {
 
   @Get(':projectId')
   @ApiOperation({ summary: 'Получить проект по id' })
-  @ApiResponse({ status: 200, description: 'Проект успешно получен' })
+  @ApiResponse({ status: 200, description: 'Проект успешно получен', type: ProjectResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к проекту' })
   @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
@@ -79,7 +82,7 @@ export class ProjectsController {
 
   @Put(':projectId')
   @ApiOperation({ summary: 'Обновить проект по id' })
-  @ApiResponse({ status: 200, description: 'Проект успешно обновлён' })
+  @ApiResponse({ status: 200, description: 'Проект успешно обновлён', type: ProjectResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 403, description: 'Forbidden - нет прав на редактирование проекта' })
   @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
@@ -98,7 +101,7 @@ export class ProjectsController {
 
   @Delete(':projectId')
   @ApiOperation({ summary: 'Удалить проект по id' })
-  @ApiResponse({ status: 200, description: 'Проект успешно удалён' })
+  @ApiResponse({ status: 200, description: 'Проект успешно удалён', type: DeleteProjectResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 403, description: 'Forbidden - нет прав на удаление проекта' })
   @ApiResponse({ status: 404, description: 'Not Found - проект не найден' })
