@@ -30,6 +30,9 @@ export function getEnvFilePaths(): string[] {
     if (nodeEnv === 'prod' || nodeEnv === 'production') {
       files.push('.env.prod');
     }
+    if (nodeEnv === 'dev') {
+      files.push('.env.dev')
+    }
     files.push(`.env.${nodeEnv}`);
   }
 

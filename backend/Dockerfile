@@ -10,7 +10,7 @@ RUN apt-get update \
 COPY package*.json ./
 COPY prisma ./prisma/
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci
+    npm ci --cache /root/.npm --prefer-offline --no-audit
 
 # Применяем миграции и билдим приложение
 COPY . .

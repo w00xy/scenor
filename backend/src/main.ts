@@ -41,6 +41,10 @@ async function bootstrap() {
   const initializationService = app.get(InitializationService);
   await initializationService.initialize();
   
-  await app.listen(process.env.PORT ?? 3000, process.env.HOSTNAME ?? '127.0.0.1');
+  const port = process.env.PORT ?? 3000;
+  const hostname = process.env.HOSTNAME ?? '0.0.0.0';
+  await app.listen(port, hostname);
+  
+  console.log(`App started on http://${hostname}:${port}`);
 }
 bootstrap();

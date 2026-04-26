@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -13,6 +13,7 @@ import { CredentialsModule } from './credentials/credentials.module.js';
 import { WorkflowSharesModule } from './workflow-shares/workflow-shares.module.js';
 import { getEnvFilePaths, validateEnv } from './config/env.config.js';
 import { InitializationModule } from './initialization/initialization.module.js';
+import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
 
 @Module({
   imports: [
@@ -35,4 +36,8 @@ import { InitializationModule } from './initialization/initialization.module.js'
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
