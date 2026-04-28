@@ -25,7 +25,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
-@ApiTags('Учётные данные')
+@ApiTags('Credentials')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard)
 @Controller()

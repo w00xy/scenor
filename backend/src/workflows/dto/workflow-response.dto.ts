@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { WorkflowStatus } from '@prisma/client';
 
 export class WorkflowResponseDto {
   @ApiProperty({
@@ -27,10 +28,30 @@ export class WorkflowResponseDto {
   projectId!: string;
 
   @ApiProperty({
-    example: true,
-    description: 'Активен ли workflow',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID создателя workflow',
+    nullable: true,
   })
-  isActive!: boolean;
+  createdBy!: string | null;
+
+  @ApiProperty({
+    enum: WorkflowStatus,
+    example: WorkflowStatus.draft,
+    description: 'Статус workflow',
+  })
+  status!: WorkflowStatus;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Версия workflow',
+  })
+  version!: number;
+
+  @ApiProperty({
+    example: false,
+    description: 'Публичный ли workflow',
+  })
+  isPublic!: boolean;
 
   @ApiProperty({
     example: '2024-01-15T10:30:00.000Z',

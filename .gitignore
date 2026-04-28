@@ -41,6 +41,7 @@ backend/.secrets/
 .env.prod
 backend/.env.prod
 backend/.env.dev
+.env*
 
 node_modules
 frontend/node_modules

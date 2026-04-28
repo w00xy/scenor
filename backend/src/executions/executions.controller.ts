@@ -26,7 +26,7 @@ type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
 };
 
-@ApiTags('Выполнение Workflow')
+@ApiTags('Workflow Executions')
 @Controller('workflows/:workflowId/executions')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')

@@ -10,6 +10,6 @@ import { AuthModule } from '../auth/auth.module.js';
   imports: [DatabaseModule, AuthModule],
   providers: [UsersService, UsersRepository, UsersUtils],
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UsersService, UsersUtils],
 })
 export class UsersModule {}

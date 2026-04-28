@@ -25,7 +25,7 @@ export class UserResponseDto {
     example: Role.USER,
     description: 'Глобальная роль пользователя',
   })
-  globalRole!: Role;
+  role!: Role;
 
   @ApiProperty({
     example: '2024-01-15T10:30:00.000Z',

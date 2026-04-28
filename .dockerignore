@@ -15,3 +15,8 @@ dist
 .git
 .env
 *.log
+.playwright
+.kilo
+.claude
+**/generated
+**/dist
