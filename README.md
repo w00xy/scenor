@@ -152,6 +152,7 @@ scenor/
 ├── IMPLEMENTATION_GUIDE.md          # Руководство разработчика
 └── README.md                         # Этот файл
 ```
+```
 scenor/
 ├── backend/                          # NestJS backend application
 │   ├── src/
@@ -262,33 +263,6 @@ scenor/
 
 ### Ключевые связи
 
-```
-User (1) ──────────────────────── (N) Project (как владелец)
-  │
-  ├─ (1) ──────────────────────── (N) ProjectMember
-  │
-  ├─ (1) ──────────────────────── (N) Workflow (как создатель)
-  │
-  └─ (1) ──────────────────────── (N) WorkflowExecution (как инициатор)
-
-Project (1) ──────────────────────── (N) Workflow
-  │
-  ├─ (1) ──────────────────────── (N) Credential
-  │
-  └─ (1) ──────────────────────── (N) ProjectMember
-
-Workflow (1) ──────────────────────── (N) WorkflowNode
-  │
-  ├─ (1) ──────────────────────── (N) WorkflowEdge
-  │
-  └─ (1) ──────────────────────── (N) WorkflowExecution
-
-WorkflowNode (N) ──────────────────────── (1) NodeType
-  │
-  └─ (N) ──────────────────────── (1) Credential (опционально)
-
-WorkflowExecution (1) ──────────────────────── (N) ExecutionNodeLog
-```
 
 ---
 
@@ -634,7 +608,6 @@ npm run studio
 
 - **CONTEXT.md** - Контекст проекта и архитектурные принципы
 - **CODEBASE_OVERVIEW.md** - Подробный справочник для всех модулей
-- **IMPLEMENTATION_GUIDE.md** - Примеры кода и лучшие практики
 - **Swagger API Docs** - http://localhost:3000/api
 
 ---
