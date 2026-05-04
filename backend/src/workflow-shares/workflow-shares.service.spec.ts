@@ -119,17 +119,6 @@ describe('WorkflowSharesService', () => {
 
   describe('deleteWorkflowShare', () => {
     it('should delete a workflow share', async () => {
-      const mockWorkflow = {
-        id: mockWorkflowId,
-        projectId: 'project-123',
-        createdBy: mockUserId,
-        name: 'Test Workflow',
-        project: {
-          ownerId: mockUserId,
-          members: [],
-        },
-      };
-
       const mockShare = {
         id: mockShareId,
         workflowId: mockWorkflowId,
@@ -137,13 +126,23 @@ describe('WorkflowSharesService', () => {
         token: mockToken,
         isPublic: true,
         createdAt: new Date(),
+        workflow: {
+          id: mockWorkflowId,
+          projectId: 'project-123',
+          createdBy: mockUserId,
+          name: 'Test Workflow',
+          project: {
+            id: 'project-123',
+            ownerId: mockUserId,
+            members: [],
+          },
+        },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow);
       (prisma.workflowShare.findUnique as jest.Mock).mockResolvedValue(mockShare);
       (prisma.workflowShare.delete as jest.Mock).mockResolvedValue(mockShare);
 
-      const result = await service.deleteWorkflowShare(mockUserId, mockWorkflowId, mockShareId);
+      const result = await service.deleteWorkflowShare(mockUserId, mockShareId);
 
       expect(result).toEqual(mockShare);
       expect(prisma.workflowShare.delete).toHaveBeenCalledWith({

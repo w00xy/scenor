@@ -28,6 +28,7 @@ describe('ProjectsService', () => {
       user: {
         findUnique: jest.fn(),
       },
+      $transaction: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -60,11 +61,21 @@ describe('ProjectsService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.project.create as jest.Mock).mockResolvedValue(mockProject);
-      (prisma.projectMember.create as jest.Mock).mockResolvedValue({
-        projectId: mockProjectId,
-        userId: mockUserId,
-        role: ProjectMemberRole.OWNER,
+      const mockTx = {
+        project: {
+          create: jest.fn().mockResolvedValue(mockProject),
+        },
+        projectMember: {
+          create: jest.fn().mockResolvedValue({
+            projectId: mockProjectId,
+            userId: mockUserId,
+            role: ProjectMemberRole.OWNER,
+          }),
+        },
+      };
+
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return callback(mockTx);
       });
 
       const result = await service.createProject(mockUserId, {
@@ -73,7 +84,7 @@ describe('ProjectsService', () => {
       });
 
       expect(result).toEqual(mockProject);
-      expect(prisma.project.create).toHaveBeenCalled();
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
 
@@ -88,14 +99,17 @@ describe('ProjectsService', () => {
           type: 'TEAM',
           createdAt: new Date(),
           updatedAt: new Date(),
+          members: [{ role: ProjectMemberRole.OWNER }],
         },
       ];
 
       (prisma.project.findMany as jest.Mock).mockResolvedValue(mockProjects);
 
-      const result = await service.listUserProjects(mockUserId);
+      const result = await service.getMyProjects(mockUserId);
 
-      expect(result).toEqual(mockProjects);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toEqual(mockProjectId);
+      expect(result[0].accessRole).toEqual(ProjectMemberRole.OWNER);
       expect(prisma.project.findMany).toHaveBeenCalled();
     });
   });
