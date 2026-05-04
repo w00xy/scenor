@@ -171,7 +171,7 @@ describe('UsersController', () => {
 
     const result = await controller.updateUser(request, data);
 
-    expect(usersService.updateUser).toHaveBeenCalledWith(data);
+    expect(usersService.updateUser).toHaveBeenCalledWith(id, data);
     expect(result).toEqual(response);
   });
 
