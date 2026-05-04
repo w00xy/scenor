@@ -666,6 +666,90 @@ export class ExecutionsService {
     return value;
   }
 
+  async runWebhookWorkflow(
+    workflowId: string,
+    webhookToken: string,
+    inputDataJson: Record<string, unknown>,
+  ) {
+    const workflow = await this.prisma.workflow.findUnique({
+      where: { id: workflowId },
+      include: {
+        nodes: true,
+        edges: true,
+        project: true,
+      },
+    });
+
+    if (!workflow) {
+      throw new NotFoundException('Workflow not found');
+    }
+
+    // Verify webhook token matches workflow's webhook trigger node
+    const webhookNode = workflow.nodes.find(
+      (node) => node.typeCode === 'webhook_trigger',
+    );
+
+    if (!webhookNode) {
+      throw new BadRequestException(
+        'Workflow does not have a webhook trigger node',
+      );
+    }
+
+    const config = webhookNode.configJson as Record<string, unknown>;
+    if (config.token !== webhookToken) {
+      throw new BadRequestException('Invalid webhook token');
+    }
+
+    const execution = await this.prisma.workflowExecution.create({
+      data: {
+        workflowId,
+        startedByUserId: null,
+        triggerType: TriggerType.webhook,
+        status: ExecutionStatus.running,
+        startedAt: new Date(),
+        inputDataJson: this.toNullablePrismaJson(inputDataJson),
+      },
+    });
+
+    try {
+      const result = await this.executeGraph(
+        execution.id,
+        workflow.nodes,
+        workflow.edges,
+        inputDataJson,
+      );
+
+      const finishedExecution = await this.prisma.workflowExecution.update({
+        where: { id: execution.id },
+        data: {
+          status: ExecutionStatus.success,
+          finishedAt: new Date(),
+          outputDataJson: this.toNullablePrismaJson({
+            nodeOutputs: result.outputs,
+            executedSteps: result.executedSteps,
+          }),
+          errorMessage: null,
+        },
+      });
+
+      return finishedExecution;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Workflow execution failed';
+
+      const failedExecution = await this.prisma.workflowExecution.update({
+        where: { id: execution.id },
+        data: {
+          status: ExecutionStatus.failed,
+          finishedAt: new Date(),
+          errorMessage: message,
+        },
+      });
+
+      return failedExecution;
+    }
+  }
+
   private async requireWorkflowGraphAccess(
     userId: string,
     workflowId: string,

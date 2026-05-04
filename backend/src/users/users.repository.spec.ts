@@ -86,7 +86,7 @@ describe('UsersRepository', () => {
         ownerId: createdUser.id,
         type: ProjectType.PERSONAL,
         name: 'Personal',
-        description: 'Default personal project',
+        description: '',
       },
       select: {
         id: true,
