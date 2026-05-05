@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prisma:generate": "prisma generate",
     "setup": "npm run prisma:generate && npm run prisma:migrate:dev && npm run build",
     "setup:deploy": "npm run prisma:generate && npm run prisma:migrate:deploy && npm run build",
     "build": "nest build",
@@ -22,8 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "studio": "prisma studio",
-    "studio:wsl": "prisma studio --port 5555 --browser none",
-    "prisma:generate":"prisma generate"
+    "studio:wsl": "prisma studio --port 5555 --browser none"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
