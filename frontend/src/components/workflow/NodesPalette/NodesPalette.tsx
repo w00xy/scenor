@@ -14,13 +14,20 @@ interface NodesPaletteProps {
 
 const nodeTypes: NodeType[] = [
   { code: "manual_trigger", displayName: "Manual Trigger", category: "trigger" },
-  { code: "webhook_trigger", displayName: "Webhook", category: "trigger" },
-  { code: "http_request", displayName: "HTTP Request", category: "action" },
+  { code: "webhook_trigger", displayName: "Webhook Trigger", category: "trigger" },
+  
   { code: "if", displayName: "IF", category: "logic" },
   { code: "switch", displayName: "Switch", category: "logic" },
+  
   { code: "set", displayName: "Set", category: "data" },
+  { code: "transform", displayName: "Transform", category: "data" },
+  
   { code: "code", displayName: "Code", category: "action" },
   { code: "delay", displayName: "Delay", category: "action" },
+  
+  { code: "http_request", displayName: "HTTP Request", category: "integration" },
+  { code: "db_select", displayName: "DB Select", category: "integration" },
+  { code: "db_insert", displayName: "DB Insert", category: "integration" },
 ];
 
 export function NodesPalette({ onAddNode }: NodesPaletteProps): JSX.Element {
@@ -39,6 +46,7 @@ export function NodesPalette({ onAddNode }: NodesPaletteProps): JSX.Element {
               {category === "action" && "Действия"}
               {category === "logic" && "Логика"}
               {category === "data" && "Данные"}
+              {category === "integration" && "Интеграции"}
             </h4>
             <div className="nodes-palette__nodes">
               {nodeTypes

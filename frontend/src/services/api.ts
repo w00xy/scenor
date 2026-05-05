@@ -306,7 +306,6 @@ export const workflowApi = {
       updatedAt: string;
     }>>(`/projects/${projectId}/workflows`, { method: "GET" }, true),
 
-  // Nodes API
   getWorkflowGraph: (workflowId: string) =>
     request<{
       nodes: Array<{
@@ -403,4 +402,62 @@ export const workflowApi = {
 
   deleteEdge: (workflowId: string, edgeId: string) =>
     request<void>(`/workflows/${workflowId}/edges/${edgeId}`, { method: "DELETE" }, true),
+
+  executeManual: (workflowId: string) =>
+    request<{
+      id: string;
+      workflowId: string;
+      startedByUserId: string;
+      triggerType: string;
+      status: string;
+      startedAt: string;
+      finishedAt: string | null;
+      inputDataJson: any;
+      outputDataJson: {
+        nodeOutputs: Record<string, any[]>;
+        executedSteps: number;
+      };
+      errorMessage: string | null;
+    }>(`/workflows/${workflowId}/executions/manual`, { method: "POST" }, true),
+
+  getExecutions: (workflowId: string, params?: { limit?: number; offset?: number }) =>
+    request<Array<{
+      id: string;
+      workflowId: string;
+      startedByUserId: string;
+      triggerType: string;
+      status: string;
+      startedAt: string;
+      finishedAt: string | null;
+      inputDataJson: any;
+      outputDataJson: any;
+      errorMessage: string | null;
+    }>>(`/workflows/${workflowId}/executions?limit=${params?.limit || 50}&offset=${params?.offset || 0}`, { method: "GET" }, true),
+
+  getExecution: (workflowId: string, executionId: string) =>
+    request<{
+      id: string;
+      workflowId: string;
+      startedByUserId: string;
+      triggerType: string;
+      status: string;
+      startedAt: string;
+      finishedAt: string | null;
+      inputDataJson: any;
+      outputDataJson: any;
+      errorMessage: string | null;
+    }>(`/workflows/${workflowId}/executions/${executionId}`, { method: "GET" }, true),
+
+  getExecutionLogs: (workflowId: string, executionId: string, params?: { limit?: number; offset?: number }) =>
+    request<Array<{
+      id: string;
+      executionId: string;
+      nodeId: string;
+      status: string;
+      startedAt: string;
+      finishedAt: string | null;
+      inputDataJson: any;
+      outputDataJson: any;
+      errorMessage: string | null;
+    }>>(`/workflows/${workflowId}/executions/${executionId}/logs?limit=${params?.limit || 100}&offset=${params?.offset || 0}`, { method: "GET" }, true),
 };

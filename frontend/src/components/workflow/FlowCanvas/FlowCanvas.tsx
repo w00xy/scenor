@@ -13,11 +13,25 @@ import {
   BackgroundVariant,
   NodeTypes,
   ReactFlowInstance,
+  PanOnScrollMode,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./FlowCanvas.scss";
 import { TriggerNode } from "../CustomNodes/TriggerNode";
 import { DefaultNode } from "../CustomNodes/DefaultNode";
+import { CustomEdge } from "../CustomEdges/CustomEdge";
+import { workflowApi } from "../../../services/api";
+
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 interface FlowCanvasProps {
   workflowId: string;
@@ -26,7 +40,29 @@ interface FlowCanvasProps {
   onNodesChange?: (nodes: Node[]) => void;
   onEdgesChange?: (edges: Edge[]) => void;
   onAddNode?: (node: Node) => void;
+  onDeleteEdge?: (edgeId: string) => Promise<void>;
+  executionState?: {
+    isExecuting: boolean;
+    triggeredNodeId: string | null;
+    executedEdges: string[];
+  };
 }
+
+const CANVAS_BOUNDS = {
+  minX: -2000,
+  maxX: 2000,
+  minY: -2000,
+  maxY: 2000,
+};
+
+const nodeTypes: NodeTypes = {
+  triggerNode: TriggerNode,
+  default: DefaultNode,
+};
+
+const edgeTypes = {
+  default: CustomEdge,
+};
 
 export function FlowCanvas({
   workflowId,
@@ -35,6 +71,8 @@ export function FlowCanvas({
   onNodesChange,
   onEdgesChange,
   onAddNode,
+  onDeleteEdge,
+  executionState,
 }: FlowCanvasProps): JSX.Element {
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
@@ -42,47 +80,215 @@ export function FlowCanvas({
   const [showMiniMap, setShowMiniMap] = useState(false);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const nodeTypes: NodeTypes = useMemo(
-    () => ({
-      triggerNode: TriggerNode,
-      default: DefaultNode,
-    }),
-    []
-  );
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
+
+  const debouncedSavePositions = useRef(
+    debounce((nodesToSave: Node[]) => {
+      onNodesChange?.(nodesToSave);
+    }, 500)
+  ).current;
 
   const onInit = useCallback((instance: ReactFlowInstance) => {
     reactFlowInstance.current = instance;
   }, []);
 
+  const prevNodesLengthRef = useRef(initialNodes.length);
   useEffect(() => {
-    setNodes(initialNodes);
+    if (initialNodes.length > prevNodesLengthRef.current) {
+      const newNodes = initialNodes.slice(prevNodesLengthRef.current);
+      setNodes((currentNodes) => [...currentNodes, ...newNodes]);
+      prevNodesLengthRef.current = initialNodes.length;
+    }
+    else if (initialNodes.length < prevNodesLengthRef.current) {
+      const initialNodeIds = new Set(initialNodes.map(n => n.id));
+      setNodes((currentNodes) => 
+        currentNodes.filter(node => initialNodeIds.has(node.id))
+      );
+      prevNodesLengthRef.current = initialNodes.length;
+    }
+    else if (prevNodesLengthRef.current === 0 && initialNodes.length > 0) {
+      setNodes(initialNodes);
+      prevNodesLengthRef.current = initialNodes.length;
+    }
   }, [initialNodes, setNodes]);
 
-  const onConnect = useCallback(
-    (params: Connection) => {
-      const newEdge = addEdge(params, edges);
-      setEdges(newEdge);
-      onEdgesChange?.(newEdge);
+  // Обновляем узлы при изменении executionState
+  useEffect(() => {
+    if (!executionState) return;
+
+    const triggeredNodeId = executionState.triggeredNodeId || null;
+
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          isTriggered: node.id === triggeredNodeId,
+        },
+      }))
+    );
+  }, [executionState, setNodes]);
+
+  const handleDeleteEdge = useCallback(
+    async (edgeId: string) => {
+      if (!workflowId) return;
+      
+      try {
+        await workflowApi.deleteEdge(workflowId, edgeId);
+        
+        setEdges((prevEdges) => {
+          const newEdges = prevEdges.filter((edge) => edge.id !== edgeId);
+          return newEdges;
+        });
+        
+        if (onDeleteEdge) {
+          await onDeleteEdge(edgeId);
+        }
+      } catch (error) {
+        console.error("Failed to delete edge:", error);
+        alert("Не удалось удалить связь");
+      }
     },
-    [edges, setEdges, onEdgesChange]
+    [workflowId, setEdges, onDeleteEdge]
+  );
+
+  const prevEdgesLengthRef = useRef(initialEdges.length);
+  useEffect(() => {
+    if (initialEdges.length > prevEdgesLengthRef.current) {
+      const newEdges = initialEdges.slice(prevEdgesLengthRef.current);
+      const edgesWithDelete = newEdges.map(edge => ({
+        ...edge,
+        data: { ...edge.data, onDelete: handleDeleteEdge }
+      }));
+      setEdges((currentEdges) => [...currentEdges, ...edgesWithDelete]);
+      prevEdgesLengthRef.current = initialEdges.length;
+    }
+    else if (prevEdgesLengthRef.current === 0 && initialEdges.length > 0) {
+      const edgesWithDelete = initialEdges.map(edge => ({
+        ...edge,
+        data: { ...edge.data, onDelete: handleDeleteEdge }
+      }));
+      setEdges(edgesWithDelete);
+      prevEdgesLengthRef.current = initialEdges.length;
+    }
+    else if (initialEdges.length < prevEdgesLengthRef.current) {
+      const edgesWithDelete = initialEdges.map(edge => ({
+        ...edge,
+        data: { ...edge.data, onDelete: handleDeleteEdge }
+      }));
+      setEdges(edgesWithDelete);
+      prevEdgesLengthRef.current = initialEdges.length;
+    }
+  }, [initialEdges, setEdges, handleDeleteEdge]);
+
+  // Обновляем edges при изменении executionState
+  useEffect(() => {
+    if (!executionState) return;
+
+    const executedEdges = executionState.executedEdges || [];
+
+    setEdges((currentEdges) =>
+      currentEdges.map((edge) => ({
+        ...edge,
+        data: {
+          ...edge.data,
+          isExecuted: executedEdges.includes(edge.id),
+        },
+        className: executedEdges.includes(edge.id) ? 'executed' : '',
+      }))
+    );
+  }, [executionState, setEdges]);
+
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      setEdges((currentEdges) =>
+        currentEdges.map((edge) => ({
+          ...edge,
+          data: { ...edge.data, onDelete: handleDeleteEdge }
+        }))
+      );
+    }
+  }, [setEdges]);
+
+  const onConnect = useCallback(
+    async (params: Connection) => {
+      if (!workflowId || !params.source || !params.target) return;
+
+      try {
+        const createdEdge = await workflowApi.createEdge(workflowId, {
+          sourceNodeId: params.source,
+          targetNodeId: params.target,
+          sourceHandle: params.sourceHandle || undefined,
+          targetHandle: params.targetHandle || undefined,
+        });
+
+        const flowEdge: Edge = {
+          id: createdEdge.id,
+          source: createdEdge.sourceNodeId,
+          target: createdEdge.targetNodeId,
+          sourceHandle: createdEdge.sourceHandle || undefined,
+          targetHandle: createdEdge.targetHandle || undefined,
+          animated: true,
+          data: { onDelete: handleDeleteEdge },
+        };
+
+        setEdges((prevEdges) => [...prevEdges, flowEdge]);
+        onEdgesChange?.([...edges, flowEdge]);
+      } catch (error) {
+        alert("Не удалось создать связь");
+      }
+    },
+    [workflowId, edges, setEdges, onEdgesChange, handleDeleteEdge]
   );
 
   const handleNodesChange = useCallback(
-    (changes: any) => {
+    async (changes: any) => {
+      const removeChanges = changes.filter((change: any) => change.type === 'remove');
+      
+      if (removeChanges.length > 0 && workflowId) {
+        for (const change of removeChanges) {
+          try {
+            await workflowApi.deleteNode(workflowId, change.id);
+          } catch (error) {
+          }
+        }
+      }
+
       onNodesChangeInternal(changes);
-      setTimeout(() => {
-        setNodes((currentNodes) => {
-          onNodesChange?.(currentNodes);
-          return currentNodes;
-        });
-      }, 0);
+      
+      const positionChanges = changes.filter(
+        (change: any) => change.type === 'position' && change.dragging === false
+      );
+
+      if (positionChanges.length > 0) {
+        setTimeout(() => {
+          setNodes((currentNodes) => {
+            const boundedNodes = currentNodes.map((node) => {
+              const x = Math.max(CANVAS_BOUNDS.minX, Math.min(CANVAS_BOUNDS.maxX, node.position.x));
+              const y = Math.max(CANVAS_BOUNDS.minY, Math.min(CANVAS_BOUNDS.maxY, node.position.y));
+              
+              if (x !== node.position.x || y !== node.position.y) {
+                return { ...node, position: { x, y } };
+              }
+              return node;
+            });
+            
+            debouncedSavePositions(boundedNodes);
+            return boundedNodes;
+          });
+        }, 0);
+      }
     },
-    [onNodesChangeInternal, setNodes, onNodesChange]
+    [workflowId, onNodesChangeInternal, setNodes, debouncedSavePositions]
   );
 
   const handleEdgesChange = useCallback(
-    (changes: any) => {
+    async (changes: any) => {
       onEdgesChangeInternal(changes);
+      
       setTimeout(() => {
         setEdges((currentEdges) => {
           onEdgesChange?.(currentEdges);
@@ -93,71 +299,25 @@ export function FlowCanvas({
     [onEdgesChangeInternal, setEdges, onEdgesChange]
   );
 
-  // Кастомная обработка колёсика мыши
-  const handleWheel = useCallback(
-    (event: WheelEvent) => {
-      if (!reactFlowInstance.current) return;
-      
-      event.preventDefault();
-      
-      // Показываем MiniMap при взаимодействии
-      setShowMiniMap(true);
-      
-      // Сбрасываем предыдущий таймер
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current);
-      }
-      
-      // Скрываем MiniMap через 2 секунды после последнего взаимодействия
-      hideTimeoutRef.current = setTimeout(() => {
-        setShowMiniMap(false);
-      }, 2000);
-      
-      const instance = reactFlowInstance.current;
-      const viewport = instance.getViewport();
-      const delta = event.deltaY;
-      const panSpeed = 0.5;
-
-      if (event.ctrlKey || event.metaKey) {
-        // Ctrl/Cmd + колёсико = зум
-        const zoomStep = 0.1;
-        const newZoom = delta < 0 ? viewport.zoom + zoomStep : viewport.zoom - zoomStep;
-        instance.setViewport({
-          x: viewport.x,
-          y: viewport.y,
-          zoom: Math.max(0.1, Math.min(2, newZoom)),
-        }, { duration: 200 });
-      } else if (event.shiftKey) {
-        // Shift + колёсико = горизонтальная панорама
-        instance.setViewport({
-          x: viewport.x - delta * panSpeed,
-          y: viewport.y,
-          zoom: viewport.zoom,
-        });
-      } else {
-        // Обычное колёсико = вертикальная панорама
-        instance.setViewport({
-          x: viewport.x,
-          y: viewport.y - delta * panSpeed,
-          zoom: viewport.zoom,
-        });
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    const flowElement = document.querySelector('.react-flow');
-    if (flowElement) {
-      flowElement.addEventListener('wheel', handleWheel as any, { passive: false });
-      return () => {
-        flowElement.removeEventListener('wheel', handleWheel as any);
-        if (hideTimeoutRef.current) {
-          clearTimeout(hideTimeoutRef.current);
-        }
-      };
+  const handleInteraction = useCallback(() => {
+    setShowMiniMap(true);
+    
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
     }
-  }, [handleWheel]);
+    
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowMiniMap(false);
+    }, 2000);
+  }, []);
+
+  const onMoveStart = useCallback(() => {
+    handleInteraction();
+  }, [handleInteraction]);
+
+  const onMoveEnd = useCallback(() => {
+    handleInteraction();
+  }, [handleInteraction]);
 
   return (
     <div className="flow-canvas">
@@ -168,12 +328,26 @@ export function FlowCanvas({
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         onInit={onInit}
-        nodeTypes={nodeTypes}
+        onMoveStart={onMoveStart}
+        onMoveEnd={onMoveEnd}
+        nodeTypes={memoizedNodeTypes}
+        edgeTypes={memoizedEdgeTypes}
+        minZoom={0.8}
+        maxZoom={2}
         fitView
         proOptions={{ hideAttribution: true }}
-        zoomOnScroll={false}
-        panOnScroll={false}
-        preventScrolling={false}
+        zoomOnScroll={true}
+        panOnScroll={true}
+        panOnScrollMode={PanOnScrollMode.Free}
+        preventScrolling={true}
+        translateExtent={[
+          [CANVAS_BOUNDS.minX, CANVAS_BOUNDS.minY],
+          [CANVAS_BOUNDS.maxX, CANVAS_BOUNDS.maxY],
+        ]}
+        nodeExtent={[
+          [CANVAS_BOUNDS.minX, CANVAS_BOUNDS.minY],
+          [CANVAS_BOUNDS.maxX, CANVAS_BOUNDS.maxY],
+        ]}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#636363" />
         <Controls position="bottom-left" />

@@ -166,7 +166,7 @@ export class WorkflowsService {
       ((nodeType.defaultConfigJson as Record<string, unknown>) ?? {});
     const validatedConfig = validateNodeConfigByType(normalizedType, rawConfig);
 
-    return this.prisma.workflowNode.create({
+    const createdNode = await this.prisma.workflowNode.create({
       data: {
         workflowId,
         nodeTypeId: nodeType.id,
@@ -181,6 +181,14 @@ export class WorkflowsService {
         isDisabled: data.isDisabled ?? false,
       },
     });
+
+    // Обновляем updatedAt у workflow
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return createdNode;
   }
 
   async updateNode(
@@ -254,10 +262,17 @@ export class WorkflowsService {
       throw new BadRequestException('No fields provided for update');
     }
 
-    return this.prisma.workflowNode.update({
+    const updatedNode = await this.prisma.workflowNode.update({
       where: { id: nodeId },
       data: updateData,
     });
+
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return updatedNode;
   }
 
   async deleteNode(userId: string, workflowId: string, nodeId: string) {
@@ -267,9 +282,16 @@ export class WorkflowsService {
     ]);
     await this.requireWorkflowNode(workflowId, nodeId);
 
-    return this.prisma.workflowNode.delete({
+    const deletedNode = await this.prisma.workflowNode.delete({
       where: { id: nodeId },
     });
+
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return deletedNode;
   }
 
   async createEdge(userId: string, workflowId: string, data: CreateWorkflowEdgeDto) {
@@ -283,7 +305,7 @@ export class WorkflowsService {
       this.requireWorkflowNode(workflowId, data.targetNodeId),
     ]);
 
-    return this.prisma.workflowEdge.create({
+    const createdEdge = await this.prisma.workflowEdge.create({
       data: {
         workflowId,
         sourceNodeId: data.sourceNodeId,
@@ -294,6 +316,14 @@ export class WorkflowsService {
         label: data.label?.trim() || null,
       },
     });
+
+    // Обновляем updatedAt у workflow
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return createdEdge;
   }
 
   async updateEdge(
@@ -341,10 +371,17 @@ export class WorkflowsService {
       throw new BadRequestException('No fields provided for update');
     }
 
-    return this.prisma.workflowEdge.update({
+    const updatedEdge = await this.prisma.workflowEdge.update({
       where: { id: edgeId },
       data: updateData,
     });
+
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return updatedEdge;
   }
 
   async deleteEdge(userId: string, workflowId: string, edgeId: string) {
@@ -354,9 +391,17 @@ export class WorkflowsService {
     ]);
     await this.requireWorkflowEdge(workflowId, edgeId);
 
-    return this.prisma.workflowEdge.delete({
+    const deletedEdge = await this.prisma.workflowEdge.delete({
       where: { id: edgeId },
     });
+
+    // Обновляем updatedAt у workflow
+    await this.prisma.workflow.update({
+      where: { id: workflowId },
+      data: { updatedAt: new Date() },
+    });
+
+    return deletedEdge;
   }
 
   private async resolveNodeType(type: string, nodeTypeId?: string) {

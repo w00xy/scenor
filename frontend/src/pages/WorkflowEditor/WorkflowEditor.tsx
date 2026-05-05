@@ -7,6 +7,7 @@ import { LNav } from "../../components/left_nav/left_nav_btns/left_nav_btns";
 import { FlowCanvas } from "../../components/workflow/FlowCanvas/FlowCanvas";
 import { NodesPalette } from "../../components/workflow/NodesPalette/NodesPalette";
 import { WorkflowActionsMenu } from "../../components/overview/pages_overview/overview_scen/MM_overview_scen_component/WorkflowActionsMenu";
+import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/BottomLogsPanel";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
@@ -32,6 +33,45 @@ export function WorkflowEditor(): JSX.Element {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const dotsRef = useRef<HTMLDivElement>(null);
+  
+  const lastSavedPositions = useRef<Map<string, { x: number; y: number }>>(new Map());
+  
+  const [executionState, setExecutionState] = useState<{
+    isExecuting: boolean;
+    triggeredNodeId: string | null;
+    executedEdges: string[];
+    lastExecutionId: string | null;
+  }>({
+    isExecuting: false,
+    triggeredNodeId: null,
+    executedEdges: [],
+    lastExecutionId: null,
+  });
+
+  const [logsPanelHeight, setLogsPanelHeight] = useState(40);
+
+  const handleDeleteNode = useCallback(async (nodeId: string) => {
+    if (!workflowId) return;
+
+    if (!confirm("Вы уверены, что хотите удалить этот узел?")) {
+      return;
+    }
+
+    try {
+      await workflowApi.deleteNode(workflowId, nodeId);
+      
+      setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
+      
+      setEdges((prevEdges) => 
+        prevEdges.filter((edge) => 
+          edge.source !== nodeId && edge.target !== nodeId
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete node:", error);
+      alert("Не удалось удалить узел");
+    }
+  }, [workflowId]);
 
   useEffect(() => {
     const loadWorkflow = async () => {
@@ -47,23 +87,31 @@ export function WorkflowEditor(): JSX.Element {
         setWorkflow(loadedWorkflow);
         setWorkflowName(loadedWorkflow.name);
 
-        // Загружаем граф workflow (nodes и edges)
         try {
           const graph = await workflowApi.getWorkflowGraph(workflowId);
           
-          // Преобразуем backend nodes в React Flow формат
-          const flowNodes: Node[] = graph.nodes.map((node) => ({
-            id: node.id,
-            type: "default",
-            position: { x: node.posX, y: node.posY },
-            data: { 
-              label: node.label || node.name || node.typeCode,
-              typeCode: node.typeCode,
-              configJson: node.configJson,
-            },
-          }));
+          const flowNodes: Node[] = graph.nodes.map((node) => {
+            const isTriggerNode = node.typeCode === 'manual_trigger' || node.typeCode === 'webhook_trigger';
+            
+            lastSavedPositions.current.set(node.id, {
+              x: node.posX,
+              y: node.posY,
+            });
+            
+            return {
+              id: node.id,
+              type: isTriggerNode ? "triggerNode" : "default",
+              position: { x: node.posX, y: node.posY },
+              data: { 
+                label: node.label || node.name || node.typeCode,
+                typeCode: node.typeCode,
+                configJson: node.configJson,
+                onDelete: handleDeleteNode,
+                onPlay: isTriggerNode ? handleRunWorkflow : undefined,
+              },
+            };
+          });
 
-          // Преобразуем backend edges в React Flow формат
           const flowEdges: Edge[] = graph.edges.map((edge) => ({
             id: edge.id,
             source: edge.sourceNodeId,
@@ -78,7 +126,6 @@ export function WorkflowEditor(): JSX.Element {
           setEdges(flowEdges);
         } catch (graphError) {
           console.error("Failed to load workflow graph:", graphError);
-          // Если граф пустой, оставляем пустые массивы
           setNodes([]);
           setEdges([]);
         }
@@ -91,18 +138,24 @@ export function WorkflowEditor(): JSX.Element {
     };
 
     void loadWorkflow();
-  }, [workflowId, getWorkflow]);
+  }, [workflowId]);
 
   const handleNodesChange = useCallback(async (updatedNodes: Node[]) => {
     if (!workflowId) return;
 
-    // Сохраняем позиции узлов на сервер
     try {
       const updatePromises = updatedNodes.map((node) => {
-        const backendNode = nodes.find((n) => n.id === node.id);
-        if (backendNode && 
-            (backendNode.position.x !== node.position.x || 
-             backendNode.position.y !== node.position.y)) {
+        const lastSaved = lastSavedPositions.current.get(node.id);
+        
+        if (!lastSaved || 
+            lastSaved.x !== node.position.x || 
+            lastSaved.y !== node.position.y) {
+          
+          lastSavedPositions.current.set(node.id, {
+            x: node.position.x,
+            y: node.position.y,
+          });
+          
           return workflowApi.updateNode(workflowId, node.id, {
             posX: node.position.x,
             posY: node.position.y,
@@ -115,13 +168,10 @@ export function WorkflowEditor(): JSX.Element {
     } catch (error) {
       console.error("Failed to save node positions:", error);
     }
-  }, [workflowId, nodes]);
+  }, [workflowId]);
 
   const handleEdgesChange = useCallback(async (updatedEdges: Edge[]) => {
     if (!workflowId) return;
-    
-    console.log("Edges changed:", updatedEdges);
-    // TODO: Реализовать сохранение изменений edges
   }, [workflowId]);
 
   const handleSaveWorkflowName = useCallback(async () => {
@@ -145,48 +195,80 @@ export function WorkflowEditor(): JSX.Element {
   const handleAddNode = useCallback(async (typeCode: string) => {
     if (!workflowId) return;
 
-    // Определяем тип узла (триггер или обычный)
     const isTriggerNode = typeCode === 'manual_trigger' || typeCode === 'webhook_trigger';
 
-    // Умное позиционирование
     let posX = 250;
     let posY = 250;
 
-    if (nodes.length === 0) {
-      // Первый нод - в центре canvas
-      posX = 250;
-      posY = 250;
-    } else {
-      // Находим самый правый нод
-      const rightmostNode = nodes.reduce((max, node) => 
-        node.position.x > max.position.x ? node : max
-      , nodes[0]);
-
-      // Размещаем справа от самого правого нода
-      posX = rightmostNode.position.x + 200;
-      
-      // Y позиция - средняя по всем нодам
-      const avgY = nodes.reduce((sum, node) => sum + node.position.y, 0) / nodes.length;
-      posY = avgY;
-    }
-
-    const nodeId = `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const flowNode: Node = {
-      id: nodeId,
-      type: isTriggerNode ? "triggerNode" : "default",
-      position: { 
-        x: posX, 
-        y: posY 
-      },
-      data: {
-        label: typeCode,
-        typeCode: typeCode,
-        configJson: {},
-      },
+    const getDefaultConfig = (type: string): Record<string, unknown> => {
+      switch (type) {
+        case 'webhook_trigger':
+          return { path: '/hook', method: 'POST' };
+        case 'http_request':
+          return {
+            url: 'https://api.example.com/resource',
+            method: 'GET',
+            headers: {},
+            query: {},
+            body: null,
+            timeout: 10000,
+          };
+        case 'transform':
+          return { script: 'return input;' };
+        case 'code':
+          return { language: 'javascript', source: 'return input;' };
+        case 'delay':
+          return { durationMs: 1000 };
+        case 'if':
+          return { mode: 'all', conditions: [] };
+        case 'switch':
+          return { expression: '{{input.value}}', cases: [] };
+        case 'set':
+          return { values: {} };
+        case 'db_select':
+          return { table: '', where: {} };
+        case 'db_insert':
+          return { table: '', values: {} };
+        default:
+          return {};
+      }
     };
 
-    setNodes((prevNodes) => [...prevNodes, flowNode]);
-  }, [workflowId, setNodes, nodes]);
+    try {
+      const createdNode = await workflowApi.createNode(workflowId, {
+        type: typeCode,
+        posX: posX,
+        posY: posY,
+        configJson: getDefaultConfig(typeCode),
+      });
+
+      lastSavedPositions.current.set(createdNode.id, {
+        x: createdNode.posX,
+        y: createdNode.posY,
+      });
+
+      const flowNode: Node = {
+        id: createdNode.id,
+        type: isTriggerNode ? "triggerNode" : "default",
+        position: { 
+          x: createdNode.posX, 
+          y: createdNode.posY 
+        },
+        data: {
+          label: createdNode.label || createdNode.name || createdNode.typeCode,
+          typeCode: createdNode.typeCode,
+          configJson: createdNode.configJson,
+          onDelete: handleDeleteNode,
+          onPlay: isTriggerNode ? handleRunWorkflow : undefined,
+        },
+      };
+
+      setNodes((prevNodes) => [...prevNodes, flowNode]);
+    } catch (error) {
+      console.error("Failed to create node:", error);
+      alert("Не удалось создать узел");
+    }
+  }, [workflowId, setNodes]);
 
   const handleDotsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -195,7 +277,7 @@ export function WorkflowEditor(): JSX.Element {
       const rect = dotsRef.current.getBoundingClientRect();
       setMenuPosition({
         top: rect.bottom + 4,
-        left: rect.right - 110,
+        left: rect.right - 200,
       });
     }
     
@@ -224,6 +306,66 @@ export function WorkflowEditor(): JSX.Element {
     alert("Функция 'Поделиться' пока не реализована");
     setShowActionsMenu(false);
   };
+
+  const handleRunWorkflow = async () => {
+    if (!workflowId) return;
+
+    try {
+      setExecutionState({
+        isExecuting: true,
+        triggeredNodeId: null,
+        executedEdges: [],
+        lastExecutionId: null,
+      });
+
+      const result = await workflowApi.executeManual(workflowId);
+
+      // Извлекаем ID узлов, которые были выполнены
+      const executedNodeIds = Object.keys(result.outputDataJson?.nodeOutputs || {});
+      
+      // Находим manual_trigger узел
+      const triggerNode = nodes.find(node => 
+        node.data.typeCode === 'manual_trigger'
+      );
+
+      // Находим все edges, которые исходят из выполненных узлов
+      const executedEdgeIds = edges
+        .filter(edge => executedNodeIds.includes(edge.source))
+        .map(edge => edge.id);
+
+      setExecutionState({
+        isExecuting: false,
+        triggeredNodeId: triggerNode?.id || null,
+        executedEdges: executedEdgeIds,
+        lastExecutionId: result.id,
+      });
+
+      setTimeout(() => {
+        setExecutionState({
+          isExecuting: false,
+          triggeredNodeId: null,
+          executedEdges: [],
+          lastExecutionId: result.id,
+        });
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to execute workflow:", error);
+      alert("Не удалось запустить сценарий");
+      setExecutionState({
+        isExecuting: false,
+        triggeredNodeId: null,
+        executedEdges: [],
+        lastExecutionId: null,
+      });
+    }
+  };
+
+  const handleDeleteEdge = useCallback(async (edgeId: string) => {
+    setEdges((prevEdges) => {
+      const newEdges = prevEdges.filter((edge) => edge.id !== edgeId);
+      return newEdges;
+    });
+  }, []);
 
   if (isLoading) {
     return (
@@ -346,16 +488,36 @@ export function WorkflowEditor(): JSX.Element {
             </div>
           )}
 
-          <div 
-            className="workflow-editor__canvas"
-            onClick={() => isPaletteOpen && setIsPaletteOpen(false)}
-          >
-            <FlowCanvas
-              workflowId={workflowId || ""}
-              initialNodes={nodes}
-              initialEdges={edges}
-              onNodesChange={handleNodesChange}
-              onEdgesChange={handleEdgesChange}
+          <div className="workflow-editor__canvas-wrapper">
+            <div 
+              className="workflow-editor__canvas"
+              onClick={() => isPaletteOpen && setIsPaletteOpen(false)}
+            >
+              <FlowCanvas
+                workflowId={workflowId || ""}
+                initialNodes={nodes}
+                initialEdges={edges}
+                onNodesChange={handleNodesChange}
+                onEdgesChange={handleEdgesChange}
+                onAddNode={(node) => setNodes((prev) => [...prev, node])}
+                onDeleteEdge={handleDeleteEdge}
+                executionState={executionState}
+              />
+
+              <button
+                className="workflow-editor__run-btn"
+                onClick={handleRunWorkflow}
+                title="Запустить сценарий"
+              >
+                Запустить сценарий
+              </button>
+            </div>
+
+            <BottomLogsPanel 
+              workflowId={workflowId || ""} 
+              lastExecutionId={executionState.lastExecutionId}
+              onHeightChange={setLogsPanelHeight}
+              nodes={nodes}
             />
           </div>
         </div>

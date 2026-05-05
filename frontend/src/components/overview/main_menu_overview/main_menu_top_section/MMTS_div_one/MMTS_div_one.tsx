@@ -20,9 +20,8 @@ export function MMTS_div_one({ text }: MMTS_div_oneProps): JSX.Element {
       return;
     }
 
+    setIsCreating(true);
     try {
-      setIsCreating(true);
-      // Получаем текущие workflow для определения номера
       const existingWorkflows = await getProjectWorkflows(personalProjectId);
       const workflowNumber = existingWorkflows.length + 1;
       

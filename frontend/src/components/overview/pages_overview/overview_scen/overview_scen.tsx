@@ -7,6 +7,7 @@ import { MM_overview_scen_div_two } from "./MM_overview_scen_div_two/MM_overview
 import { useProjects } from "../../../../context/ProjectsContext";
 import { useWorkflows, Workflow } from "../../../../context/WorkflowsContext";
 import { workflowApi } from "../../../../services/api";
+import { formatTimeAgo } from "../../../../utils/timeFormat";
 
 interface WorkflowWithProject extends Workflow {
   projectName: string;
@@ -17,7 +18,7 @@ const ITEMS_PER_PAGE = 5;
 export function Overview_scen(): JSX.Element {
   const navigate = useNavigate();
   const { projects } = useProjects();
-  const { getProjectWorkflows } = useWorkflows();
+  const { workflows, getProjectWorkflows } = useWorkflows();
   const [sortBy, setSortBy] = useState<string>("");
   const [searchValue, setSearchValue] = useState<string>("");
   const [allWorkflows, setAllWorkflows] = useState<WorkflowWithProject[]>([]);
@@ -55,20 +56,7 @@ export function Overview_scen(): JSX.Element {
     };
 
     void loadAllWorkflows();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects.length]);
-
-  const formatTimeAgo = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffHours < 1) return "менее часа";
-    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "час" : "часов"}`;
-    return `${diffDays} ${diffDays === 1 ? "день" : "дней"}`;
-  };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -76,44 +64,38 @@ export function Overview_scen(): JSX.Element {
     return `${date.getDate()} ${months[date.getMonth()]}`;
   };
 
-  const sortWorkflows = (a: WorkflowWithProject, b: WorkflowWithProject) => {
-    switch (sortBy) {
-      case "Name":
-        return a.name.localeCompare(b.name);
-      case "Creation date":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case "Update date":
-        return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-      default:
-        return 0;
-    }
-  };
-
   const filteredAndSortedWorkflows = useMemo(() => {
     let result = allWorkflows;
 
-    // Фильтрация по поиску
     if (searchValue.trim()) {
       result = result.filter((workflow) =>
         workflow.name.toLowerCase().includes(searchValue.toLowerCase())
       );
     }
 
-    // Сортировка
     if (sortBy) {
-      result = [...result].sort(sortWorkflows);
+      result = [...result].sort((a, b) => {
+        switch (sortBy) {
+          case "Name":
+            return a.name.localeCompare(b.name);
+          case "Creation date":
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          case "Update date":
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          default:
+            return 0;
+        }
+      });
     }
 
     return result;
   }, [allWorkflows, searchValue, sortBy]);
 
-  // Пагинация
   const totalPages = Math.ceil(filteredAndSortedWorkflows.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedWorkflows = filteredAndSortedWorkflows.slice(startIndex, endIndex);
 
-  // Сброс на первую страницу при изменении фильтров
   useEffect(() => {
     setCurrentPage(1);
   }, [searchValue, sortBy]);
@@ -125,7 +107,6 @@ export function Overview_scen(): JSX.Element {
 
     try {
       await workflowApi.deleteWorkflow(workflowId);
-      // Обновляем список после удаления
       setAllWorkflows((prev) => prev.filter((w) => w.id !== workflowId));
     } catch (error) {
       console.error("Failed to delete workflow:", error);

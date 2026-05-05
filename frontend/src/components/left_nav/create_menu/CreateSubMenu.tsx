@@ -30,7 +30,6 @@ export function CreateSubMenu({
       const parentRect = parentRef.current.getBoundingClientRect();
       const menuRect = menuRef.current.getBoundingClientRect();
       
-      // Вычисляем смещение чтобы выровнять по верхнему краю родителя
       setTopOffset(parentRect.top - menuRect.top);
     }
   }, [parentRef]);

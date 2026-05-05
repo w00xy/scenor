@@ -36,7 +36,13 @@ export class InitializationService {
     const adminPassword = this.configService.get('ADMIN_PASSWORD', { infer: true });
 
     const existingAdmin = await this.prisma.user.findFirst({
-      where: { role: Role.SUPER_ADMIN },
+      where: {
+        OR: [
+          { role: Role.SUPER_ADMIN },
+          { username: adminUsername },
+          { email: adminEmail },
+        ],
+      },
     });
 
     if (existingAdmin) {

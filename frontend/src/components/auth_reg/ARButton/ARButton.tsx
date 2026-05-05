@@ -4,7 +4,7 @@ interface ARButtonProps {
   text: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: 'button' | 'submit';
-  disabled?: boolean; // новый проп
+  disabled?: boolean;
 }
 
 export function ARButton({ text, onClick, type = 'submit', disabled = false }: ARButtonProps): JSX.Element {

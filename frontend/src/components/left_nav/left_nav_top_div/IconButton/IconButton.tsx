@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 interface IconButtonProps {
   icon: React.ReactNode;
-  to?: string; // опциональный
-  onClick?: () => void; // опциональный
+  to?: string;
+  onClick?: () => void;
   buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 

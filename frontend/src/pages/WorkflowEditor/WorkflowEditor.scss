@@ -100,6 +100,7 @@
   &__workspace {
     flex: 1;
     display: flex;
+    flex-direction: column;
     min-height: 0;
     height: 100%;
     position: relative;
@@ -163,7 +164,14 @@
     background: #0f0f0f;
     overflow: hidden;
     min-height: 0;
-    height: 100%;
+  }
+
+  &__canvas-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   &__placeholder {
@@ -220,6 +228,32 @@
 
     &:hover {
       background: #db5442;
+    }
+  }
+
+  &__run-btn {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 10px 60px;
+    background: #FF4B33;
+    color: $color-white;
+    border: none;
+    border-radius: 8px;
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #db5442;
+    }
+
+    &:active {
+      transform: translateX(-50%) scale(0.98);
     }
   }
 }
