@@ -16,7 +16,7 @@ export function ManualTriggerConfig({ config, onSave }: ManualTriggerConfigProps
 
   return (
     <ResizableNodeConfig hasInput={false} hasOutput={true}>
-      <div className="node-config__section node-config__section--params">
+      <div className="node-config__section node-config__section--params-trigger">
         <h3 className="node-config__section-title">Параметры</h3>
         
         <div className="node-config__params-content">
@@ -26,7 +26,7 @@ export function ManualTriggerConfig({ config, onSave }: ManualTriggerConfigProps
         </div>
       </div>
 
-      <div className="node-config__section node-config__section--output">
+      <div className="node-config__section node-config__section--output-trigger">
         <h3 className="node-config__section-title">Выход</h3>
         <div className="node-config__info">
           Узел передаёт пустой объект данных следующим узлам в цепочке.
