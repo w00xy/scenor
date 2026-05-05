@@ -10,7 +10,7 @@
 
 ## Статус проекта
 
-**Дата обновления:** 5 мая 2026
+**Дата обновления:** 6 мая 2026
 
 ✅ **Backend MVP** - полностью реализован и готов к использованию
 - 13 модулей (10 feature + 3 shared)
@@ -19,10 +19,12 @@
 - Execution engine с поддержкой условной логики
 - Шифрование credentials
 - Audit trail для критических операций
+- ✅ **WebSocket real-time updates** - полностью интегрирован
 
 🚧 **Frontend** - в разработке другим разработчиком
 - Backend API готов для интеграции
 - Swagger документация доступна
+- WebSocket API готов для real-time обновлений
 
 ## Технологический стек
 
@@ -36,7 +38,7 @@
 - **Шифрование:** Node.js crypto (AES-256-GCM)
 - **Хеширование паролей:** bcrypt 6.0.0
 - **API документация:** Swagger 11.0.0
-- **WebSocket:** Socket.io для real-time updates
+- **WebSocket:** ws 8.20.0 для real-time updates
 
 ### Frontend
 - **Framework:** React 19.2.0 + TypeScript (в разработке)
@@ -95,6 +97,7 @@ docker-compose up -d
 - **API:** http://localhost:3000
 - **Swagger UI:** http://localhost:3000/api
 - **OpenAPI spec:** http://localhost:3000/api-json
+- **WebSocket:** ws://localhost:3000/executions
 - **Prisma Studio:** `npm run studio` (в папке backend)
 
 ### Переменные окружения
@@ -120,9 +123,10 @@ HOSTNAME=0.0.0.0
 - ✅ Визуально строить workflow из узлов и связей
 - ✅ Делиться workflow с другими пользователями или по публичной ссылке
 - ✅ Запускать workflow вручную или через webhook
-- ✅ Просматривать историю выполнения и логи узлов
+- ✅ Просматривать историю выполнения и логи узлов в real-time
 - ✅ Управлять зашифрованными credentials
 - ✅ Удалять executions с audit trail
+- ✅ Получать real-time обновления через WebSocket
 
 Workflow представляется как направленный граф:
 - **nodes (узлы)** = действия / триггеры / логика / блоки данных
@@ -138,11 +142,10 @@ Workflow представляется как направленный граф:
 3. **ProjectsModule** - создание проектов, управление членством
 4. **WorkflowsModule** - CRUD для workflows, nodes, edges с валидацией Zod
 5. **NodeTypesModule** - реестр типов узлов, 11 дефолтных типов
-6. **ExecutionsModule** - execution engine, логирование, удаление с audit trail
+6. **ExecutionsModule** - execution engine, логирование, WebSocket gateway, удаление с audit trail
 7. **CredentialsModule** - шифрование/дешифрование учетных данных
 8. **WorkflowSharesModule** - публичный доступ к workflow через токены
 9. **InitializationModule** - инициализация системы (создание admin, seed node types)
-10. **WebSocketModule** - real-time обновления через Socket.io
 
 #### Shared модули (3):
 1. **AuthModule** - JWT guards, token service, role guards
@@ -178,6 +181,18 @@ Workflow представляется как направленный граф:
 - `/node-types/*` - получение типов узлов
 - `/credentials/*` - управление credentials
 - `/workflow-shares/*` - управление публичным доступом
+
+### WebSocket API
+
+- **Endpoint:** `ws://localhost:3000/executions`
+- **События:**
+  - `subscribe-execution` - подписка на обновления execution
+  - `unsubscribe-execution` - отписка от обновлений
+- **Broadcast сообщения:**
+  - `execution-update` - обновление статуса execution (running/success/failed)
+  - `node-log` - логи выполнения узлов в real-time
+- **Документация:** `backend/src/executions/gateways/README.md`
+- **Test Client:** `backend/src/executions/gateways/websocket-test.html`
 
 ## Реализованные типы узлов (11 типов)
 
