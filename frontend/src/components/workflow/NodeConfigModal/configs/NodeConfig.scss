@@ -44,6 +44,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .node-config__section {
@@ -59,13 +60,19 @@
 
   &--input {
     background-color: #212121;
-    flex: 1 1 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(50% + var(--params-offset, 0px) - 275px);
   }
 
   &--params {
-    flex: 0 0 var(--params-width, 550px);
-    min-width: var(--params-width, 550px);
-    max-width: var(--params-width, 550px);
+    position: absolute;
+    left: calc(50% + var(--params-offset, 0px) - 275px);
+    top: 0;
+    bottom: 0;
+    width: 550px;
     display: flex;
     flex-direction: column;
     background-color: #2B2B2B;
@@ -73,7 +80,11 @@
 
   &--output {
     background-color: #212121;
-    flex: 1 1 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(50% - var(--params-offset, 0px) - 275px);
   }
 }
 

@@ -16,22 +16,20 @@ export function ManualTriggerConfig({ config, onSave }: ManualTriggerConfigProps
 
   return (
     <ResizableNodeConfig hasInput={false} hasOutput={true}>
-      <div className="node-config__sections">
-        <div className="node-config__section node-config__section--params">
-          <h3 className="node-config__section-title">Параметры</h3>
-          
-          <div className="node-config__params-content">
-            <div className="node-config__info">
-              Manual Trigger не требует настройки. Нажмите кнопку "Запустить" для активации workflow.
-            </div>
+      <div className="node-config__section node-config__section--params">
+        <h3 className="node-config__section-title">Параметры</h3>
+        
+        <div className="node-config__params-content">
+          <div className="node-config__info">
+            Manual Trigger не требует настройки. Нажмите кнопку "Запустить" для активации workflow.
           </div>
         </div>
+      </div>
 
-        <div className="node-config__section node-config__section--output">
-          <h3 className="node-config__section-title">Выход</h3>
-          <div className="node-config__info">
-            Узел передаёт пустой объект данных следующим узлам в цепочке.
-          </div>
+      <div className="node-config__section node-config__section--output">
+        <h3 className="node-config__section-title">Выход</h3>
+        <div className="node-config__info">
+          Узел передаёт пустой объект данных следующим узлам в цепочке.
         </div>
       </div>
     </ResizableNodeConfig>

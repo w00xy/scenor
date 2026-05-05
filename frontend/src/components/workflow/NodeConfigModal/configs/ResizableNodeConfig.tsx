@@ -8,7 +8,8 @@ interface ResizableNodeConfigProps {
 }
 
 export function ResizableNodeConfig({ hasInput, hasOutput, children }: ResizableNodeConfigProps): JSX.Element {
-  const [paramsWidth, setParamsWidth] = useState(550);
+  // Смещение секции Параметров от левого края (в пикселях)
+  const [paramsOffset, setParamsOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -16,12 +17,13 @@ export function ResizableNodeConfig({ hasInput, hasOutput, children }: Resizable
     setIsDragging(true);
 
     const startX = e.clientX;
-    const startWidth = paramsWidth;
+    const startOffset = paramsOffset;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const newWidth = Math.max(300, Math.min(1200, startWidth + deltaX));
-      setParamsWidth(newWidth);
+      // Ограничиваем смещение: минимум -400px (влево), максимум +400px (вправо)
+      const newOffset = Math.max(-400, Math.min(400, startOffset + deltaX));
+      setParamsOffset(newOffset);
     };
 
     const handleMouseUp = () => {
@@ -42,12 +44,12 @@ export function ResizableNodeConfig({ hasInput, hasOutput, children }: Resizable
         <div 
           className={`node-config__resizer ${isDragging ? 'node-config__resizer--dragging' : ''}`}
           onMouseDown={handleMouseDown}
-          style={{ left: `calc(50% - ${paramsWidth / 2}px)` }}
+          style={{ left: `calc(50% + ${paramsOffset}px)` }}
         >
           <div className="node-config__resizer-handle"></div>
         </div>
       )}
-      <div className="node-config__sections" style={{ '--params-width': `${paramsWidth}px` } as React.CSSProperties}>
+      <div className="node-config__sections" style={{ '--params-offset': `${paramsOffset}px` } as React.CSSProperties}>
         {children}
       </div>
     </div>
