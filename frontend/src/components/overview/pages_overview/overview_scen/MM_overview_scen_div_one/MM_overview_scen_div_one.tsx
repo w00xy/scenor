@@ -1,6 +1,6 @@
 import React from "react";
 import { JSX } from "react";
-import MM_SearchSVG from "../../../../../assets/MM_SearchSVG.svg?react";
+import MM_SearchSVG from "../../../../../assets/common/Search.svg?react";
 import "./MM_overview_scen_div_one.scss";
 
 interface MM_overview_scen_div_oneProps {

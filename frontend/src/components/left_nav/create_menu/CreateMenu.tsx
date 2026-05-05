@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjects } from "../../../context/ProjectsContext";
-import VectorTwoIcon from "../../../assets/MM_Vectors-pages/Vector_Two.svg?react";
+import VectorTwoIcon from "../../../assets/navigation/VectorTwo.svg?react";
 import { CreateMenuItem } from "./CreateMenuItem";
 import { CreateSubMenu } from "./CreateSubMenu";
 import "./CreateMenu.scss";

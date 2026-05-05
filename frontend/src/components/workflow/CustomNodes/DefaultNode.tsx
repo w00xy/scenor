@@ -1,8 +1,9 @@
 import { JSX, memo } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import PlaySVG from "../../../assets/PlaySVG.svg?react";
-import TrashSVG from "../../../assets/TrashSVG.svg?react";
-import MMDotsSVG from "../../../assets/MM_DotsSVG.svg?react";
+import PlaySVG from "../../../assets/common/Play.svg?react";
+import TrashSVG from "../../../assets/common/Trash.svg?react";
+import MMDotsSVG from "../../../assets/common/Dots.svg?react";
+import { nodeIconMap, nodeDisplayNames } from "../nodeIconMap";
 import "./DefaultNode.scss";
 
 export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element => {
@@ -20,6 +21,10 @@ export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element
   const handleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+
+  const nodeType = data?.typeCode || data?.type || "";
+  const NodeIcon = nodeIconMap[nodeType];
+  const displayName = nodeDisplayNames[nodeType] || data.label || "Node";
 
   return (
     <div className={`default-node ${selected ? 'selected' : ''}`}>
@@ -41,7 +46,15 @@ export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element
       )}
       
       <div className="default-node__content">
-        {data.label || "Node"}
+        {NodeIcon && (
+          <div className="default-node__icon">
+            <NodeIcon />
+          </div>
+        )}
+      </div>
+      
+      <div className="default-node__label">
+        {displayName}
       </div>
     </div>
   );

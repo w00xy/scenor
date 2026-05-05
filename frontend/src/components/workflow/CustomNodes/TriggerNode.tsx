@@ -1,8 +1,9 @@
 import { JSX, memo } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
-import PlaySVG from "../../../assets/PlaySVG.svg?react";
-import TrashSVG from "../../../assets/TrashSVG.svg?react";
-import MMDotsSVG from "../../../assets/MM_DotsSVG.svg?react";
+import PlaySVG from "../../../assets/common/Play.svg?react";
+import TrashSVG from "../../../assets/common/Trash.svg?react";
+import MMDotsSVG from "../../../assets/common/Dots.svg?react";
+import { nodeIconMap, nodeDisplayNames } from "../nodeIconMap";
 import "./TriggerNode.scss";
 
 export const TriggerNode = memo(({ data, selected, id }: NodeProps): JSX.Element => {
@@ -25,6 +26,9 @@ export const TriggerNode = memo(({ data, selected, id }: NodeProps): JSX.Element
   };
 
   const isTriggered = data?.isTriggered || false;
+  const nodeType = data?.typeCode || data?.type || "";
+  const NodeIcon = nodeIconMap[nodeType];
+  const displayName = nodeDisplayNames[nodeType] || data.label || "Trigger";
 
   return (
     <div className={`trigger-node ${selected ? 'selected' : ''} ${isTriggered ? 'triggered' : ''}`}>
@@ -45,7 +49,15 @@ export const TriggerNode = memo(({ data, selected, id }: NodeProps): JSX.Element
       )}
       
       <div className="trigger-node__content">
-        {data.label || "Trigger"}
+        {NodeIcon && (
+          <div className="trigger-node__icon">
+            <NodeIcon />
+          </div>
+        )}
+      </div>
+      
+      <div className="trigger-node__label">
+        {displayName}
       </div>
     </div>
   );

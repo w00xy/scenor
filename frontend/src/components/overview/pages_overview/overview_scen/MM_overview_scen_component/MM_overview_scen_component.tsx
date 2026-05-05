@@ -1,7 +1,7 @@
 import { JSX, useState, useRef } from "react";
 import "./MM_overview_scen_component.scss";
-import MM_DotsSVG from "../../../../../assets/MM_DotsSVG.svg?react";
-import PersonalGray from "../../../../../assets/Personal_gray.svg?react";
+import MM_DotsSVG from "../../../../../assets/common/Dots.svg?react";
+import PersonalGray from "../../../../../assets/navigation/PersonalGray.svg?react";
 import { WorkflowActionsMenu } from "./WorkflowActionsMenu";
 
 interface MM_overview_scen_componentProps {

@@ -4,7 +4,7 @@ import { ModeName } from "../../../../auth_reg/ModeName/ModeName";
 import { ARButton } from "../../../../auth_reg/ARButton/ARButton";
 import { Input } from "../../../../auth_reg/Input/Input";
 import { useState } from "react";
-import CloseSVG from "../../../../../assets/MM_Vectors-pages/Close.svg?react";
+import CloseSVG from "../../../../../assets/common/Close.svg?react";
 
 interface ConfirmPasswordModalProps {
   onClose: () => void;

@@ -5,8 +5,8 @@ import { useMenu } from "../../../context/MenuContext";
 import { CreateMenu } from "../create_menu/CreateMenu";
 
 import Logo from "../../../assets/logo.svg?react";
-import PlusSVG from "../../../assets/MM_Vectors-pages/Plus.svg?react";
-import Decrease from "../../../assets/decrease.svg?react";
+import PlusSVG from "../../../assets/common/Plus.svg?react";
+import Decrease from "../../../assets/common/Decrease.svg?react";
 
 export function LNTDiv(): JSX.Element {
   const { collapsed, toggleMenu } = useMenu();

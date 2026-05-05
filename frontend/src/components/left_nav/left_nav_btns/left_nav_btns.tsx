@@ -5,10 +5,10 @@ import "./left_nav_btns.scss";
 import { LNBtn } from "./left_nav_btn/left_nav_btn";
 import { SettingsMenu } from "../sidebar_settings_menu/SettingsMenu";
 
-import LockSVG from "../../../assets/MM_Vectors-pages/Lock.svg?react";
-import SettingSVG from "../../../assets/Settings.svg?react";
-import TemplateSVG from "../../../assets/Templates.svg?react";
-import ReviewSVG from "../../../assets/Review.svg?react";
+import LockSVG from "../../../assets/navigation/Lock.svg?react";
+import SettingSVG from "../../../assets/settings/Settings.svg?react";
+import TemplateSVG from "../../../assets/navigation/Templates.svg?react";
+import ReviewSVG from "../../../assets/navigation/Review.svg?react";
 
 export function LNav(): JSX.Element {
   const { collapsed } = useMenu();

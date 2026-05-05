@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../../context/CurrentUserContext";
 import { useProjects } from "../../../context/ProjectsContext";
 import { clearTokens } from "../../../services/api";
-import ProfileIcon from "../../../assets/settings_sidebar/Profile.svg?react";
-import OpenDoorIcon from "../../../assets/settings_sidebar/OpenDoor.svg?react";
+import ProfileIcon from "../../../assets/settings/Profile.svg?react";
+import OpenDoorIcon from "../../../assets/settings/OpenDoor.svg?react";
 import "./SettingsMenu.scss";
 
 interface SettingsMenuProps {

@@ -1,8 +1,8 @@
 import {JSX} from "react"
 import "./MM_overview_scen_div_two.scss"
 
-import VectorOne from "../../../../../assets/MM_Vectors-pages/Vector_One.svg?react"
-import VectorTwo from "../../../../../assets/MM_Vectors-pages/Vector_Two.svg?react"
+import VectorOne from "../../../../../assets/navigation/VectorOne.svg?react"
+import VectorTwo from "../../../../../assets/navigation/VectorTwo.svg?react"
 
 
 interface MM_overview_scen_div_twoProps{

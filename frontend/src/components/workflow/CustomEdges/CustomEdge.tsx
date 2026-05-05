@@ -5,7 +5,7 @@ import {
   EdgeProps,
   getBezierPath,
 } from "reactflow";
-import TrashSVG from "../../../assets/TrashSVG.svg?react";
+import TrashSVG from "../../../assets/common/Trash.svg?react";
 import "./CustomEdge.scss";
 
 export function CustomEdge({

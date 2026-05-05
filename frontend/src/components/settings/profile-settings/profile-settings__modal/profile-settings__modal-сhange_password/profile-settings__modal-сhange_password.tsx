@@ -6,7 +6,7 @@ import { Input } from "../../../../../components/auth_reg/Input/Input";
 import { FieldSpacer } from "../../../../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useState } from "react";
 import { useFieldFeedbackContext } from "../../../../../context/FieldFeedbackContext";
-import CloseSVG from "../../../../../assets/MM_Vectors-pages/Close.svg?react";
+import CloseSVG from "../../../../../assets/common/Close.svg?react";
 import { userApi } from "../../../../../services/api";
 
 interface ChangePasswordModalProps {

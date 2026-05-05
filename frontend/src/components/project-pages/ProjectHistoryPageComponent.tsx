@@ -2,6 +2,7 @@ import { JSX, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { HistoryTableRow } from "./HistoryTableRow";
 import { workflowApi } from "../../services/api";
+import MM_DotsSVG from "../../assets/common/Dots.svg?react";
 import "./ProjectHistoryPageComponent.scss";
 
 interface Execution {
@@ -27,6 +28,9 @@ export function ProjectHistoryPageComponent(): JSX.Element {
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [workflows, setWorkflows] = useState<Map<string, Workflow>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedExecutions, setSelectedExecutions] = useState<Set<string>>(new Set());
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const [headerMenuPosition, setHeaderMenuPosition] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const loadExecutions = async () => {
@@ -111,6 +115,53 @@ export function ProjectHistoryPageComponent(): JSX.Element {
     }
   };
 
+  const handleSelectAll = () => {
+    if (selectedExecutions.size === executions.length) {
+      setSelectedExecutions(new Set());
+    } else {
+      setSelectedExecutions(new Set(executions.map(e => e.id)));
+    }
+  };
+
+  const handleSelectExecution = (executionId: string) => {
+    const newSelected = new Set(selectedExecutions);
+    if (newSelected.has(executionId)) {
+      newSelected.delete(executionId);
+    } else {
+      newSelected.add(executionId);
+    }
+    setSelectedExecutions(newSelected);
+  };
+
+  const handleHeaderDotsClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    setHeaderMenuPosition({
+      top: rect.bottom + 4,
+      left: rect.right - 150,
+    });
+    setShowHeaderMenu(!showHeaderMenu);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedExecutions.size === 0) return;
+    
+    if (!confirm(`Вы уверены, что хотите удалить ${selectedExecutions.size} выполнений?`)) {
+      return;
+    }
+
+    try {
+      console.log("Deleting executions:", Array.from(selectedExecutions));
+      
+      setExecutions(executions.filter(e => !selectedExecutions.has(e.id)));
+      setSelectedExecutions(new Set());
+      setShowHeaderMenu(false);
+    } catch (error) {
+      console.error("Failed to delete executions:", error);
+      alert("Не удалось удалить выполнения");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="history-table">
@@ -125,7 +176,12 @@ export function ProjectHistoryPageComponent(): JSX.Element {
         <thead>
           <tr className="history-table__header-row">
             <th>
-              <input type="checkbox" className="history-table__checkbox" />
+              <input 
+                type="checkbox" 
+                className="history-table__checkbox"
+                checked={selectedExecutions.size === executions.length && executions.length > 0}
+                onChange={handleSelectAll}
+              />
             </th>
             <th>Сценарий</th>
             <th>Статус</th>
@@ -133,7 +189,14 @@ export function ProjectHistoryPageComponent(): JSX.Element {
             <th>Время выполнения</th>
             <th>Exec. id</th>
             <th>Способ</th>
-            <th></th>
+            <th>
+              <div 
+                className="history-table__header-dots"
+                onClick={handleHeaderDotsClick}
+              >
+                <MM_DotsSVG />
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -147,17 +210,42 @@ export function ProjectHistoryPageComponent(): JSX.Element {
             executions.map((execution) => (
               <HistoryTableRow
                 key={execution.id}
+                executionId={execution.id}
                 scenarioName={workflows.get(execution.workflowId)?.name || "Неизвестный сценарий"}
                 status={getStatusText(execution.status)}
                 startTime={formatDate(execution.startedAt)}
                 executionTime={calculateDuration(execution.startedAt, execution.finishedAt)}
                 execId={execution.id.slice(0, 8)}
                 method={getTriggerTypeText(execution.triggerType)}
+                isSelected={selectedExecutions.has(execution.id)}
+                onSelect={() => handleSelectExecution(execution.id)}
               />
             ))
           )}
         </tbody>
       </table>
+
+      {showHeaderMenu && (
+        <div 
+          className="history-table__header-menu"
+          style={{ top: `${headerMenuPosition.top}px`, left: `${headerMenuPosition.left}px` }}
+        >
+          <button 
+            className="history-table__menu-item"
+            onClick={handleDeleteSelected}
+            disabled={selectedExecutions.size === 0}
+          >
+            Удалить выбранные ({selectedExecutions.size})
+          </button>
+        </div>
+      )}
+
+      {showHeaderMenu && (
+        <div 
+          className="history-table__overlay"
+          onClick={() => setShowHeaderMenu(false)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { nodeIconMap, nodeDisplayNames } from "../nodeIconMap";
 import "./NodesPalette.scss";
 
 interface NodeType {
@@ -51,21 +52,28 @@ export function NodesPalette({ onAddNode }: NodesPaletteProps): JSX.Element {
             <div className="nodes-palette__nodes">
               {nodeTypes
                 .filter((node) => node.category === category)
-                .map((node) => (
-                  <button
-                    key={node.code}
-                    className="nodes-palette__node-button"
-                    onClick={() => onAddNode(node.code)}
-                    title={node.displayName}
-                  >
-                    <span className="nodes-palette__node-icon">
-                      {node.icon || "📦"}
-                    </span>
-                    <span className="nodes-palette__node-name">
-                      {node.displayName}
-                    </span>
-                  </button>
-                ))}
+                .map((node) => {
+                  const NodeIcon = nodeIconMap[node.code];
+                  const displayName = nodeDisplayNames[node.code] || node.displayName;
+                  
+                  return (
+                    <button
+                      key={node.code}
+                      className="nodes-palette__node-button"
+                      onClick={() => onAddNode(node.code)}
+                      title={displayName}
+                    >
+                      {NodeIcon && (
+                        <span className="nodes-palette__node-icon">
+                          <NodeIcon />
+                        </span>
+                      )}
+                      <span className="nodes-palette__node-name">
+                        {displayName}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         ))}

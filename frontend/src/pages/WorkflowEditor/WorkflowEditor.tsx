@@ -12,8 +12,8 @@ import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
 import { Node, Edge } from "reactflow";
-import PlusSVG from "../../assets/MM_Vectors-pages/Plus.svg?react";
-import MM_DotsSVG from "../../assets/MM_DotsSVG.svg?react";
+import PlusSVG from "../../assets/common/Plus.svg?react";
+import MM_DotsSVG from "../../assets/common/Dots.svg?react";
 import "./WorkflowEditor.scss";
 
 export function WorkflowEditor(): JSX.Element {
