@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execution WebSocket Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button.primary {
+            background: #007bff;
+            color: white;
+        }
+        button.primary:hover {
+            background: #0056b3;
+        }
+        button.success {
+            background: #28a745;
+            color: white;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        button.danger {
+            background: #dc3545;
+            color: white;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+        button.secondary:hover {
+            background: #5a6268;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .log-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border-left: 4px solid;
+        }
+        .log-entry.info {
+            background: #e7f3ff;
+            border-left-color: #007bff;
+        }
+        .log-entry.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .log-entry.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .log-entry.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .timestamp {
+            color: #6c757d;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+        .message-type {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        pre {
+            margin: 5px 0 0 0;
+            padding: 8px;
+            background: white;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔌 Execution WebSocket Test Client</h1>
+    
+    <div class="container">
+        <h2>Authentication</h2>
+        <div class="controls">
+            <input type="text" id="apiUrl" value="http://localhost:3000" placeholder="API URL">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button class="primary" onclick="login()">Login</button>
+        </div>
+        <div id="tokenInfo" style="margin-top: 10px; font-size: 12px; color: #6c757d;"></div>
+    </div>
+
+    <div class="container">
+        <h2>Connection</h2>
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div class="controls">
+            <input type="text" id="wsUrl" value="ws://localhost:3000/executions" placeholder="WebSocket URL">
+            <input type="text" id="token" placeholder="JWT Token (or login above)">
+            <button class="primary" onclick="connect()">Connect</button>
+            <button class="danger" onclick="disconnect()">Disconnect</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Subscription</h2>
+        <div class="controls">
+            <input type="text" id="executionId" placeholder="Execution ID (e.g., cm5x1y2z3...)">
+            <button class="success" onclick="subscribe()">Subscribe</button>
+            <button class="secondary" onclick="unsubscribe()">Unsubscribe</button>
+            <button class="secondary" onclick="sendPing()">Send Ping</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Statistics</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="messagesReceived">0</div>
+                <div class="stat-label">Messages Received</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="executionUpdates">0</div>
+                <div class="stat-label">Execution Updates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nodeLogs">0</div>
+                <div class="stat-label">Node Logs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="errors">0</div>
+                <div class="stat-label">Errors</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Message Log</h2>
+        <button class="secondary" onclick="clearLog()" style="margin-bottom: 10px;">Clear Log</button>
+        <div id="log" class="log-container"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        let accessToken = null;
+        let stats = {
+            messagesReceived: 0,
+            executionUpdates: 0,
+            nodeLogs: 0,
+            errors: 0
+        };
+
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+
+        function updateStats() {
+            document.getElementById('messagesReceived').textContent = stats.messagesReceived;
+            document.getElementById('executionUpdates').textContent = stats.executionUpdates;
+            document.getElementById('nodeLogs').textContent = stats.nodeLogs;
+            document.getElementById('errors').textContent = stats.errors;
+        }
+
+        function addLog(message, type = 'info', data = null) {
+            const logEl = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, fractionalSecondDigits: 3 });
+            
+            let html = `<span class="timestamp">[${timestamp}]</span>`;
+            html += `<span class="message-type">${type.toUpperCase()}</span>`;
+            html += message;
+            
+            if (data) {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            entry.innerHTML = html;
+            logEl.insertBefore(entry, logEl.firstChild);
+            
+            // Keep only last 100 entries
+            while (logEl.children.length > 100) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+
+        async function login() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                addLog('Please enter username and password', 'error');
+                return;
+            }
+
+            try {
+                addLog('Logging in...', 'info');
+                const response = await fetch(`${apiUrl}/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Login failed');
+                }
+
+                const data = await response.json();
+                accessToken = data.accessToken;
+                document.getElementById('token').value = accessToken;
+                document.getElementById('tokenInfo').textContent = `✓ Logged in as ${username}`;
+                document.getElementById('tokenInfo').style.color = '#28a745';
+                addLog(`Login successful! Token obtained.`, 'success');
+            } catch (error) {
+                addLog(`Login failed: ${error.message}`, 'error');
+                document.getElementById('tokenInfo').textContent = `✗ Login failed`;
+                document.getElementById('tokenInfo').style.color = '#dc3545';
+            }
+        }
+
+        function connect() {
+            const url = document.getElementById('wsUrl').value;
+            const token = document.getElementById('token').value || accessToken;
+            
+            if (!token) {
+                addLog('Please login first or provide a JWT token', 'error');
+                return;
+            }
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                addLog('Already connected', 'warning');
+                return;
+            }
+
+            updateStatus('Connecting...', 'connecting');
+            addLog(`Connecting to ${url}...`, 'info');
+
+            try {
+                // Add token as query parameter
+                const wsUrlWithToken = `${url}?token=${encodeURIComponent(token)}`;
+                ws = new WebSocket(wsUrlWithToken);
+
+                ws.onopen = () => {
+                    updateStatus('Connected', 'connected');
+                    addLog('WebSocket connection established', 'success');
+                };
+
+                ws.onmessage = (event) => {
+                    stats.messagesReceived++;
+                    
+                    try {
+                        const message = JSON.parse(event.data);
+                        
+                        switch (message.type) {
+                            case 'connected':
+                                addLog(`Connected! User ID: ${message.userId}`, 'success', message);
+                                break;
+
+                            case 'subscribed':
+                                addLog(`Subscribed to execution: ${message.executionId}`, 'success', message);
+                                break;
+
+                            case 'unsubscribed':
+                                addLog(`Unsubscribed from execution: ${message.executionId}`, 'info', message);
+                                break;
+                                
+                            case 'execution-update':
+                                stats.executionUpdates++;
+                                addLog(`Execution Update: ${message.data.status}`, 'info', message);
+                                break;
+                                
+                            case 'node-log':
+                                stats.nodeLogs++;
+                                const nodeStatus = message.nodeLog.status;
+                                const logType = nodeStatus === 'failed' ? 'error' : 
+                                               nodeStatus === 'success' ? 'success' : 'info';
+                                addLog(`Node Log: ${nodeStatus} (Node: ${message.nodeLog.nodeId})`, logType, message);
+                                break;
+
+                            case 'pong':
+                                addLog(`Pong received (latency: ${Date.now() - message.timestamp}ms)`, 'info');
+                                break;
+
+                            case 'error':
+                                stats.errors++;
+                                addLog(`Server Error: ${message.message}`, 'error', message);
+                                break;
+                                
+                            default:
+                                addLog(`Unknown message type: ${message.type}`, 'warning', message);
+                        }
+                        
+                        updateStats();
+                    } catch (error) {
+                        stats.errors++;
+                        addLog(`Failed to parse message: ${error.message}`, 'error', { raw: event.data });
+                        updateStats();
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    stats.errors++;
+                    addLog('WebSocket error occurred', 'error', error);
+                    updateStats();
+                };
+
+                ws.onclose = (event) => {
+                    updateStatus('Disconnected', 'disconnected');
+                    addLog(`WebSocket connection closed (code: ${event.code}, reason: ${event.reason || 'none'})`, 'warning');
+                    ws = null;
+                };
+            } catch (error) {
+                stats.errors++;
+                updateStatus('Error', 'disconnected');
+                addLog(`Connection error: ${error.message}`, 'error');
+                updateStats();
+            }
+        }
+
+        function disconnect() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('Not connected', 'warning');
+                return;
+            }
+
+            ws.close();
+            addLog('Disconnecting...', 'info');
+        }
+
+        function subscribe() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('Not connected. Please connect first.', 'error');
+                return;
+            }
+
+            const executionId = document.getElementById('executionId').value.trim();
+            
+            if (!executionId) {
+                addLog('Please enter an execution ID', 'error');
+                return;
+            }
+
+            const message = {
+                event: 'subscribe-execution',
+                data: { executionId }
+            };
+
+            ws.send(JSON.stringify(message));
+            addLog(`Subscribing to execution: ${executionId}`, 'info', message);
+        }
+
+        function unsubscribe() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('Not connected', 'error');
+                return;
+            }
+
+            const executionId = document.getElementById('executionId').value.trim();
+            
+            if (!executionId) {
+                addLog('Please enter an execution ID', 'error');
+                return;
+            }
+
+            const message = {
+                event: 'unsubscribe-execution',
+                data: { executionId }
+            };
+
+            ws.send(JSON.stringify(message));
+            addLog(`Unsubscribing from execution: ${executionId}`, 'info', message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            addLog('Log cleared', 'info');
+        }
+
+        function sendPing() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('Not connected', 'error');
+                return;
+            }
+
+            const message = {
+                event: 'ping'
+            };
+
+            ws.send(JSON.stringify(message));
+            addLog('Ping sent', 'info');
+        }
+
+        // Initial log message
+        addLog('WebSocket test client ready. Login and connect to start.', 'info');
+    </script>
+</body>
+</html>

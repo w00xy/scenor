@@ -15,6 +15,7 @@ import {
   WorkflowNode,
 } from '@prisma/client';
 import { DatabaseService } from '../database/database.service.js';
+import { ExecutionGateway } from './gateways/execution.gateway.js';
 
 type NodeExecutionResult = {
   output: unknown;
@@ -28,7 +29,10 @@ type QueueItem = {
 
 @Injectable()
 export class ExecutionsService {
-  constructor(private readonly prisma: DatabaseService) {}
+  constructor(
+    private readonly prisma: DatabaseService,
+    private readonly executionGateway: ExecutionGateway,
+  ) {}
 
   async runManualWorkflow(
     userId: string,
@@ -49,6 +53,13 @@ export class ExecutionsService {
         startedAt: new Date(),
         inputDataJson: this.toNullablePrismaJson(inputDataJson ?? {}),
       },
+    });
+
+    // Broadcast execution started
+    this.executionGateway.broadcastExecutionUpdate(execution.id, {
+      status: execution.status,
+      startedAt: execution.startedAt,
+      workflowId: execution.workflowId,
     });
 
     try {
@@ -72,6 +83,14 @@ export class ExecutionsService {
         },
       });
 
+      // Broadcast execution completed successfully
+      this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        status: finishedExecution.status,
+        finishedAt: finishedExecution.finishedAt,
+        outputDataJson: finishedExecution.outputDataJson,
+        executedSteps: result.executedSteps,
+      });
+
       return finishedExecution;
     } catch (error) {
       const message =
@@ -84,6 +103,13 @@ export class ExecutionsService {
           finishedAt: new Date(),
           errorMessage: message,
         },
+      });
+
+      // Broadcast execution failed
+      this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        status: failedExecution.status,
+        finishedAt: failedExecution.finishedAt,
+        errorMessage: failedExecution.errorMessage,
       });
 
       return failedExecution;
@@ -234,7 +260,7 @@ export class ExecutionsService {
       }
 
       if (node.isDisabled) {
-        await this.prisma.executionNodeLog.create({
+        const skippedLog = await this.prisma.executionNodeLog.create({
           data: {
             executionId,
             nodeId: node.id,
@@ -245,6 +271,9 @@ export class ExecutionsService {
             outputJson: this.toNullablePrismaJson(item.payload),
           },
         });
+
+        // Broadcast skipped node log
+        this.executionGateway.broadcastNodeLog(executionId, skippedLog);
 
         for (const edge of outgoingByNodeId.get(node.id) ?? []) {
           queue.push({
@@ -266,10 +295,13 @@ export class ExecutionsService {
         },
       });
 
+      // Broadcast node started
+      this.executionGateway.broadcastNodeLog(executionId, log);
+
       try {
         const result = await this.executeNode(node, item.payload, executionId);
 
-        await this.prisma.executionNodeLog.update({
+        const updatedLog = await this.prisma.executionNodeLog.update({
           where: { id: log.id },
           data: {
             status: NodeExecutionStatus.success,
@@ -277,6 +309,9 @@ export class ExecutionsService {
             outputJson: this.toNullablePrismaJson(result.output),
           },
         });
+
+        // Broadcast node completed successfully
+        this.executionGateway.broadcastNodeLog(executionId, updatedLog);
 
         if (!outputs[node.id]) {
           outputs[node.id] = [];
@@ -296,7 +331,7 @@ export class ExecutionsService {
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Node execution failed';
 
-        await this.prisma.executionNodeLog.update({
+        const failedLog = await this.prisma.executionNodeLog.update({
           where: { id: log.id },
           data: {
             status: NodeExecutionStatus.failed,
@@ -304,6 +339,9 @@ export class ExecutionsService {
             errorMessage: message,
           },
         });
+
+        // Broadcast node failed
+        this.executionGateway.broadcastNodeLog(executionId, failedLog);
 
         throw error;
       }
@@ -712,6 +750,14 @@ export class ExecutionsService {
       },
     });
 
+    // Broadcast webhook execution started
+    this.executionGateway.broadcastExecutionUpdate(execution.id, {
+      status: execution.status,
+      startedAt: execution.startedAt,
+      workflowId: execution.workflowId,
+      triggerType: execution.triggerType,
+    });
+
     try {
       const result = await this.executeGraph(
         execution.id,
@@ -733,6 +779,14 @@ export class ExecutionsService {
         },
       });
 
+      // Broadcast webhook execution completed
+      this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        status: finishedExecution.status,
+        finishedAt: finishedExecution.finishedAt,
+        outputDataJson: finishedExecution.outputDataJson,
+        executedSteps: result.executedSteps,
+      });
+
       return finishedExecution;
     } catch (error) {
       const message =
@@ -745,6 +799,13 @@ export class ExecutionsService {
           finishedAt: new Date(),
           errorMessage: message,
         },
+      });
+
+      // Broadcast webhook execution failed
+      this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        status: failedExecution.status,
+        finishedAt: failedExecution.finishedAt,
+        errorMessage: failedExecution.errorMessage,
       });
 
       return failedExecution;
