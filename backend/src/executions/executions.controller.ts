@@ -52,6 +52,23 @@ export class ExecutionsController {
     );
   }
 
+  @Post('webhook/:webhookToken')
+  @ApiOperation({ summary: 'Запустить workflow через webhook' })
+  @ApiResponse({ status: 201, description: 'Workflow успешно запущен через webhook', type: ExecutionResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
+  @ApiResponse({ status: 404, description: 'Not Found - workflow или webhook не найден' })
+  async runWebhook(
+    @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
+    @Param('webhookToken') webhookToken: string,
+    @Body() data?: Record<string, unknown>,
+  ) {
+    return this.executionsService.runWebhookWorkflow(
+      workflowId,
+      webhookToken,
+      data ?? {},
+    );
+  }
+
   @Get()
   @ApiOperation({ summary: 'Получить список выполнений workflow' })
   @ApiResponse({ status: 200, description: 'Список выполнений успешно получен', type: ExecutionsListResponseDto })

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, ProjectMemberRole } from '@prisma/client';
+import { randomBytes } from 'crypto';
 import { DatabaseService } from '../database/database.service.js';
 import {
   CreateWorkflowDto,
@@ -161,9 +162,16 @@ export class WorkflowsService {
       data.credentialsId,
     );
 
-    const rawConfig =
+    let rawConfig =
       data.configJson ??
       ((nodeType.defaultConfigJson as Record<string, unknown>) ?? {});
+
+    // Generate webhook token for webhook_trigger nodes
+    if (normalizedType === 'webhook_trigger') {
+      const token = this.generateWebhookToken();
+      rawConfig = { ...rawConfig, token };
+    }
+
     const validatedConfig = validateNodeConfigByType(normalizedType, rawConfig);
 
     return this.prisma.workflowNode.create({
@@ -357,6 +365,10 @@ export class WorkflowsService {
     return this.prisma.workflowEdge.delete({
       where: { id: edgeId },
     });
+  }
+
+  private generateWebhookToken(): string {
+    return randomBytes(32).toString('hex');
   }
 
   private async resolveNodeType(type: string, nodeTypeId?: string) {

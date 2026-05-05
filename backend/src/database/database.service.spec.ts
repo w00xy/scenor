@@ -6,8 +6,8 @@ describe('DatabaseService', () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
 
   beforeEach(async () => {
-    process.env.DATABASE_URL =
-      'postgresql://postgres:postgres@localhost:5432/test_db';
+    // Mock DATABASE_URL for testing
+    process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [DatabaseService],
@@ -16,20 +16,16 @@ describe('DatabaseService', () => {
     service = module.get<DatabaseService>(DatabaseService);
   });
 
-  afterAll(() => {
-    process.env.DATABASE_URL = originalDatabaseUrl;
+  afterEach(() => {
+    delete process.env.DATABASE_URL;
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should connect', async () => {
-    const connectSpy = jest
-      .spyOn(service, '$connect')
-      .mockResolvedValue(undefined);
-
-    await expect(service.$connect()).resolves.toBeUndefined();
-    expect(connectSpy).toHaveBeenCalledTimes(1);
+  it('should have prisma client', () => {
+    expect(service).toHaveProperty('$connect');
+    expect(service).toHaveProperty('$disconnect');
   });
 });
