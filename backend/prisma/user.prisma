@@ -7,12 +7,13 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  projects          Project[]           @relation("ProjectOwner")
-  memberships       ProjectMember[]     @relation("ProjectMemberUser")
-  invitedMembers    ProjectMember[]     @relation("ProjectMemberInvitedBy")
-  createdWorkflows  Workflow[]          @relation("WorkflowCreator")
-  workflowShares    WorkflowShare[]     @relation("WorkflowShareCreatedBy")
-  startedExecutions WorkflowExecution[] @relation("ExecutionStartedBy")
+  projects          Project[]                @relation("ProjectOwner")
+  memberships       ProjectMember[]          @relation("ProjectMemberUser")
+  invitedMembers    ProjectMember[]          @relation("ProjectMemberInvitedBy")
+  createdWorkflows  Workflow[]               @relation("WorkflowCreator")
+  workflowShares    WorkflowShare[]          @relation("WorkflowShareCreatedBy")
+  startedExecutions WorkflowExecution[]      @relation("ExecutionStartedBy")
+  deletionAudits    ExecutionDeletionAudit[] @relation("ExecutionDeletionAuditDeletedBy")
 
   profile UserProfile?
 
