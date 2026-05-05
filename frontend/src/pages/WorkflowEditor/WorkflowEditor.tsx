@@ -8,6 +8,7 @@ import { FlowCanvas } from "../../components/workflow/FlowCanvas/FlowCanvas";
 import { NodesPalette } from "../../components/workflow/NodesPalette/NodesPalette";
 import { WorkflowActionsMenu } from "../../components/overview/pages_overview/overview_scen/MM_overview_scen_component/WorkflowActionsMenu";
 import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/BottomLogsPanel";
+import { NodeConfigWrapper } from "../../components/workflow/NodeConfigModal/configs/NodeConfigWrapper";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
@@ -49,6 +50,66 @@ export function WorkflowEditor(): JSX.Element {
   });
 
   const [logsPanelHeight, setLogsPanelHeight] = useState(40);
+
+  const [configModal, setConfigModal] = useState<{
+    isOpen: boolean;
+    nodeId: string | null;
+    nodeType: string | null;
+    nodeData: any;
+  }>({
+    isOpen: false,
+    nodeId: null,
+    nodeType: null,
+    nodeData: null,
+  });
+
+  const handleNodeDoubleClick = useCallback((nodeId: string) => {
+    console.log('Double click on node:', nodeId);
+    setNodes((currentNodes) => {
+      const node = currentNodes.find(n => n.id === nodeId);
+      console.log('Found node:', node);
+      if (node) {
+        console.log('Opening modal for node type:', node.data.typeCode);
+        setConfigModal({
+          isOpen: true,
+          nodeId: nodeId,
+          nodeType: node.data.typeCode,
+          nodeData: node.data,
+        });
+      }
+      return currentNodes;
+    });
+  }, []);
+
+  const handleCloseConfigModal = useCallback(() => {
+    setConfigModal({
+      isOpen: false,
+      nodeId: null,
+      nodeType: null,
+      nodeData: null,
+    });
+  }, []);
+
+  const handleSaveNodeConfig = useCallback(async (nodeId: string, config: any) => {
+    if (!workflowId) return;
+
+    try {
+      await workflowApi.updateNode(workflowId, nodeId, {
+        configJson: config,
+      });
+
+      setNodes((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, configJson: config } }
+            : node
+        )
+      );
+    } catch (error) {
+      console.error("Failed to save node config:", error);
+      alert("Не удалось сохранить конфигурацию узла");
+    }
+  }, [workflowId]);
 
   const handleDeleteNode = useCallback(async (nodeId: string) => {
     if (!workflowId) return;
@@ -108,6 +169,7 @@ export function WorkflowEditor(): JSX.Element {
                 configJson: node.configJson,
                 onDelete: handleDeleteNode,
                 onPlay: isTriggerNode ? handleRunWorkflow : undefined,
+                onDoubleClick: handleNodeDoubleClick,
               },
             };
           });
@@ -120,6 +182,9 @@ export function WorkflowEditor(): JSX.Element {
             targetHandle: edge.targetHandle || undefined,
             label: edge.label || undefined,
             animated: true,
+            data: {
+              isExecuted: false,
+            },
           }));
 
           setNodes(flowNodes);
@@ -260,6 +325,7 @@ export function WorkflowEditor(): JSX.Element {
           configJson: createdNode.configJson,
           onDelete: handleDeleteNode,
           onPlay: isTriggerNode ? handleRunWorkflow : undefined,
+          onDoubleClick: handleNodeDoubleClick,
         },
       };
 
@@ -307,7 +373,7 @@ export function WorkflowEditor(): JSX.Element {
     setShowActionsMenu(false);
   };
 
-  const handleRunWorkflow = async () => {
+  const handleRunWorkflow = useCallback(async () => {
     if (!workflowId) return;
 
     try {
@@ -328,9 +394,13 @@ export function WorkflowEditor(): JSX.Element {
         node.data.typeCode === 'manual_trigger'
       );
 
-      // Находим все edges, которые исходят из выполненных узлов
+      // Находим все edges, которые соединяют выполненные узлы
+      // (связь подсвечивается только если оба узла выполнились)
       const executedEdgeIds = edges
-        .filter(edge => executedNodeIds.includes(edge.source))
+        .filter(edge => 
+          executedNodeIds.includes(edge.source) && 
+          executedNodeIds.includes(edge.target)
+        )
         .map(edge => edge.id);
 
       setExecutionState({
@@ -358,7 +428,7 @@ export function WorkflowEditor(): JSX.Element {
         lastExecutionId: null,
       });
     }
-  };
+  }, [workflowId, nodes, edges]);
 
   const handleDeleteEdge = useCallback(async (edgeId: string) => {
     setEdges((prevEdges) => {
@@ -521,6 +591,15 @@ export function WorkflowEditor(): JSX.Element {
             />
           </div>
         </div>
+
+        <NodeConfigWrapper
+          isOpen={configModal.isOpen}
+          nodeId={configModal.nodeId || ""}
+          nodeType={configModal.nodeType || ""}
+          nodeData={configModal.nodeData}
+          onClose={handleCloseConfigModal}
+          onSave={handleSaveNodeConfig}
+        />
       </div>
     </div>
   );

@@ -22,12 +22,25 @@ export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element
     e.stopPropagation();
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('DefaultNode double click:', id, 'has handler:', !!data?.onDoubleClick);
+    if (data?.onDoubleClick) {
+      data.onDoubleClick(id);
+    } else {
+      console.warn('No onDoubleClick handler in node data');
+    }
+  };
+
   const nodeType = data?.typeCode || data?.type || "";
   const NodeIcon = nodeIconMap[nodeType];
   const displayName = nodeDisplayNames[nodeType] || data.label || "Node";
 
   return (
-    <div className={`default-node ${selected ? 'selected' : ''}`}>
+    <div 
+      className={`default-node ${selected ? 'selected' : ''}`}
+      onDoubleClick={handleDoubleClick}
+    >
       <Handle type="target" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />
       

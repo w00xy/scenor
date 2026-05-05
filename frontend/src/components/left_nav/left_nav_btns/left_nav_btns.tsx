@@ -6,6 +6,7 @@ import { LNBtn } from "./left_nav_btn/left_nav_btn";
 import { SettingsMenu } from "../sidebar_settings_menu/SettingsMenu";
 
 import LockSVG from "../../../assets/navigation/Lock.svg?react";
+import ProjectSVG from "../../../assets/navigation/Project.svg?react";
 import SettingSVG from "../../../assets/settings/Settings.svg?react";
 import TemplateSVG from "../../../assets/navigation/Templates.svg?react";
 import ReviewSVG from "../../../assets/navigation/Review.svg?react";
@@ -37,7 +38,7 @@ export function LNav(): JSX.Element {
               .map((project) => (
                 <LNBtn
                   key={project.id}
-                  icon={<LockSVG />}
+                  icon={<ProjectSVG />}
                   text={project.name}
                   to={`/projects/${project.id}`}
                 />

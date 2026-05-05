@@ -25,13 +25,26 @@ export const TriggerNode = memo(({ data, selected, id }: NodeProps): JSX.Element
     e.stopPropagation();
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log('TriggerNode double click:', id, 'has handler:', !!data?.onDoubleClick);
+    if (data?.onDoubleClick) {
+      data.onDoubleClick(id);
+    } else {
+      console.warn('No onDoubleClick handler in node data');
+    }
+  };
+
   const isTriggered = data?.isTriggered || false;
   const nodeType = data?.typeCode || data?.type || "";
   const NodeIcon = nodeIconMap[nodeType];
   const displayName = nodeDisplayNames[nodeType] || data.label || "Trigger";
 
   return (
-    <div className={`trigger-node ${selected ? 'selected' : ''} ${isTriggered ? 'triggered' : ''}`}>
+    <div 
+      className={`trigger-node ${selected ? 'selected' : ''} ${isTriggered ? 'triggered' : ''}`}
+      onDoubleClick={handleDoubleClick}
+    >
       <Handle type="source" position={Position.Right} id="right" />
       
       {selected && (

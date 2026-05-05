@@ -1,0 +1,99 @@
+@import '../../../styles/variables/variables';
+
+.node-config-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.node-config-modal {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  width: 98vw;
+  height: 96vh;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid #444;
+}
+
+.node-config-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  height: 50px;
+  border-bottom: 1px solid #444;
+  flex-shrink: 0;
+  background-color: #2B2B2B;
+}
+
+.node-config-modal__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.node-config-modal__icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.node-config-modal__title {
+  font-family: $font-family;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.node-config-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: #999;
+  }
+
+  &:hover {
+    background-color: #2a2a2a;
+
+    svg {
+      fill: #fff;
+    }
+  }
+}
+
+.node-config-modal__content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}

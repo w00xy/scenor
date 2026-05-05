@@ -49,7 +49,7 @@ export function CustomEdge({
   const handleMouseLeave = () => {
     hideTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 1000);
+    }, 500);
   };
 
   useEffect(() => {

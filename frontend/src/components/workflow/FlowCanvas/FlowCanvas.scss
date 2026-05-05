@@ -11,6 +11,9 @@
     background: transparent;
     border: none;
     padding: 0;
+    overflow: visible;
+    width: fit-content !important;
+    height: fit-content !important;
 
     &:focus,
     &:focus-visible,
@@ -23,6 +26,9 @@
   .react-flow__node-triggerNode {
     outline: none !important;
     box-shadow: none !important;
+    overflow: visible;
+    width: fit-content !important;
+    height: fit-content !important;
 
     &:focus,
     &:focus-visible {

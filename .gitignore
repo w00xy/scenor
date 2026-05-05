@@ -6,6 +6,7 @@
 .playwright
 .kilo
 .claude
+CONTEXT.md
 
 # Git internals and tooling
 *.log
@@ -29,6 +30,7 @@ backend/generated/prisma/
 frontend/dist/
 frontend/build/
 frontend/coverage/
+frontend/Итог/
 
 # Env files
 backend/.env

@@ -194,11 +194,12 @@ export function FlowCanvas({
         data: {
           ...edge.data,
           isExecuted: executedEdges.includes(edge.id),
+          onDelete: edge.data?.onDelete || handleDeleteEdge,
         },
         className: executedEdges.includes(edge.id) ? 'executed' : '',
       }))
     );
-  }, [executionState, setEdges]);
+  }, [executionState, setEdges, handleDeleteEdge]);
 
   const isInitialMount = useRef(true);
   useEffect(() => {
@@ -232,7 +233,10 @@ export function FlowCanvas({
           sourceHandle: createdEdge.sourceHandle || undefined,
           targetHandle: createdEdge.targetHandle || undefined,
           animated: true,
-          data: { onDelete: handleDeleteEdge },
+          data: { 
+            onDelete: handleDeleteEdge,
+            isExecuted: false,
+          },
         };
 
         setEdges((prevEdges) => [...prevEdges, flowEdge]);
