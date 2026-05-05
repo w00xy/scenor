@@ -6,7 +6,7 @@
 .playwright
 .kilo
 .claude
-CONTEXT
+CONTEXT.md
 
 # Git internals and tooling
 *.log
