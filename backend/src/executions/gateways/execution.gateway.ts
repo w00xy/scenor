@@ -23,8 +23,7 @@ type AuthenticatedWebSocket = WebSocket & {
 };
 
 @WebSocketGateway({
-  namespace: 'executions',
-  transports: ['websocket'],
+  path: '/executions',
 })
 @Injectable()
 export class ExecutionGateway
