@@ -29,8 +29,11 @@ describe('UsersService', () => {
   });
 
   const toPublicUser = (user: User) => {
-    const { passwordHash, ...publicUser } = user;
-    return publicUser;
+    const { passwordHash, role, ...publicUser } = user;
+    return {
+      ...publicUser,
+      globalRole: role,
+    };
   };
 
   beforeEach(async () => {

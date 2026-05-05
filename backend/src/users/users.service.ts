@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository.js';
 import { UsersUtils } from './users.utils.js';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, Role } from '@prisma/client';
 import { CreateUserDto } from './dto/users-create.dto.js';
 import { LoginUserDto } from './dto/users-login.dto.js';
 import { UpdateUserDto } from './dto/users-update.dto.js';
@@ -281,8 +281,11 @@ export class UsersService {
     return { ok: isPasswordValid };
   }
 
-  private toPublicUser(user: User): Omit<User, 'passwordHash'> {
-    const { passwordHash, ...publicUser } = user;
-    return publicUser;
+  private toPublicUser(user: User): Omit<User, 'passwordHash' | 'role'> & { globalRole: Role } {
+    const { passwordHash, role, ...publicUser } = user;
+    return {
+      ...publicUser,
+      globalRole: role,
+    };
   }
 }

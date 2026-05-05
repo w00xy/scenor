@@ -3,7 +3,6 @@ import { DatabaseService } from './database.service.js';
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
-  const originalDatabaseUrl = process.env.DATABASE_URL;
 
   beforeEach(async () => {
     // Mock DATABASE_URL for testing
