@@ -140,6 +140,34 @@
     border-left: 3px solid #FF4B33;
   }
 
+  &__input {
+    margin-top: 8px;
+    
+    summary {
+      cursor: pointer;
+      color: #2196F3;
+      font-size: 12px;
+      user-select: none;
+      padding: 4px 0;
+      
+      &:hover {
+        color: #42A5F5;
+      }
+    }
+
+    pre {
+      margin-top: 8px;
+      padding: 8px;
+      background: #1a1a1a;
+      border-radius: 4px;
+      color: #ccc;
+      font-size: 11px;
+      overflow-x: auto;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+
   &__output {
     margin-top: 8px;
     

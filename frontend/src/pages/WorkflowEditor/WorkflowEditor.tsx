@@ -9,6 +9,7 @@ import { NodesPalette } from "../../components/workflow/NodesPalette/NodesPalett
 import { WorkflowActionsMenu } from "../../components/overview/pages_overview/overview_scen/MM_overview_scen_component/WorkflowActionsMenu";
 import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/BottomLogsPanel";
 import { NodeConfigWrapper } from "../../components/workflow/NodeConfigModal/configs/NodeConfigWrapper";
+import { RunWorkflowModal } from "../../components/workflow/RunWorkflowModal";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
@@ -61,6 +62,12 @@ export function WorkflowEditor(): JSX.Element {
     nodeId: null,
     nodeType: null,
     nodeData: null,
+  });
+
+  const [runModal, setRunModal] = useState<{
+    isOpen: boolean;
+  }>({
+    isOpen: false,
   });
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
@@ -373,7 +380,7 @@ export function WorkflowEditor(): JSX.Element {
     setShowActionsMenu(false);
   };
 
-  const handleRunWorkflow = useCallback(async () => {
+  const handleRunWorkflow = useCallback(async (inputData?: Record<string, unknown>) => {
     if (!workflowId) return;
 
     try {
@@ -384,7 +391,20 @@ export function WorkflowEditor(): JSX.Element {
         lastExecutionId: null,
       });
 
-      const result = await workflowApi.executeManual(workflowId);
+      // Если inputData не передан, пытаемся взять из конфигурации manual_trigger узла
+      let finalInputData = inputData;
+      
+      if (!finalInputData) {
+        const triggerNode = nodes.find(node => 
+          node.data.typeCode === 'manual_trigger'
+        );
+        
+        if (triggerNode?.data?.configJson?.inputDataJson) {
+          finalInputData = triggerNode.data.configJson.inputDataJson;
+        }
+      }
+
+      const result = await workflowApi.executeManual(workflowId, finalInputData);
 
       // Извлекаем ID узлов, которые были выполнены
       const executedNodeIds = Object.keys(result.outputDataJson?.nodeOutputs || {});
@@ -429,6 +449,18 @@ export function WorkflowEditor(): JSX.Element {
       });
     }
   }, [workflowId, nodes, edges]);
+
+  const handleOpenRunModal = useCallback(() => {
+    setRunModal({ isOpen: true });
+  }, []);
+
+  const handleCloseRunModal = useCallback(() => {
+    setRunModal({ isOpen: false });
+  }, []);
+
+  const handleRunWithData = useCallback((inputData: Record<string, unknown>) => {
+    handleRunWorkflow(inputData);
+  }, [handleRunWorkflow]);
 
   const handleDeleteEdge = useCallback(async (edgeId: string) => {
     setEdges((prevEdges) => {
@@ -576,7 +608,7 @@ export function WorkflowEditor(): JSX.Element {
 
               <button
                 className="workflow-editor__run-btn"
-                onClick={handleRunWorkflow}
+                onClick={handleOpenRunModal}
                 title="Запустить сценарий"
               >
                 Запустить сценарий
@@ -599,6 +631,13 @@ export function WorkflowEditor(): JSX.Element {
           nodeData={configModal.nodeData}
           onClose={handleCloseConfigModal}
           onSave={handleSaveNodeConfig}
+        />
+
+        <RunWorkflowModal
+          isOpen={runModal.isOpen}
+          onClose={handleCloseRunModal}
+          onRun={handleRunWithData}
+          workflowName={workflow?.name || "Сценарий"}
         />
       </div>
     </div>

@@ -403,7 +403,7 @@ export const workflowApi = {
   deleteEdge: (workflowId: string, edgeId: string) =>
     request<void>(`/workflows/${workflowId}/edges/${edgeId}`, { method: "DELETE" }, true),
 
-  executeManual: (workflowId: string) =>
+  executeManual: (workflowId: string, inputDataJson?: Record<string, unknown>) =>
     request<{
       id: string;
       workflowId: string;
@@ -418,7 +418,10 @@ export const workflowApi = {
         executedSteps: number;
       };
       errorMessage: string | null;
-    }>(`/workflows/${workflowId}/executions/manual`, { method: "POST" }, true),
+    }>(`/workflows/${workflowId}/executions/manual`, { 
+      method: "POST", 
+      body: JSON.stringify({ inputDataJson: inputDataJson || {} }) 
+    }, true),
 
   getExecutions: (workflowId: string, params?: { limit?: number; offset?: number }) =>
     request<Array<{

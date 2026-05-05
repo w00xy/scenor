@@ -187,6 +187,12 @@ export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, n
                   {log.errorMessage && (
                     <div className="log-item__error">{log.errorMessage}</div>
                   )}
+                  {log.inputDataJson && Object.keys(log.inputDataJson).length > 0 && (
+                    <details className="log-item__input">
+                      <summary>Входные данные</summary>
+                      <pre>{JSON.stringify(log.inputDataJson, null, 2)}</pre>
+                    </details>
+                  )}
                   {log.outputDataJson && (
                     <details className="log-item__output">
                       <summary>Результат выполнения</summary>
