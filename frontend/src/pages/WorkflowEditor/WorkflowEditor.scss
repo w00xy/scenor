@@ -1,0 +1,259 @@
+@use "../../styles/variables/_variables" as *;
+
+.workflow-editor {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background: #0f0f0f;
+
+  &__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  &__header {
+    height: 70px;
+    background: #212121;
+    border-bottom: 1px solid #424242;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    flex-shrink: 0;
+    justify-content: space-between;
+  }
+
+  &__title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: $font-family;
+    font-size: 16px;
+  }
+
+  &__dots-button {
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__project-name {
+    color: #999;
+    font-weight: 400;
+  }
+
+  &__separator {
+    color: #666;
+  }
+
+  &__workflow-name {
+    color: $color-white;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__name-input {
+    background: #2a2a2a;
+    border: 1px solid #FF4B33;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: $color-white;
+    font-family: $font-family;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    min-width: 200px;
+
+    &:focus {
+      border-color: #FF4B33;
+    }
+  }
+
+  &__title {
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    margin: 0;
+  }
+
+  &__workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__add-node-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    background: #FF4B33;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background: #db5442;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__palette-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 101;
+    animation: slideInRight 0.3s ease-out;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  &__canvas {
+    flex: 1;
+    position: relative;
+    background: #0f0f0f;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  &__canvas-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+    font-family: $font-family;
+
+    p {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+
+  &__placeholder-subtitle {
+    margin-top: 8px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    color: #555 !important;
+  }
+
+  &__loading,
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-family: $font-family;
+    font-size: 18px;
+    color: $color-white;
+  }
+
+  &__error {
+    flex-direction: column;
+    gap: 16px;
+    color: #ff6b6b;
+  }
+
+  &__back-button {
+    padding: 10px 20px;
+    background: #FF4B33;
+    color: $color-white;
+    border: none;
+    border-radius: 6px;
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #db5442;
+    }
+  }
+
+  &__run-btn {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 10px 60px;
+    background: #FF4B33;
+    color: $color-white;
+    border: none;
+    border-radius: 8px;
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #db5442;
+    }
+
+    &:active {
+      transform: translateX(-50%) scale(0.98);
+    }
+  }
+}

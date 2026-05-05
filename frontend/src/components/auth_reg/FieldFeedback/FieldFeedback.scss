@@ -1,0 +1,111 @@
+.field-feedback-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  min-width: 320px;
+  max-width: 400px;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  font-family: "Inter", sans-serif;
+  opacity: 0;
+  transform: translateX(120%);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.field-feedback-toast-error {
+  background: #2B2B2B;
+  color: white;
+}
+
+.field-feedback-toast-success {
+  background: #2B2B2B;
+  color: white;
+}
+
+.field-feedback-toast-warning {
+  background: #2B2B2B;
+  color: white;
+}
+
+.field-feedback-toast-content {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 12px;
+  position: relative;
+}
+
+.field-feedback-toast-icon {
+  font-size: 24px;
+  line-height: 1;
+  animation: popIn 0.4s ease;
+}
+
+.field-feedback-toast-message {
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.field-feedback-toast-close {
+  background: none;
+  border: none;
+  color: currentColor;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: all 0.2s;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.field-feedback-toast-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .field-feedback-toast {
+    min-width: auto;
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .field-feedback-toast-content {
+    padding: 14px 16px;
+  }
+
+  .field-feedback-toast-message {
+    font-size: 13px;
+  }
+}
+
+.field-feedback-toast.visible {
+  opacity: 1;
+  transform: translateX(0);
+}

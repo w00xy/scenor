@@ -30,7 +30,7 @@ export function Auth(): JSX.Element {
         <InputField>
           <Input
             placeholder="Адрес электронной почты"
-            type="text"
+            type="email"
             maxlength={30}
             autoComplete="email"
             value={email}

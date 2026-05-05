@@ -1,0 +1,73 @@
+@use "../../../styles/variables/_variables" as *;
+
+.team-project-settings {
+  width: 100%;
+  max-width: 1280px;
+  padding-top: 0;
+  margin-top: 0;
+
+  &__h1{
+    font-family: $font-family;
+    color: $color-white;
+    font-size: 18px;
+    padding: 22px 0px 16px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-bottom: 0;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__button {
+    border: none;
+    border-radius: 6px;
+    height: 36px;
+    padding: 0 20px;
+    font-family: $font-family;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &--cancel {
+      background: transparent;
+      border: 1px solid #424242;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #2a2a2a;
+      }
+    }
+
+    &--save {
+      background: #FF4B33;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #db5442;
+      }
+    }
+
+    &--danger {
+      background: #d32f2f;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: #b71c1c;
+      }
+    }
+  }
+}

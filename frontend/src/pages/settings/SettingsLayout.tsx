@@ -1,22 +1,30 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import "./SettingsLayout.scss";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
-import { MenuProvider } from "../../context/MenuContext";
 import { LNBtn } from "../../components/left_nav/left_nav_btns/left_nav_btn/left_nav_btn";
-import PersonalSVG from "../../assets/Personal.svg?react";
-import ArrowLeftSVG from "../../assets/MM_Vectors-pages/Arrow_left.svg?react"
+import ProfileSVG from "../../assets/settings/Profile.svg?react";
+import ArrowLeftSVG from "../../assets/common/ArrowLeft.svg?react";
+
 export function SettingsLayout() {
   return (
-    <MenuProvider>
-      <div className="settings-layout">
-        <LNBody variant="settings">
-          <LNBtn icon={<ArrowLeftSVG />} text="Настройки" to="/overview" />
-          <LNBtn icon={<PersonalSVG />} text="Профиль" to="/settings/profile" />
-        </LNBody>
-        <div className="settings-layout__content">
-          <Outlet />
-        </div>
+    <div className="settings-layout">
+      <LNBody variant="settings" forceExpanded>
+        <LNBtn
+          icon={<ArrowLeftSVG />}
+          text="Настройки"
+          to="/overview"
+          forceExpanded
+        />
+        <LNBtn
+          icon={<ProfileSVG />}
+          text="Профиль"
+          to="/settings/profile"
+          forceExpanded
+        />
+      </LNBody>
+      <div className="settings-layout__content">
+        <Outlet />
       </div>
-    </MenuProvider>
+    </div>
   );
 }

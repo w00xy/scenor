@@ -1,6 +1,10 @@
 import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
+import { useProjects } from "../../../context/ProjectsContext";
 import { clearTokens } from "../../../services/api";
+import ProfileIcon from "../../../assets/settings/Profile.svg?react";
+import OpenDoorIcon from "../../../assets/settings/OpenDoor.svg?react";
 import "./SettingsMenu.scss";
 
 interface SettingsMenuProps {
@@ -15,6 +19,8 @@ export function SettingsMenu({
   ignoreRef,
 }: SettingsMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const { clearCurrentUser } = useCurrentUser();
+  const { clearProjects } = useProjects();
   const navigate = useNavigate();
   const positionClass = collapsed
     ? "settings-menu--right"
@@ -42,6 +48,8 @@ export function SettingsMenu({
 
   const handleLogout = () => {
     clearTokens();
+    clearCurrentUser();
+    clearProjects();
     navigate("/auth", { replace: true });
     onClose();
   };
@@ -49,10 +57,12 @@ export function SettingsMenu({
   return (
     <div className={`settings-menu ${positionClass}`} ref={menuRef}>
       <button className="settings-menu__item" onClick={handlePersonal}>
-        Personal
+        <ProfileIcon className="settings-menu__icon" />
+        <span>Профиль</span>
       </button>
       <button className="settings-menu__item" onClick={handleLogout}>
-        Выйти из аккаунта
+        <OpenDoorIcon className="settings-menu__icon" />
+        <span>Выйти из аккаунта</span>
       </button>
     </div>
   );

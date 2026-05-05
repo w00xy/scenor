@@ -1,0 +1,74 @@
+@use "../../../styles/variables/_variables" as *;
+
+.custom-edge-button {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  .edge-delete-btn {
+    width: 20px;
+    height: 20px;
+    background: #2a2a2a;
+    border: 1px solid #FF4B33;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    svg {
+      width: 10px;
+      height: 10px;
+      
+      path {
+        stroke: #FF4B33;
+      }
+    }
+
+    &:hover {
+      background: rgba(255, 75, 51, 0.2);
+      border-color: #db5442;
+      transform: scale(1.1);
+      
+      svg path {
+        stroke: #db5442;
+      }
+    }
+  }
+}
+
+.react-flow__edge-path {
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.react-flow__edge.executed .react-flow__edge-path {
+  stroke: #4CAF50 !important;
+  stroke-width: 2 !important;
+  animation: pulse-edge 1s ease-in-out;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #FF4B33 !important;
+  stroke-width: 2 !important;
+}
+
+.edge-hover-area {
+  cursor: default;
+  pointer-events: all;
+}
+
+@keyframes pulse-edge {
+  0% {
+    stroke-opacity: 0.5;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-opacity: 1;
+  }
+}

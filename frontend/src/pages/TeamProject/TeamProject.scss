@@ -1,0 +1,65 @@
+@use "../../styles/variables/_variables" as *;
+
+.team-project {
+  display: flex;
+  max-height: 100vh;
+  height: 100vh;
+}
+
+.team-project__main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.team-project__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  min-height: 30px;
+}
+
+.team-project__copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-project__title {
+  margin: 0;
+  font-family: $font-family;
+  font-size: 20px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.team-project__subtitle {
+  margin: 0;
+  font-family: $font-family;
+  font-size: 14px;
+  color: #adadad;
+}
+
+.team-project__action {
+  border: none;
+  border-radius: 6px;
+  width: 170px;
+  height: 30px;
+  font-family: $font-family;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #FF4B33;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #db5442;
+    transition-duration: 0.2s;
+  }
+}
+
+.team-project__content {
+  margin-top: 20px;
+}

@@ -50,4 +50,15 @@
             color: #CCCCCC;
         }
     }
+
+    .dots-button {
+        cursor: pointer;
+        padding: 4px;
+        min-width: auto;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
 }

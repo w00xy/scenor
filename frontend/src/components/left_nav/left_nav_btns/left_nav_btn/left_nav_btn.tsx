@@ -8,21 +8,29 @@ interface LNBtnProps {
   text: string;
   to: string;
   end?: boolean;
+  forceExpanded?: boolean;
 }
 
-export function LNBtn({ icon, text, to, end }: LNBtnProps): JSX.Element {
+export function LNBtn({
+  icon,
+  text,
+  to,
+  end,
+  forceExpanded = false,
+}: LNBtnProps): JSX.Element {
   const { collapsed } = useMenu();
+  const isCollapsed = forceExpanded ? false : collapsed;
 
   return (
     <NavLink
       to={to}
       end={end}
       className={({ isActive }) =>
-        `left_nav_button ${isActive ? "active" : ""} ${collapsed ? "collapsed" : ""}`
+        `left_nav_button ${isActive ? "active" : ""} ${isCollapsed ? "collapsed" : ""}`
       }
     >
       {icon}
-      {!collapsed && <span className="left_nav_button__text">{text}</span>}
+      {!isCollapsed && <span className="left_nav_button__text">{text}</span>}
     </NavLink>
   );
 }

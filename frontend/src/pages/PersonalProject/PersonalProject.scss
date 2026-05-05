@@ -1,0 +1,92 @@
+@use "../../styles/variables/_variables" as *;
+
+.personal-project {
+  display: flex;
+  max-height: 100vh;
+  height: 100vh;
+}
+
+.personal-project__main {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.personal-project__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.personal-project__copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.personal-project__title {
+  margin: 0;
+  font-family: $font-family;
+  font-size: 20px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.personal-project__subtitle {
+  margin: 0;
+  font-family: $font-family;
+  font-size: 14px;
+  color: #adadad;
+}
+
+.personal-project__action {
+  border: none;
+  border-radius: 6px;
+  width: 170px;
+  height: 30px;
+  font-family: $font-family;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #FF4B33;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #db5442;
+    transition-duration: 0.2s;
+  }
+}
+
+.personal-project__content {
+  margin-top: 20px;
+}
+
+.personal-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.personal-page {
+  min-height: 320px;
+  border: 1px solid #2f2f2f;
+  border-radius: 12px;
+  padding: 20px;
+  background: rgba(28, 28, 28, 0.85);
+}
+
+.personal-page__title {
+  font-family: $font-family;
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.personal-page__text {
+  margin: 0;
+  font-family: $font-family;
+  font-size: 14px;
+  color: #adadad;
+}

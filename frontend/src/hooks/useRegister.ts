@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
+import { useCurrentUser } from '../context/CurrentUserContext';
 import { authApi, setTokens } from '../services/api';
 import { validateRegistrationForm } from '../utils/validation/registrationValidation';
-
+import { useProjects } from '../context/ProjectsContext';
 export function useRegister() {
   const { showFeedback } = useFieldFeedbackContext();
+  const { refreshCurrentUser } = useCurrentUser();
+  const { refreshProjects } = useProjects();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -28,11 +31,12 @@ export function useRegister() {
       await authApi.register(username.trim(), email.trim(), password);
       const loginData = await authApi.login({ email: email.trim(), password });
       setTokens(loginData.accessToken, loginData.refreshToken);
+      await refreshCurrentUser();
+      await refreshProjects();
       showFeedback('Регистрация успешна!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;
     } catch (error: any) {
-      console.error(error);
       showFeedback(error.message || 'Ошибка регистрации', 'error');
       return false;
     } finally {

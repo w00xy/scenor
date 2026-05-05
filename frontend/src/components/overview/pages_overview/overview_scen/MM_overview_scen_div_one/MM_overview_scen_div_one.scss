@@ -20,6 +20,8 @@
     @include text_add_14px;
     color: $color-text-add;
     font-size: 12px;
+    pointer-events: auto;
+    user-select: text;
   }
 
   select {
@@ -34,17 +36,39 @@
     appearance: none;
     border-radius: 5px;
     border: 1px solid #424242;
-    background: none;
+    background: #1a1a1a;
 
     cursor: pointer;
+    transition: all 0.2s ease;
 
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 14px;
 
+    &:hover {
+      border-color: #666666;
+      background-color: #222222;
+    }
+
     &:focus {
       outline: none;
+      border-color: #FF4B33;
+      background-color: #222222;
+    }
+
+    option {
+      background-color: #1a1a1a;
+      color: $color-text-add;
+      padding: 8px 16px;
+
+      &:hover {
+        background-color: #2a2a2a;
+      }
+
+      &:disabled {
+        color: #666666;
+      }
     }
   }
 }
@@ -57,7 +81,19 @@
   gap: 12px;
   border-radius: 5px;
   border: 1px solid #424242;
+  background: #1a1a1a;
 
   display: flex;
   align-items: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #666666;
+    background-color: #222222;
+  }
+
+  &:focus-within {
+    border-color: #FF4B33;
+    background-color: #222222;
+  }
 }

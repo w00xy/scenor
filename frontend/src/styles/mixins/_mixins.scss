@@ -17,3 +17,53 @@
   text-align: left;
   font-size: 14px;
 }
+
+@mixin text_add_17px {
+  font-family: $font-family;
+  font-weight: 400;
+  line-height: normal;
+  text-align: left;
+  font-size: 14px;
+  color: #ADADAD;
+}
+
+@mixin default_form {
+  position: relative;
+  background-color: rgba(33, 33, 33, 0.75);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@mixin default_form_before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(45deg, #ffffff, #42424200, #ffffffd0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  opacity: 0.4;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+@mixin modal_form_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}

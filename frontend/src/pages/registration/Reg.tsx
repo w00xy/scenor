@@ -48,7 +48,7 @@ export function Reg(): JSX.Element {
           <InputField>
             <Input
               placeholder="Электронная почта"
-              type="text"
+              type="email"
               maxlength={50}
               autoComplete="email"
               value={email}

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
+import { useCurrentUser } from '../context/CurrentUserContext';
 import { authApi, setTokens } from '../services/api';
-
+import { useProjects } from '../context/ProjectsContext';
 export function useLogin() {
   const { showFeedback } = useFieldFeedbackContext();
+  const { refreshCurrentUser } = useCurrentUser();
+  const { refreshProjects } = useProjects();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -24,11 +27,12 @@ export function useLogin() {
     try {
       const data = await authApi.login({ email: email.trim(), password });
       setTokens(data.accessToken, data.refreshToken);
+      await refreshCurrentUser();
+      await refreshProjects();
       showFeedback('Успешный вход!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;
     } catch (error: any) {
-      console.error(error);
       showFeedback(error.message || 'Неверный Email или пароль', 'error');
       return false;
     } finally {
