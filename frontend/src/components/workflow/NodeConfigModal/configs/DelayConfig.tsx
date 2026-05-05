@@ -12,7 +12,10 @@ export function DelayConfig({ config, onSave }: DelayConfigProps): JSX.Element {
 
   const handleChange = (newConfig: any) => {
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+  };
+
+  const handleBlur = () => {
+    onSave(localConfig);
   };
 
   return (
@@ -35,6 +38,7 @@ export function DelayConfig({ config, onSave }: DelayConfigProps): JSX.Element {
             className="node-config__input"
             value={localConfig.durationMs || 1000}
             onChange={(e) => handleChange({ ...localConfig, durationMs: parseInt(e.target.value) })}
+            onBlur={handleBlur}
             min={100}
             max={60000}
           />

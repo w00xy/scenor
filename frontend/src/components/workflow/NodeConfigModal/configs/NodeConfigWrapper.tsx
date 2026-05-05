@@ -34,7 +34,7 @@ export function NodeConfigWrapper({
 
   const handleSave = (config: any) => {
     onSave(nodeId, config);
-    onClose();
+    // Не закрываем модалку автоматически - пользователь закроет сам
   };
 
   const renderConfig = () => {

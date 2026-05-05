@@ -13,9 +13,18 @@ export function CodeConfig({ config, onSave }: CodeConfigProps): JSX.Element {
     source: 'return input;' 
   });
 
-  const handleChange = (newConfig: any) => {
+  const handleLanguageChange = (language: string) => {
+    const newConfig = { ...localConfig, language };
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+    onSave(newConfig);
+  };
+
+  const handleSourceChange = (source: string) => {
+    setLocalConfig({ ...localConfig, source });
+  };
+
+  const handleSourceBlur = () => {
+    onSave(localConfig);
   };
 
   return (
@@ -36,7 +45,7 @@ export function CodeConfig({ config, onSave }: CodeConfigProps): JSX.Element {
           <select
             className="node-config__select"
             value={localConfig.language || 'javascript'}
-            onChange={(e) => handleChange({ ...localConfig, language: e.target.value })}
+            onChange={(e) => handleLanguageChange(e.target.value)}
           >
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
@@ -48,7 +57,8 @@ export function CodeConfig({ config, onSave }: CodeConfigProps): JSX.Element {
           <textarea
             className="node-config__textarea node-config__textarea--code"
             value={localConfig.source || ''}
-            onChange={(e) => handleChange({ ...localConfig, source: e.target.value })}
+            onChange={(e) => handleSourceChange(e.target.value)}
+            onBlur={handleSourceBlur}
             placeholder="return input;"
             rows={15}
             spellCheck={false}

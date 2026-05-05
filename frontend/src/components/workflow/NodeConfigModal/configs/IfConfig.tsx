@@ -8,9 +8,9 @@ interface IfConfigProps {
 }
 
 interface Condition {
-  field: string;
+  left: string;
   operator: string;
-  value: string;
+  right: any;
 }
 
 export function IfConfig({ config, onSave }: IfConfigProps): JSX.Element {
@@ -22,10 +22,10 @@ export function IfConfig({ config, onSave }: IfConfigProps): JSX.Element {
   const addCondition = () => {
     const newConfig = {
       ...localConfig,
-      conditions: [...localConfig.conditions, { field: '', operator: '==', value: '' }]
+      conditions: [...localConfig.conditions, { left: '', operator: 'equals', right: '' }]
     };
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+    onSave(newConfig);
   };
 
   const removeCondition = (index: number) => {
@@ -34,7 +34,7 @@ export function IfConfig({ config, onSave }: IfConfigProps): JSX.Element {
       conditions: localConfig.conditions.filter((_: any, i: number) => i !== index)
     };
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+    onSave(newConfig);
   };
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
@@ -42,13 +42,24 @@ export function IfConfig({ config, onSave }: IfConfigProps): JSX.Element {
     newConditions[index] = { ...newConditions[index], [field]: value };
     const newConfig = { ...localConfig, conditions: newConditions };
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+  };
+
+  const handleConditionBlur = () => {
+    onSave(localConfig);
+  };
+
+  const handleOperatorChange = (index: number, operator: string) => {
+    const newConditions = [...localConfig.conditions];
+    newConditions[index] = { ...newConditions[index], operator };
+    const newConfig = { ...localConfig, conditions: newConditions };
+    setLocalConfig(newConfig);
+    onSave(newConfig);
   };
 
   const handleModeChange = (mode: string) => {
     const newConfig = { ...localConfig, mode };
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+    onSave(newConfig);
   };
 
   return (
@@ -83,29 +94,31 @@ export function IfConfig({ config, onSave }: IfConfigProps): JSX.Element {
               <input
                 type="text"
                 className="node-config__input node-config__input--small"
-                value={condition.field}
-                onChange={(e) => updateCondition(index, 'field', e.target.value)}
-                placeholder="Поле (например: input.value)"
+                value={condition.left}
+                onChange={(e) => updateCondition(index, 'left', e.target.value)}
+                onBlur={handleConditionBlur}
+                placeholder="Левая часть (например: {{input.body.completed}})"
               />
               <select
                 className="node-config__select node-config__select--small"
                 value={condition.operator}
-                onChange={(e) => updateCondition(index, 'operator', e.target.value)}
+                onChange={(e) => handleOperatorChange(index, e.target.value)}
               >
-                <option value="==">=</option>
-                <option value="!=">≠</option>
-                <option value=">">{'>'}</option>
-                <option value="<">{'<'}</option>
-                <option value=">=">{'>='}</option>
-                <option value="<=">{'<='}</option>
+                <option value="equals">=</option>
+                <option value="not_equals">≠</option>
+                <option value="greater_than">{'>'}</option>
+                <option value="less_than">{'<'}</option>
+                <option value="greater_than_or_equal">{'>='}</option>
+                <option value="less_than_or_equal">{'<='}</option>
                 <option value="contains">содержит</option>
               </select>
               <input
                 type="text"
                 className="node-config__input node-config__input--small"
-                value={condition.value}
-                onChange={(e) => updateCondition(index, 'value', e.target.value)}
-                placeholder="Значение"
+                value={condition.right}
+                onChange={(e) => updateCondition(index, 'right', e.target.value)}
+                onBlur={handleConditionBlur}
+                placeholder="Правая часть (например: true)"
               />
               <button
                 className="node-config__remove-btn"

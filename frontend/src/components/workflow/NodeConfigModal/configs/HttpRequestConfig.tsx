@@ -40,14 +40,18 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
         body,
       });
     } catch (error) {
-      alert('Ошибка в JSON формате. Проверьте синтаксис.');
+      console.error('JSON parse error:', error);
     }
   };
 
-  // Автосохранение при изменении
+  // Обновление локального состояния без сохранения
   const handleChange = (newConfig: any) => {
     setLocalConfig(newConfig);
-    // TODO: Автосохранение будет реализовано позже
+  };
+
+  // Сохранение при потере фокуса
+  const handleBlur = () => {
+    handleSave();
   };
 
   return (
@@ -70,6 +74,7 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
             className="node-config__input"
             value={localConfig.url || ''}
             onChange={(e) => handleChange({ ...localConfig, url: e.target.value })}
+            onBlur={handleBlur}
             placeholder="https://api.example.com/resource"
           />
         </div>
@@ -79,7 +84,11 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
           <select
             className="node-config__select"
             value={localConfig.method || 'GET'}
-            onChange={(e) => handleChange({ ...localConfig, method: e.target.value })}
+            onChange={(e) => {
+              const newConfig = { ...localConfig, method: e.target.value };
+              handleChange(newConfig);
+              onSave(newConfig);
+            }}
           >
             <option value="GET">GET</option>
             <option value="POST">POST</option>
@@ -95,6 +104,7 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
             className="node-config__textarea"
             value={headersText}
             onChange={(e) => setHeadersText(e.target.value)}
+            onBlur={handleSave}
             placeholder='{"Content-Type": "application/json"}'
             rows={4}
           />
@@ -106,6 +116,7 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
             className="node-config__textarea"
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
+            onBlur={handleSave}
             placeholder='{"page": 1, "limit": 10}'
             rows={4}
           />
@@ -117,6 +128,7 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
             className="node-config__textarea"
             value={bodyText}
             onChange={(e) => setBodyText(e.target.value)}
+            onBlur={handleSave}
             placeholder='{"key": "value"}'
             rows={6}
           />
@@ -129,6 +141,7 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
             className="node-config__input"
             value={localConfig.timeout || 10000}
             onChange={(e) => handleChange({ ...localConfig, timeout: parseInt(e.target.value) })}
+            onBlur={handleBlur}
             min={1000}
             max={60000}
           />
