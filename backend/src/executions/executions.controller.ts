@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -16,7 +17,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
-import { RunWorkflowManualDto } from './dto/index.js';
+import { DeleteExecutionDto, DeleteExecutionResponseDto, RunWorkflowManualDto } from './dto/index.js';
 import { ExecutionsService } from './executions.service.js';
 import { ExecutionResponseDto } from './dto/execution-response.dto.js';
 import { ExecutionsListResponseDto } from './dto/executions-list-response.dto.js';
@@ -129,6 +130,44 @@ export class ExecutionsController {
       executionId,
       limit,
       offset,
+    );
+  }
+
+  @Delete(':executionId')
+  @ApiOperation({ summary: 'Удалить выполнение workflow и все его логи' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Выполнение успешно удалено', 
+    type: DeleteExecutionResponseDto 
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad Request - выполнение в процессе выполнения' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - требуется авторизация' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - недостаточно прав для удаления' 
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Not Found - выполнение или workflow не найден' 
+  })
+  async deleteExecution(
+    @Req() request: AuthenticatedRequest,
+    @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
+    @Param('executionId', new ParseUUIDPipe()) executionId: string,
+    @Body() data?: DeleteExecutionDto,
+  ) {
+    const userId = this.requireUserId(request);
+    return this.executionsService.deleteWorkflowExecution(
+      userId,
+      workflowId,
+      executionId,
+      data?.reason,
     );
   }
 

@@ -10,6 +10,7 @@ import {
   ExecutionStatus,
   NodeExecutionStatus,
   ProjectMemberRole,
+  Role,
   TriggerType,
   WorkflowNode,
   WorkflowEdge,
@@ -23,15 +24,20 @@ describe('ExecutionsService', () => {
   const mockWorkflowId = 'workflow-123';
   const mockProjectId = 'project-123';
   const mockExecutionId = 'execution-123';
+  const mockAuditId = 'audit-123';
 
   beforeEach(async () => {
     const prismaMock = {
+      user: {
+        findUnique: jest.fn(),
+      },
       workflow: {
         findUnique: jest.fn(),
       },
       workflowExecution: {
         create: jest.fn(),
         update: jest.fn(),
+        delete: jest.fn(),
         findMany: jest.fn(),
         findFirst: jest.fn(),
       },
@@ -39,6 +45,9 @@ describe('ExecutionsService', () => {
         create: jest.fn(),
         update: jest.fn(),
         findMany: jest.fn(),
+      },
+      executionDeletionAudit: {
+        create: jest.fn(),
       },
       $transaction: jest.fn(),
     };
@@ -875,6 +884,293 @@ describe('ExecutionsService', () => {
 
       expect(result.status).toBe(ExecutionStatus.failed);
       expect(result.errorMessage).toBe('Workflow has no nodes');
+    });
+  });
+
+  describe('deleteWorkflowExecution', () => {
+    const mockUser = {
+      id: mockUserId,
+      role: Role.USER,
+    };
+
+    const mockWorkflow = {
+      id: mockWorkflowId,
+      name: 'Test Workflow',
+      projectId: mockProjectId,
+      project: {
+        ownerId: mockUserId,
+        members: [],
+      },
+    };
+
+    const mockExecution = {
+      id: mockExecutionId,
+      workflowId: mockWorkflowId,
+      startedByUserId: mockUserId,
+      status: ExecutionStatus.success,
+      startedAt: new Date(),
+      finishedAt: new Date(),
+      _count: {
+        logs: 15,
+      },
+    };
+
+    beforeEach(() => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow);
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(mockExecution);
+    });
+
+    it('should allow OWNER to delete any execution', async () => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const txMock = {
+          executionDeletionAudit: {
+            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+          },
+          workflowExecution: {
+            delete: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await service.deleteWorkflowExecution(
+        mockUserId,
+        mockWorkflowId,
+        mockExecutionId,
+        'Test deletion',
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.deletedExecutionId).toBe(mockExecutionId);
+      expect(result.deletedLogsCount).toBe(15);
+      expect(result.auditId).toBe(mockAuditId);
+    });
+
+    it('should allow EDITOR to delete their own execution', async () => {
+      const editorWorkflow = {
+        ...mockWorkflow,
+        project: {
+          ownerId: 'different-user',
+          members: [{ role: ProjectMemberRole.EDITOR }],
+        },
+      };
+
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(editorWorkflow);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const txMock = {
+          executionDeletionAudit: {
+            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+          },
+          workflowExecution: {
+            delete: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await service.deleteWorkflowExecution(
+        mockUserId,
+        mockWorkflowId,
+        mockExecutionId,
+      );
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should NOT allow EDITOR to delete others execution', async () => {
+      const editorWorkflow = {
+        ...mockWorkflow,
+        project: {
+          ownerId: 'different-user',
+          members: [{ role: ProjectMemberRole.EDITOR }],
+        },
+      };
+
+      const othersExecution = {
+        ...mockExecution,
+        startedByUserId: 'other-user-id',
+      };
+
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(editorWorkflow);
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(othersExecution);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should NOT allow VIEWER to delete any execution', async () => {
+      const viewerWorkflow = {
+        ...mockWorkflow,
+        project: {
+          ownerId: 'different-user',
+          members: [{ role: ProjectMemberRole.VIEWER }],
+        },
+      };
+
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(viewerWorkflow);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow SUPER_ADMIN to delete any execution', async () => {
+      const superAdminUser = {
+        id: mockUserId,
+        role: Role.SUPER_ADMIN,
+      };
+
+      const othersWorkflow = {
+        ...mockWorkflow,
+        project: {
+          ownerId: 'different-user',
+          members: [],
+        },
+      };
+
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(superAdminUser);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(othersWorkflow);
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const txMock = {
+          executionDeletionAudit: {
+            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+          },
+          workflowExecution: {
+            delete: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should NOT allow deletion of running execution', async () => {
+      const runningExecution = {
+        ...mockExecution,
+        status: ExecutionStatus.running,
+      };
+
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(runningExecution);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw NotFoundException when execution does not exist', async () => {
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when workflow does not exist', async () => {
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.deleteWorkflowExecution(
+          mockUserId,
+          mockWorkflowId,
+          mockExecutionId,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should create audit record with correct data', async () => {
+      let capturedAuditData: any;
+
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const txMock = {
+          executionDeletionAudit: {
+            create: jest.fn().mockImplementation((params) => {
+              capturedAuditData = params.data;
+              return Promise.resolve({ id: mockAuditId });
+            }),
+          },
+          workflowExecution: {
+            delete: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      await service.deleteWorkflowExecution(
+        mockUserId,
+        mockWorkflowId,
+        mockExecutionId,
+        'Cleanup old test data',
+      );
+
+      expect(capturedAuditData).toMatchObject({
+        executionId: mockExecutionId,
+        workflowId: mockWorkflowId,
+        workflowName: 'Test Workflow',
+        deletedByUserId: mockUserId,
+        deletedByRole: ProjectMemberRole.OWNER,
+        executionStatus: ExecutionStatus.success,
+        nodeLogsCount: 15,
+        reason: 'Cleanup old test data',
+      });
+    });
+
+    it('should handle deletion without reason', async () => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        const txMock = {
+          executionDeletionAudit: {
+            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+          },
+          workflowExecution: {
+            delete: jest.fn().mockResolvedValue({}),
+          },
+        };
+        return callback(txMock);
+      });
+
+      const result = await service.deleteWorkflowExecution(
+        mockUserId,
+        mockWorkflowId,
+        mockExecutionId,
+      );
+
+      expect(result.success).toBe(true);
     });
   });
 });

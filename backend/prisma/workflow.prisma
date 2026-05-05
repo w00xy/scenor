@@ -212,3 +212,25 @@ model ExecutionNodeLog {
   @@index([status])
   @@map("execution_node_logs")
 }
+
+model ExecutionDeletionAudit {
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  executionId         String            @map("execution_id") @db.Uuid
+  workflowId          String            @map("workflow_id") @db.Uuid
+  workflowName        String            @map("workflow_name")
+  deletedByUserId     String            @map("deleted_by_user_id") @db.Uuid
+  deletedByRole       ProjectMemberRole @map("deleted_by_role")
+  executionStatus     ExecutionStatus   @map("execution_status")
+  executionStartedAt  DateTime?         @map("execution_started_at")
+  executionFinishedAt DateTime?         @map("execution_finished_at")
+  nodeLogsCount       Int               @map("node_logs_count")
+  deletedAt           DateTime          @default(now()) @map("deleted_at")
+  reason              String?           @db.VarChar(500)
+
+  deletedBy User @relation("ExecutionDeletionAuditDeletedBy", fields: [deletedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([deletedByUserId])
+  @@index([deletedAt])
+  @@map("execution_deletion_audit")
+}

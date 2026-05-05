@@ -1,630 +1,372 @@
-# Scenor - Платформа автоматизации рабочих процессов
+# Scenor - Платформа автоматизации workflow
 
-**Дипломный проект, реализующий платформу визуальной автоматизации рабочих процессов, вдохновленную n8n**
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-blue.svg)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11.0.1-red.svg)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-7.6.0-2D3748.svg)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg)](https://www.postgresql.org/)
 
-## 📋 Обзор проекта
+Дипломный проект - упрощенная платформа автоматизации рабочих процессов. Позволяет создавать workflow из узлов (nodes) и связей (edges), выполнять их и отслеживать результаты.
 
-Scenor — это MVP (минимально жизнеспособный продукт) платформы автоматизации рабочих процессов, которая позволяет пользователям создавать, управлять и выполнять сложные рабочие процессы автоматизации через визуальный интерфейс. Платформа позволяет пользователям строить рабочие процессы, соединяя узлы (действия, триггеры, логика) с ребрами (соединения), но с упрощенным, сфокусированным набором функций
+## 📊 Статус проекта
 
-### Основные возможности
+**Дата обновления:** 5 мая 2026
 
-- **Аутентификация и авторизация пользователей** - Регистрация, вход, JWT-аутентификация с контролем доступа на основе ролей
-- **Управление проектами** - Создание и организация проектов с командной работой
-- **Визуальный редактор рабочих процессов** - Построение рабочих процессов путем соединения узлов и ребер
-- **Выполнение рабочих процессов** - Запуск рабочих процессов вручную или через вебхуки с отслеживанием выполнения в реальном времени
-- **Реестр типов узлов** - 12+ встроенных типов узлов, охватывающих триггеры, логику, преобразование данных и интеграции
-- **Управление учетными данными** - Безопасное хранение ключей API и учетных данных с шифрованием AES-256
-- **История выполнения** - Отслеживание запусков рабочих процессов с подробными логами и статусом выполнения
-- **Совместное использование рабочих процессов** - Совместное использование рабочих процессов публично или с конкретными пользователями через токены
-- **REST API** - Полнофункциональный API с документацией Swagger
+✅ **Backend MVP** - полностью реализован и готов к использованию
+- 13 модулей (10 feature + 3 shared)
+- 50+ API endpoints
+- Полная система аутентификации и авторизации
+- Execution engine с поддержкой условной логики
+- Шифрование credentials (AES-256-GCM)
+- Audit trail для критических операций
 
----
+🚧 **Frontend** - в разработке другим разработчиком
+- Backend API готов для интеграции
+- Swagger документация доступна
 
-## 🏗️ Обзор архитектуры
+## 🚀 Технологии
 
-### Технологический стек
-
-**Backend:**
-- **Фреймворк:** NestJS 11.x
-- **Язык:** TypeScript 5.7
-- **База данных:** PostgreSQL 16
+### Backend
+- **Framework:** NestJS 11.0.1
+- **Язык:** TypeScript 5.7.3
 - **ORM:** Prisma 7.6.0
-- **Валидация:** Zod 4.3.6, class-validator
-- **Аутентификация:** JWT (jsonwebtoken 9.0.3)
-- **Шифрование:** bcrypt, crypto (AES-256-GCM)
+- **База данных:** PostgreSQL 16
+- **Аутентификация:** JWT (access + refresh tokens)
+- **Валидация:** Zod 4.3.6 + class-validator 0.14.4
+- **Шифрование:** AES-256-GCM для credentials
+- **Хеширование:** bcrypt 6.0.0
+- **API документация:** Swagger 11.0.0
+- **WebSocket:** Socket.io для real-time updates
 
-**Frontend:**
-- **Фреймворк:** React 19.2.0
-- **Язык:** TypeScript 5.9
-- **Инструмент сборки:** Vite 7.2.4
-- **Маршрутизация:** React Router 7.10.1
-- **Стили:** SCSS
-- **Тестирование:** Vitest
+### База данных
+- PostgreSQL 16 (Alpine)
+- 13 моделей Prisma
+- Полная система миграций
 
-**Инфраструктура:**
-- **Контейнеризация:** Docker & Docker Compose
-- **Документация API:** Swagger/OpenAPI
+## ⚡ Быстрый старт
 
-### Основные архитектурные принципы
+### Требования
+- Node.js 18+
+- PostgreSQL 12+
+- npm или yarn
 
-#### 1. **Рабочий процесс как направленный граф**
-Рабочие процессы представлены как направленные ациклические графы (DAG), состоящие из:
-- **Узлы** - Отдельные действия, триггеры или блоки логики
-- **Ребра** - Соединения между узлами, определяющие поток выполнения
+### Установка
 
-#### 2. **Универсальная модель узла**
-Вместо отдельных таблиц для каждого типа узла система использует:
-- Одна таблица `NodeType` - Определяет доступные типы узлов со схемами
-- Одна таблица `WorkflowNode` - Экземпляры узлов в рабочих процессах
-- JSON конфигурация - Параметры, специфичные для узла, хранятся в `configJson`
+```bash
+# Клонировать репозиторий
+git clone <repo-url>
+cd scenor
 
-#### 3. **Разделение ответственности**
-- **Время проектирования** - Структура рабочего процесса (узлы, ребра, конфигурация)
-- **Время выполнения** - Данные выполнения (выполнения, логи, выходные данные)
-- **Учетные данные** - Зашифрованные секреты хранятся отдельно от конфигурации узла
+# Перейти в папку backend
+cd backend
 
-#### 4. **Контроль доступа на основе ролей**
-- **Глобальные роли** - Администратор, Пользователь
-- **Роли проекта** - Владелец, Редактор, Зритель
-- **Совместное использование рабочих процессов** - Публичные ссылки и токены для конкретных пользователей
+# Установить зависимости
+npm install
 
----
+# Настроить переменные окружения
+cp .env.example .env
+# Отредактировать .env файл с вашими настройками
+
+# Сгенерировать Prisma client
+npm run prisma:generate
+
+# Применить миграции базы данных
+npm run prisma:migrate:dev
+
+# Запустить backend в режиме разработки
+npm run dev
+```
+
+### Запуск через Docker
+
+```bash
+# Из корневой папки проекта
+docker-compose up -d
+```
+
+### Переменные окружения
+
+Создайте файл `.env` в папке `backend/`:
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/scenor
+JWT_ACCESS_SECRET=your-secret-key-min-32-chars
+JWT_REFRESH_SECRET=your-secret-key-min-32-chars
+CREDENTIALS_ENCRYPTION_KEY=64-character-hex-string-for-aes256
+PORT=3000
+HOSTNAME=0.0.0.0
+```
+
+## 📚 API документация
+
+После запуска backend:
+- **Swagger UI:** http://localhost:3000/api
+- **OpenAPI spec:** http://localhost:3000/api-json
+- **Prisma Studio:** `npm run studio` (в папке backend)
 
 ## 📁 Структура проекта
 
 ```
 scenor/
-├── backend/                          # NestJS backend приложение
+├── backend/                    # NestJS backend (готов)
 │   ├── src/
-│   │   ├── app.module.ts            # Корневой модуль
-│   │   ├── main.ts                  # Точка входа приложения
-│   │   ├── auth/                    # Аутентификация и авторизация
-│   │   │   ├── auth.guard.ts        # Проверка JWT
-│   │   │   ├── auth-token.service.ts # Генерация/валидация токенов
-│   │   │   └── roles.guard.ts       # Контроль доступа на основе ролей
-│   │   ├── users/                   # Управление пользователями
-│   │   │   ├── users.service.ts     # Бизнес-логика пользователей
-│   │   │   ├── users.controller.ts  # Endpoints пользователей
-│   │   │   ├── users.repository.ts  # Запросы к БД
-│   │   │   └── dto/                 # Объекты передачи данных
-│   │   ├── profiles/                # Профили пользователей
-│   │   ├── projects/                # Управление проектами
-│   │   ├── workflows/               # CRUD операции рабочих процессов
-│   │   │   ├── workflows.service.ts # Бизнес-логика рабочих процессов
-│   │   │   ├── workflows.controller.ts
-│   │   │   ├── node-config.schemas.ts # Zod схемы валидации
-│   │   │   └── dto/                 # DTOs рабочих процессов
-│   │   ├── node-types/              # Реестр типов узлов
-│   │   │   ├── node-types.service.ts
-│   │   │   ├── node-types.defaults.ts # Встроенные определения узлов
-│   │   │   └── dto/
-│   │   ├── executions/              # Движок выполнения рабочих процессов
-│   │   │   ├── executions.service.ts # Логика выполнения и обход графа
-│   │   │   ├── executions.controller.ts
-│   │   │   └── dto/
-│   │   ├── credentials/             # Управление учетными данными
-│   │   │   ├── credentials.service.ts # Шифрование/расшифровка
-│   │   │   ├── credentials.controller.ts
-│   │   │   └── dto/
-│   │   ├── workflow-shares/         # Совместное использование рабочих процессов
-│   │   ├── database/                # Настройка Prisma клиента
-│   │   ├── initialization/          # Инициализация и seed данные
-│   │   ├── config/                  # Конфигурация окружения
-│   │   └── common/                  # Общие утилиты и middleware
+│   │   ├── users/             # Модуль пользователей
+│   │   ├── profiles/          # Модуль профилей
+│   │   ├── projects/          # Модуль проектов
+│   │   ├── workflows/         # Модуль workflow
+│   │   ├── executions/        # Execution engine
+│   │   ├── node-types/        # Реестр типов узлов
+│   │   ├── credentials/       # Управление credentials
+│   │   ├── workflow-shares/   # Публичный доступ
+│   │   ├── auth/              # Аутентификация
+│   │   ├── database/          # Prisma client
+│   │   └── config/            # Конфигурация
 │   ├── prisma/
-│   │   └── schema.prisma            # Схема базы данных
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── Dockerfile
-│
-├── frontend/                         # React frontend приложение
-│   ├── src/
-│   │   ├── App.tsx                  # Корневой компонент
-│   │   ├── main.tsx                 # Точка входа
-│   │   ├── pages/                   # Компоненты страниц
-│   │   │   ├── authorization/       # Страница входа
-│   │   │   ├── registration/        # Страница регистрации
-│   │   │   ├── overview/            # Главная панель управления
-│   │   │   └── settings/            # Настройки пользователя
-│   │   ├── components/              # Переиспользуемые компоненты
-│   │   │   ├── left_nav/            # Боковая навигация
-│   │   │   ├── settings/            # Компоненты настроек
-│   │   │   ├── overview/            # Компоненты страницы обзора
-│   │   │   └── ProtectedRoute.tsx   # Обертка защиты маршрутов
-│   │   ├── services/
-│   │   │   └── api.ts               # API клиент
-│   │   ├── hooks/                   # Пользовательские React хуки
-│   │   │   ├── useLogin.ts
-│   │   │   ├── useRegister.ts
-│   │   │   ├── useProfile.ts
-│   │   │   └── useFieldFeedback.ts
-│   │   ├── context/                 # React context провайдеры
-│   │   ├── utils/                   # Вспомогательные функции
-│   │   │   └── validation/          # Валидация входных данных
-│   │   └── styles/                  # Глобальные стили
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tsconfig.json
-│
-├── docker-compose.yml               # Оркестрация Docker сервисов
-├── CONTEXT.md                        # Контекст проекта и принципы
-├── CODEBASE_OVERVIEW.md             # Подробный справочник кодовой базы
-├── IMPLEMENTATION_GUIDE.md          # Руководство разработчика
-└── README.md                         # Этот файл
-```
-```
-scenor/
-├── backend/                          # NestJS backend application
-│   ├── src/
-│   │   ├── app.module.ts            # Root module
-│   │   ├── main.ts                  # Application entry point
-│   │   ├── auth/                    # Authentication & authorization
-│   │   │   ├── auth.guard.ts        # JWT validation guard
-│   │   │   ├── auth-token.service.ts # Token generation/validation
-│   │   │   └── roles.guard.ts       # Role-based access control
-│   │   ├── users/                   # User management
-│   │   │   ├── users.service.ts     # User business logic
-│   │   │   ├── users.controller.ts  # User endpoints
-│   │   │   ├── users.repository.ts  # Database queries
-│   │   │   └── dto/                 # Data transfer objects
-│   │   ├── profiles/                # User profiles
-│   │   ├── projects/                # Project management
-│   │   ├── workflows/               # Workflow CRUD operations
-│   │   │   ├── workflows.service.ts # Workflow business logic
-│   │   │   ├── workflows.controller.ts
-│   │   │   ├── node-config.schemas.ts # Zod validation schemas
-│   │   │   └── dto/                 # Workflow DTOs
-│   │   ├── node-types/              # Node type registry
-│   │   │   ├── node-types.service.ts
-│   │   │   ├── node-types.defaults.ts # Pre-built node definitions
-│   │   │   └── dto/
-│   │   ├── executions/              # Workflow execution engine
-│   │   │   ├── executions.service.ts # Execution logic & graph traversal
-│   │   │   ├── executions.controller.ts
-│   │   │   └── dto/
-│   │   ├── credentials/             # Credential management
-│   │   │   ├── credentials.service.ts # Encryption/decryption
-│   │   │   ├── credentials.controller.ts
-│   │   │   └── dto/
-│   │   ├── workflow-shares/         # Workflow sharing
-│   │   ├── database/                # Prisma client setup
-│   │   ├── initialization/          # Seed data & initialization
-│   │   ├── config/                  # Environment configuration
-│   │   └── common/                  # Shared utilities & middleware
-│   ├── prisma/
-│   │   └── schema.prisma            # Database schema
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── Dockerfile
-│
-├── frontend/                         # React frontend application
-│   ├── src/
-│   │   ├── App.tsx                  # Root component
-│   │   ├── main.tsx                 # Entry point
-│   │   ├── pages/                   # Page components
-│   │   │   ├── authorization/       # Login page
-│   │   │   ├── registration/        # Registration page
-│   │   │   ├── overview/            # Main dashboard
-│   │   │   └── settings/            # User settings
-│   │   ├── components/              # Reusable components
-│   │   │   ├── left_nav/            # Navigation sidebar
-│   │   │   ├── settings/            # Settings components
-│   │   │   ├── overview/            # Overview page components
-│   │   │   └── ProtectedRoute.tsx   # Route protection wrapper
-│   │   ├── services/
-│   │   │   └── api.ts               # API client
-│   │   ├── hooks/                   # Custom React hooks
-│   │   │   ├── useLogin.ts
-│   │   │   ├── useRegister.ts
-│   │   │   ├── useProfile.ts
-│   │   │   └── useFieldFeedback.ts
-│   │   ├── context/                 # React context providers
-│   │   ├── utils/                   # Utility functions
-│   │   │   └── validation/          # Input validation
-│   │   └── styles/                  # Global styles
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tsconfig.json
-│
-├── docker-compose.yml               # Docker services orchestration
-├── CONTEXT.md                        # Project context & principles
-├── CODEBASE_OVERVIEW.md             # Detailed codebase reference
-├── IMPLEMENTATION_GUIDE.md          # Developer guide
-└── README.md                         # This file
+│   │   ├── schema.prisma      # Главная схема
+│   │   ├── user.prisma        # Модели пользователей
+│   │   ├── project.prisma     # Модели проектов
+│   │   ├── workflow.prisma    # Модели workflow
+│   │   └── migrations/        # Миграции БД
+│   ├── test/                  # Тесты
+│   └── package.json
+├── frontend/                   # React frontend (в разработке)
+├── CONTEXT/                    # Детальная документация
+│   ├── CODEBASE_OVERVIEW.md   # Обзор кодовой базы
+│   ├── IMPLEMENTATION_GUIDE.md # Руководство по разработке
+│   └── README_EXPLORATION.md  # Итоги исследования
+├── CONTEXT.md                  # Обзор проекта и архитектуры
+├── README.md                   # Этот файл
+└── docker-compose.yml          # Docker конфигурация
 ```
 
----
-
-## 🗄️ Схема базы данных
-
-### Основные сущности
-
-**Управление пользователями:**
-- `User` - Учетные записи пользователей с учетными данными аутентификации
-- `UserProfile` - Расширенная информация пользователя (аватар, биография и т.д.)
-
-**Организация проектов:**
-- `Project` - Рабочее пространство для организации рабочих процессов
-- `ProjectMember` - Члены команды с ролями (Владелец, Редактор, Зритель)
-
-**Определение рабочего процесса:**
-- `Workflow` - Метаданные рабочего процесса (имя, описание, статус)
-- `WorkflowNode` - Отдельные узлы в рабочем процессе
-- `WorkflowEdge` - Соединения между узлами
-- `NodeType` - Реестр доступных типов узлов
-
-**Выполнение и логирование:**
-- `WorkflowExecution` - Записи о запусках рабочих процессов
-- `ExecutionNodeLog` - Подробные логи для каждого выполнения узла
-
-**Учетные данные и совместное использование:**
-- `Credential` - Зашифрованные ключи API и секреты
-- `WorkflowShare` - Публичные ссылки и токены совместного использования для конкретных пользователей
-
-### Ключевые связи
-
-
----
-
-## 🔄 Движок выполнения рабочих процессов
-
-### Поток выполнения
-
-1. **Триггер** - Рабочий процесс запускается вручную или через вебхук
-2. **Анализ графа** - Система определяет начальные узлы и строит граф выполнения
-3. **Обработка очереди** - Узлы выполняются в топологическом порядке
-4. **Выполнение узла** - Каждый обработчик узла обрабатывает входные данные и производит выходные данные
-5. **Ветвление** - Узлы логики (IF, Switch) определяют пути выполнения
-6. **Логирование** - Каждый шаг логируется со статусом, входными данными, выходными данными и длительностью
-7. **Завершение** - Рабочий процесс завершается с успехом или ошибкой
-
-### Типы узлов
-
-#### Триггеры
-- **Manual Trigger** - Запускает рабочий процесс вручную с опциональными входными данными
-- **Webhook Trigger** - Запускает рабочий процесс через HTTP POST на сгенерированную конечную точку
-
-#### Логика
-- **IF** - Условное ветвление на основе выражений
-- **Switch** - Маршрутизация выполнения в разные ветви на основе совпадения значений
-
-#### Преобразование данных
-- **Set** - Создание или переопределение полей данных
-- **Transform** - Выполнение пользовательского JavaScript для преобразования данных
-
-#### Действия
-- **HTTP Request** - Выполнение HTTP запросов с заголовками, телом, параметрами запроса
-- **Code** - Выполнение пользовательских фрагментов JavaScript
-- **Delay** - Пауза выполнения на указанную длительность
-
-#### Интеграции
-- **DB Select** - Запрос записей из базы данных
-- **DB Insert** - Вставка записей в базу данных
-
-### Конечный автомат состояния выполнения
-
-```
-Состояния выполнения рабочего процесса:
-  queued → running → success
-                  ↘ failed → cancelled
-
-Состояния выполнения узла:
-  pending → running → success
-                   ↘ failed
-                   ↘ skipped
-```
-
----
-
-## 🔐 Аутентификация и авторизация
-
-### Поток аутентификации
-
-1. **Регистрация** - Пользователь создает учетную запись с именем пользователя, электронной почтой и паролем
-2. **Вход** - Пользователь получает JWT токен доступа и токен обновления
-3. **Защищенные маршруты** - Frontend хранит токены в cookies (рекомендуется httpOnly)
-4. **Валидация токена** - Backend валидирует JWT при каждом запросе
-5. **Обновление токена** - Истекшие токены доступа можно обновить с помощью токена обновления
-
-### Модель авторизации
-
-**Глобальные роли:**
-- `ADMIN` - Системный администратор
-- `USER` - Обычный пользователь
-
-**Роли проекта:**
-- `OWNER` - Полный контроль над проектом
-- `EDITOR` - Может создавать и изменять рабочие процессы
-- `VIEWER` - Доступ только для чтения
-
-**Совместное использование рабочих процессов:**
-- Публичные ссылки - Любой с ссылкой может просматривать/выполнять
-- Токены пользователей - Конкретным пользователям предоставлен доступ через токен
-
----
-
-## 🚀 Начало работы
-
-### Предварительные требования
-
-- Node.js 18+
-- PostgreSQL 16+
-- Docker & Docker Compose (опционально)
-
-### Настройка Backend
-
-```bash
-cd backend
-
-# Установка зависимостей
-npm install
-
-# Генерация Prisma клиента
-npm run prisma:generate
-
-# Запуск миграций базы данных
-npm run prisma:migrate:dev
-
-# Запуск сервера разработки
-npm run dev
-```
-
-### Настройка Frontend
-
-```bash
-cd frontend
-
-# Установка зависимостей
-npm install
-
-# Запуск сервера разработки
-npm run dev
-```
-
-### Переменные окружения
-
-Создайте файл `.env` в директории `backend/`:
-
-```env
-# База данных
-DATABASE_URL=postgresql://user:password@localhost:5432/scenor
-
-# JWT Секреты (минимум 32 символа)
-JWT_ACCESS_SECRET=your-secret-key-min-32-chars-for-access-token
-JWT_REFRESH_SECRET=your-secret-key-min-32-chars-for-refresh-token
-
-# Шифрование учетных данных (64-символная hex строка для AES-256)
-CREDENTIALS_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-
-# Сервер
-PORT=3000
-HOSTNAME=0.0.0.0
-NODE_ENV=dev
-```
-
-### Настройка Docker
-
-```bash
-# Запуск всех сервисов
-docker-compose up -d
-
-# Просмотр логов
-docker-compose logs -f app
-
-# Остановка сервисов
-docker-compose down
-```
-
----
-
-## 📚 Документация API
-
-### Swagger UI
-
-После запуска backend, получите доступ к документации API по адресу:
-```
-http://localhost:3000/api
-```
-
-### Ключевые endpoints
-
-**Аутентификация:**
-- `POST /users/register` - Создание новой учетной записи пользователя
-- `POST /users/login` - Вход и получение токенов
-- `POST /users/refresh` - Обновление токена доступа
-
-**Проекты:**
-- `GET /projects` - Список проектов пользователя
-- `POST /projects` - Создание нового проекта
-- `GET /projects/:id` - Получение деталей проекта
-- `PUT /projects/:id` - Обновление проекта
-- `DELETE /projects/:id` - Удаление проекта
-
-**Рабочие процессы:**
-- `GET /projects/:projectId/workflows` - Список рабочих процессов
-- `POST /projects/:projectId/workflows` - Создание рабочего процесса
-- `GET /workflows/:id` - Получение рабочего процесса с узлами и ребрами
-- `PUT /workflows/:id` - Обновление рабочего процесса
-- `DELETE /workflows/:id` - Удаление рабочего процесса
-
-**Узлы рабочего процесса:**
-- `POST /workflows/:workflowId/nodes` - Создание узла
-- `PUT /workflows/:workflowId/nodes/:nodeId` - Обновление узла
-- `DELETE /workflows/:workflowId/nodes/:nodeId` - Удаление узла
-
-**Ребра рабочего процесса:**
-- `POST /workflows/:workflowId/edges` - Создание ребра
-- `PUT /workflows/:workflowId/edges/:edgeId` - Обновление ребра
-- `DELETE /workflows/:workflowId/edges/:edgeId` - Удаление ребра
-
-**Выполнения:**
-- `POST /workflows/:workflowId/execute` - Запуск рабочего процесса вручную
-- `GET /workflows/:workflowId/executions` - Список истории выполнения
-- `GET /workflows/:workflowId/executions/:executionId` - Получение деталей выполнения
-- `GET /workflows/:workflowId/executions/:executionId/logs` - Получение логов выполнения
-
-**Учетные данные:**
-- `GET /projects/:projectId/credentials` - Список учетных данных
-- `POST /projects/:projectId/credentials` - Создание учетных данных
-- `PUT /projects/:projectId/credentials/:id` - Обновление учетных данных
-- `DELETE /projects/:projectId/credentials/:id` - Удаление учетных данных
-
-**Типы узлов:**
-- `GET /node-types` - Список доступных типов узлов
-
-**Совместное использование рабочих процессов:**
-- `POST /workflows/:workflowId/share` - Создание ссылки совместного использования
-- `GET /workflows/share/:token` - Доступ к общему рабочему процессу
-- `GET /workflows/:workflowId/shares` - Список совместных использований
-- `DELETE /workflows/:workflowId/shares/:shareId` - Удаление совместного использования
-
----
+## ✨ Основные возможности
+
+### Реализовано ✅
+
+**Аутентификация и авторизация:**
+- ✅ Регистрация пользователей с валидацией
+- ✅ Логин с JWT токенами (access + refresh)
+- ✅ Role-based access control (USER, SUPER_ADMIN)
+- ✅ Project-level permissions (OWNER, EDITOR, VIEWER)
+
+**Управление проектами:**
+- ✅ CRUD операции для проектов
+- ✅ Управление членством в проектах
+- ✅ Типы проектов (PERSONAL, TEAM)
+- ✅ Архивация проектов
+
+**Workflow management:**
+- ✅ Создание и редактирование workflow
+- ✅ Визуальное построение графа (nodes + edges)
+- ✅ 11 типов узлов (triggers, logic, data, actions)
+- ✅ Валидация конфигурации узлов через Zod
+- ✅ Статусы workflow (draft, active, inactive, archived)
+
+**Execution engine:**
+- ✅ Запуск workflow вручную
+- ✅ Топологическая сортировка узлов
+- ✅ Условное ветвление (if/switch)
+- ✅ Логирование выполнения узлов
+- ✅ История всех запусков
+- ✅ Обработка ошибок
+
+**Credentials management:**
+- ✅ Шифрование credentials (AES-256-GCM)
+- ✅ Привязка credentials к узлам
+- ✅ Scope credentials к проектам
+- ✅ Безопасное хранение секретов
+
+**Workflow sharing:**
+- ✅ Публичный доступ через токены
+- ✅ Типы доступа (view, comment, edit)
+- ✅ Срок действия токенов
+- ✅ Доступ к workflow по ссылке
+
+**Audit и безопасность:**
+- ✅ Audit trail для удаления executions
+- ✅ Логирование критических операций
+- ✅ Защита от удаления running executions
+- ✅ Bcrypt для паролей
+- ✅ Input validation (Zod + class-validator)
+
+### Частично реализовано ⚠️
+
+- ⚠️ **Webhook triggers** - backend определен, но не полностью реализован
+- ⚠️ **Database nodes** (db_select, db_insert) - только заглушки
+
+### Не реализовано ❌
+
+- ❌ Frontend визуальный редактор (в разработке другим разработчиком)
+- ❌ Cron scheduling для автоматического запуска
+- ❌ Real-time collaboration между пользователями
+- ❌ Workflow versioning
+- ❌ Team invitations UI
+- ❌ Activity logs UI
+- ❌ Monitoring dashboard
+- ❌ Экспорт/импорт workflows
+
+## 🔧 Типы узлов
+
+### Триггеры (2)
+- **manual_trigger** - ручной запуск workflow
+- **webhook_trigger** - запуск через webhook (частично)
+
+### Логика (2)
+- **if** - условное ветвление (режимы: all/any)
+- **switch** - множественное ветвление по выражению
+
+### Данные (2)
+- **set** - установка/изменение значений полей
+- **transform** - трансформация данных через JavaScript
+
+### Действия (3)
+- **http_request** - HTTP запросы с поддержкой credentials
+- **code** - выполнение JavaScript кода
+- **delay** - задержка выполнения на указанное время
+
+### База данных (2 - заглушки)
+- **db_select** - выборка из БД (placeholder)
+- **db_insert** - вставка в БД (placeholder)
+
+## 🗄️ База данных
+
+### 13 моделей Prisma:
+
+1. **User** - пользователи системы
+2. **UserProfile** - профили пользователей
+3. **Project** - проекты (PERSONAL/TEAM)
+4. **ProjectMember** - членство в проектах с ролями
+5. **Workflow** - workflow (draft/active/inactive/archived)
+6. **NodeType** - типы узлов (trigger/action/logic/data/integration)
+7. **WorkflowNode** - экземпляры узлов в workflow
+8. **WorkflowEdge** - связи между узлами
+9. **Credential** - зашифрованные учетные данные
+10. **WorkflowShare** - публичный доступ к workflow
+11. **WorkflowExecution** - запуски workflow
+12. **ExecutionNodeLog** - логи выполнения узлов
+13. **ExecutionDeletionAudit** - аудит удалений executions
+
+## 📖 Документация
+
+### Основная документация
+- **[CONTEXT.md](./CONTEXT.md)** - Полный обзор проекта и архитектуры
+- **[README.md](./README.md)** - Этот файл (быстрый старт)
+
+### Детальная документация (папка CONTEXT/)
+- **[CODEBASE_OVERVIEW.md](./CONTEXT/CODEBASE_OVERVIEW.md)** - Полный обзор кодовой базы (681 строка)
+  - Структура модулей и зависимости
+  - API endpoints reference
+  - Матрица прав доступа
+  - Troubleshooting guide
+  
+- **[IMPLEMENTATION_GUIDE.md](./CONTEXT/IMPLEMENTATION_GUIDE.md)** - Руководство по разработке (897 строк)
+  - Пошаговые инструкции добавления функций
+  - Примеры кода
+  - Best practices
+  - Общие паттерны
+  - Debugging guide
+  
+- **[README_EXPLORATION.md](./CONTEXT/README_EXPLORATION.md)** - Итоги исследования проекта (448 строк)
+  - Анализ архитектуры
+  - Метрики качества кода
+  - Рекомендации по развитию
+
+### API документация
+- **Swagger UI:** http://localhost:3000/api (после запуска backend)
+- **OpenAPI spec:** http://localhost:3000/api-json
+
+### База данных
+- **Prisma Studio:** `npm run studio` (в папке backend)
+- **Схемы:** `backend/prisma/*.prisma`
+- **Миграции:** `backend/prisma/migrations/`
+
+## 🏗️ Архитектурные принципы
+
+### 1. Workflow = Граф
+Workflow представляет собой направленный граф из узлов и рёбер. Execution engine обходит граф, выполняя узлы в правильном порядке.
+
+### 2. Универсальные узлы
+Все узлы хранятся в одной таблице `workflow_nodes`. Поведение определяется через `typeCode` и `configJson` (JSONB).
+
+### 3. Разделение design-time и runtime
+- **Design-time:** workflows, nodes, edges (структура)
+- **Runtime:** executions, logs (выполнение)
+
+### 4. Секреты отдельно
+Credentials хранятся в отдельной таблице с шифрованием AES-256-GCM, а не внутри конфигурации узлов.
+
+## 🔒 Безопасность
+
+- ✅ JWT access tokens (15 минут) + refresh tokens (7 дней)
+- ✅ AES-256-GCM шифрование для credentials
+- ✅ Bcrypt для хеширования паролей
+- ✅ Role-based access control (USER, SUPER_ADMIN)
+- ✅ Project-level permissions (OWNER, EDITOR, VIEWER)
+- ✅ Input validation (Zod + class-validator)
+- ✅ Audit trail для критических операций
 
 ## 🧪 Тестирование
 
-### Backend тесты
-
 ```bash
-cd backend
-
-# Запуск всех тестов
+# Запустить все тесты
 npm run test
 
-# Запуск тестов в режиме наблюдения
+# Запустить тесты в watch режиме
 npm run test:watch
 
-# Генерация отчета о покрытии
+# Запустить тесты с coverage
 npm run test:cov
+
+# Запустить e2e тесты
+npm run test:e2e
 ```
 
-### Frontend тесты
+## 🛠️ Полезные команды
+
+### Backend
 
 ```bash
-cd frontend
-
-# Запуск тестов
-npm run test
-
-# Запуск тестов в режиме наблюдения
-npm run test:watch
+npm run dev              # Запустить dev server с hot reload
+npm run build            # Собрать для production
+npm run start:prod       # Запустить production build
+npm run lint             # Запустить ESLint
+npm run format           # Форматировать код с Prettier
+npm run test             # Запустить тесты
+npm run test:watch       # Запустить тесты в watch режиме
+npm run prisma:migrate:dev    # Создать и применить миграцию
+npm run prisma:generate       # Сгенерировать Prisma client
+npm run studio                # Открыть Prisma Studio
 ```
 
----
+## 🎓 Тип проекта
 
-## 📝 Рекомендации по разработке
+**Дипломный проект - 2026**
 
-### Организация кода
+Это упрощённая платформа автоматизации workflow (аналог n8n) для дипломного проекта. Проект демонстрирует:
+- Чистую архитектуру backend на NestJS
+- Работу с графами и топологической сортировкой
+- Систему аутентификации и авторизации
+- Шифрование чувствительных данных
+- Execution engine для выполнения workflow
+- RESTful API с полной документацией
 
-- **Services** - Бизнес-логика и операции с базой данных
-- **Controllers** - Обработка HTTP запросов и маршрутизация
-- **DTOs** - Валидация данных и сериализация
-- **Repositories** - Абстракция запросов к базе данных (при необходимости)
-- **Guards** - Аутентификация и авторизация
-- **Middleware** - Обработка запросов/ответов
+## 📝 Лицензия
 
-### Соглашения об именовании
+UNLICENSED (частный проект)
 
-- **База данных** - `snake_case` (например, `workflow_node`, `created_at`)
-- **TypeScript** - `camelCase` (например, `workflowNode`, `createdAt`)
-- **Классы** - `PascalCase` (например, `WorkflowsService`)
-- **Файлы** - `kebab-case` (например, `workflows.service.ts`)
+## 👥 Команда
 
-### Валидация
+- **Backend:** Полностью реализован
+- **Frontend:** В разработке другим разработчиком
 
-- Используйте **Zod** для сложной валидации конфигурации узлов рабочего процесса
-- Используйте **class-validator** для валидации DTO
-- Всегда валидируйте входные данные пользователя перед операциями с базой данных
+## 🔗 Ссылки
 
-### Обработка ошибок
-
-- Используйте встроенные исключения NestJS (`BadRequestException`, `NotFoundException`, `ForbiddenException`)
-- Включайте описательные сообщения об ошибках
-- Логируйте ошибки для отладки
-
-### Миграции базы данных
-
-```bash
-cd backend
-
-# Создание новой миграции
-npm run prisma:migrate:dev
-
-# Развертывание миграций в production
-npm run prisma:migrate:deploy
-
-# Просмотр базы данных в Prisma Studio
-npm run studio
-```
+- [NestJS Documentation](https://docs.nestjs.com)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs)
 
 ---
 
-## 🔧 Частые задачи
-
-### Добавление нового типа узла
-
-1. **Определение типа узла** в `backend/src/node-types/node-types.defaults.ts`
-2. **Создание обработчика** в сервисе выполнения
-3. **Добавление схемы валидации** в `backend/src/workflows/node-config.schemas.ts`
-4. **Тестирование выполнения** с примером рабочего процесса
-
-### Добавление нового API endpoint
-
-1. **Создание DTO** в `backend/src/feature/dto/`
-2. **Добавление метода сервиса** в `backend/src/feature/feature.service.ts`
-3. **Добавление метода контроллера** в `backend/src/feature/feature.controller.ts`
-4. **Добавление маршрута** с правильными guards и валидацией
-5. **Документирование** в декораторах Swagger
-
-### Отладка выполнения рабочего процесса
-
-1. Проверьте логи выполнения в базе данных: таблица `ExecutionNodeLog`
-2. Просмотрите выход узла в `WorkflowExecution.outputDataJson`
-3. Проверьте сообщение об ошибке в `WorkflowExecution.errorMessage`
-4. Включите отладочное логирование в сервисе выполнения
-
----
-
-## 📊 Соображения производительности
-
-- **Обход графа** - Использует топологическую сортировку с защитой от бесконечных циклов
-- **Пагинация** - Все endpoints списков поддерживают пагинацию limit/offset
-- **Шифрование учетных данных** - Использует AES-256-GCM для безопасного хранения
-- **Индексы базы данных** - Ключевые поля индексированы для производительности запросов
-- **Пулинг соединений** - Prisma управляет пулом соединений с базой данных
-
----
-
-## 🐛 Известные ограничения
-
-- Выполнение рабочего процесса синхронное (нет асинхронной очереди заданий)
-- Нет встроенного планирования рабочих процессов (только ручные/вебхук триггеры)
-- Ограниченные типы узлов по сравнению с полным n8n
-- Нет версионирования или отката рабочих процессов
-- Однопоточное выполнение (нет параллельного выполнения узлов)
-
----
-
-## 📖 Дополнительные ресурсы
-
-- **CONTEXT.md** - Контекст проекта и архитектурные принципы
-- **CODEBASE_OVERVIEW.md** - Подробный справочник для всех модулей
-- **Swagger API Docs** - http://localhost:3000/api
-
----
-
-## 👨‍💼 Информация о проекте
-
-**Тип:** Дипломный проект  
-**Статус:** MVP (реализованы основные функции)  
-**Последнее обновление:** 29 апреля 2026  
-**Лицензия:** UNLICENSED
-
----
-
-## 📞 Поддержка и обратная связь
-
-По вопросам, проблемам или предложениям обратитесь к документации проекта или свяжитесь с командой разработки.
-
----
-
-**Создано с ❤️ используя NestJS, React и PostgreSQL**
+**Последнее обновление:** 5 мая 2026  
+**Версия:** 1.0 (Backend MVP)  
+**Статус:** Backend готов к использованию

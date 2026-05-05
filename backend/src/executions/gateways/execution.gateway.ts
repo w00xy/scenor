@@ -5,7 +5,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'ws';
+import { Server, WebSocket } from 'ws';
 import { Injectable } from '@nestjs/common';
 
 @WebSocketGateway({
@@ -15,15 +15,15 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ExecutionGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
-  private executionSubscribers: Map<string, Set<Socket>> = new Map();
+  private executionSubscribers: Map<string, Set<WebSocket>> = new Map();
 
-  handleConnection(client: Socket) {
+  handleConnection(client: WebSocket) {
     console.log(`Client connected: ${(client as any).id}`);
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: WebSocket) {
     console.log(`Client disconnected: ${(client as any).id}`);
     // Clean up subscriptions
     for (const subscribers of this.executionSubscribers.values()) {
@@ -32,7 +32,7 @@ export class ExecutionGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   @SubscribeMessage('subscribe-execution')
-  handleSubscribeExecution(client: Socket, data: { executionId: string }) {
+  handleSubscribeExecution(client: WebSocket, data: { executionId: string }) {
     const { executionId } = data;
     if (!this.executionSubscribers.has(executionId)) {
       this.executionSubscribers.set(executionId, new Set());
@@ -45,7 +45,7 @@ export class ExecutionGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   @SubscribeMessage('unsubscribe-execution')
-  handleUnsubscribeExecution(client: Socket, data: { executionId: string }) {
+  handleUnsubscribeExecution(client: WebSocket, data: { executionId: string }) {
     const { executionId } = data;
     const subscribers = this.executionSubscribers.get(executionId);
     if (subscribers) {

@@ -10,14 +10,14 @@ enum ProjectType {
 }
 
 model Project {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ownerId     String   @map("owner_id") @db.Uuid
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId     String      @map("owner_id") @db.Uuid
   name        String
-  description String?  @db.VarChar(255)
-  isArchived  Boolean  @default(false) @map("is_archived")
+  description String?     @db.VarChar(255)
+  isArchived  Boolean     @default(false) @map("is_archived")
   type        ProjectType @default(PERSONAL)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   owner User @relation("ProjectOwner", fields: [ownerId], references: [id])
 

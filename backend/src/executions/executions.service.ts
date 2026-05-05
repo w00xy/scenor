@@ -9,6 +9,7 @@ import {
   NodeExecutionStatus,
   Prisma,
   ProjectMemberRole,
+  Role,
   TriggerType,
   WorkflowEdge,
   WorkflowNode,
@@ -748,6 +749,125 @@ export class ExecutionsService {
 
       return failedExecution;
     }
+  }
+
+  async deleteWorkflowExecution(
+    userId: string,
+    workflowId: string,
+    executionId: string,
+    reason?: string,
+  ) {
+    // Load user to check global role
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Load workflow with access check
+    const workflow = await this.prisma.workflow.findUnique({
+      where: { id: workflowId },
+      include: {
+        project: {
+          include: {
+            members: {
+              where: { userId },
+              select: { role: true },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+
+    if (!workflow) {
+      throw new NotFoundException('Workflow not found');
+    }
+
+    // Determine user's role in the project
+    const projectRole =
+      workflow.project.ownerId === userId
+        ? ProjectMemberRole.OWNER
+        : workflow.project.members[0]?.role;
+
+    if (!projectRole) {
+      throw new ForbiddenException('You do not have access to this workflow');
+    }
+
+    // Load execution and verify it belongs to this workflow
+    const execution = await this.prisma.workflowExecution.findFirst({
+      where: { id: executionId, workflowId },
+      include: {
+        _count: {
+          select: { logs: true },
+        },
+      },
+    });
+
+    if (!execution) {
+      throw new NotFoundException('Execution not found');
+    }
+
+    // Safety check: prevent deletion of running executions
+    if (execution.status === ExecutionStatus.running) {
+      throw new BadRequestException(
+        'Cannot delete execution that is currently running',
+      );
+    }
+
+    // Authorization check: determine if user can delete this execution
+    const isSuperAdmin = user.role === Role.SUPER_ADMIN;
+    const isOwner = projectRole === ProjectMemberRole.OWNER;
+    const isExecutionInitiator = execution.startedByUserId === userId;
+    const isEditor = projectRole === ProjectMemberRole.EDITOR;
+
+    const canDelete =
+      isSuperAdmin ||
+      isOwner ||
+      (isEditor && isExecutionInitiator);
+
+    if (!canDelete) {
+      throw new ForbiddenException(
+        'Only project owners or execution initiators can delete executions',
+      );
+    }
+
+    // Perform deletion in transaction with audit logging
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Create audit record before deletion
+      const auditRecord = await tx.executionDeletionAudit.create({
+        data: {
+          executionId: execution.id,
+          workflowId: workflow.id,
+          workflowName: workflow.name,
+          deletedByUserId: userId,
+          deletedByRole: projectRole,
+          executionStatus: execution.status,
+          executionStartedAt: execution.startedAt,
+          executionFinishedAt: execution.finishedAt,
+          nodeLogsCount: execution._count.logs,
+          reason: reason?.trim() || null,
+        },
+      });
+
+      // Delete execution (cascade deletes all logs)
+      await tx.workflowExecution.delete({
+        where: { id: executionId },
+      });
+
+      return {
+        success: true,
+        message: 'Execution deleted successfully',
+        deletedExecutionId: executionId,
+        deletedLogsCount: execution._count.logs,
+        auditId: auditRecord.id,
+      };
+    });
+
+    return result;
   }
 
   private async requireWorkflowGraphAccess(
