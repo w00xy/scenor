@@ -2,13 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
+import { InitializationService } from './initialization/initialization.service.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*', // only on dev
-  });
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true,
+  })
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -19,22 +21,30 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Scenor api')
-    .setDescription('The scenor API description')
+    .setTitle('Scenor API')
+    .setDescription('API Документация проекта')
     .setVersion('1.0.1')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'JWT Token from /users/login',
+        description: 'JWT полученный после регистрации',
       },
       'access-token',
     )
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
+
+  // Initialize admin user and node types
+  const initializationService = app.get(InitializationService);
+  await initializationService.initialize();
   
-  await app.listen(process.env.PORT ?? 3000, process.env.HOSTNAME ?? '127.0.0.1');
+  const port = process.env.PORT ?? 3000;
+  const hostname = process.env.HOSTNAME ?? '0.0.0.0';
+  await app.listen(port, hostname);
+  
+  console.log(`App started on http://${hostname}:${port}`);
 }
 bootstrap();
