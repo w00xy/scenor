@@ -14,6 +14,7 @@ import { WorkflowSharesModule } from './workflow-shares/workflow-shares.module.j
 import { getEnvFilePaths, validateEnv } from './config/env.config.js';
 import { InitializationModule } from './initialization/initialization.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
+import { AdminModule } from './admin/admin.module.js';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
     CredentialsModule,
     WorkflowSharesModule,
     InitializationModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
