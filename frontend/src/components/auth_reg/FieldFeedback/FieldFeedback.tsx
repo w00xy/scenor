@@ -18,14 +18,19 @@ export function FieldFeedback({
 
   useEffect(() => {
     if (message) {
-      setIsVisible(false);
-
-      const timer = setTimeout(() => {
+      // Используем setTimeout для асинхронного обновления состояния
+      const showTimer = setTimeout(() => {
         setIsVisible(true);
       }, 50);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(showTimer);
+      };
     }
+    // Сбрасываем видимость когда message становится пустым
+    return () => {
+      setIsVisible(false);
+    };
   }, [message]);
 
   if (!message) return null;

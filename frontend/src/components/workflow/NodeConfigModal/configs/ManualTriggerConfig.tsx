@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface ManualTriggerConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -54,6 +58,7 @@ export function ManualTriggerConfig({
       const parsed = JSON.parse(value);
       setJsonError(null);
       const updated = { ...localConfig, inputDataJson: parsed };
+     
       setLocalConfig(updated);
       onSave(updated);
     } catch (e) {
@@ -84,7 +89,7 @@ export function ManualTriggerConfig({
             <textarea
               className={`node-config__textarea ${jsonError ? 'error' : ''}`}
               value={inputDataJson}
-              onChange={(e) => handleInputDataChange(e.target.value)}
+              onChange={(_e) => handleInputDataChange(e.target.value)}
               placeholder='{"key": "value"}'
               rows={8}
             />

@@ -20,4 +20,3 @@ export class CreateProjectDto {
   @MaxLength(255)
   description?: string;
 }
-

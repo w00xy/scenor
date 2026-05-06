@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectsService } from './projects.service';
 import { DatabaseService } from '../database/database.service';
-import { ProjectMemberRole, Role } from '@prisma/client';
+import { ProjectMemberRole } from '@prisma/client';
 
 describe('ProjectsService', () => {
   let service: ProjectsService;
@@ -42,7 +42,7 @@ describe('ProjectsService', () => {
     }).compile();
 
     service = module.get<ProjectsService>(ProjectsService);
-    prisma = module.get(DatabaseService) as jest.Mocked<DatabaseService>;
+    prisma = module.get(DatabaseService);
   });
 
   it('should be defined', () => {
@@ -74,9 +74,13 @@ describe('ProjectsService', () => {
         },
       };
 
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        return callback(mockTx);
-      });
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/require-await
+        async (callback) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+          return callback(mockTx);
+        },
+      );
 
       const result = await service.createProject(mockUserId, {
         name: 'Test Project',
@@ -84,6 +88,7 @@ describe('ProjectsService', () => {
       });
 
       expect(result).toEqual(mockProject);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
@@ -110,6 +115,7 @@ describe('ProjectsService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toEqual(mockProjectId);
       expect(result[0].accessRole).toEqual(ProjectMemberRole.OWNER);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.project.findMany).toHaveBeenCalled();
     });
   });
@@ -132,6 +138,7 @@ describe('ProjectsService', () => {
       const result = await service.getProjectById(mockUserId, mockProjectId);
 
       expect(result).toEqual(mockProject);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.project.findUnique).toHaveBeenCalledWith({
         where: { id: mockProjectId },
         include: expect.any(Object),

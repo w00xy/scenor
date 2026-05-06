@@ -38,22 +38,22 @@ export function useExecutionWebSocket(
   const subscribedExecutionsRef = useRef<Set<string>>(new Set());
 
   const handleConnectionChange = useCallback((status: ConnectionStatus) => {
-    console.log('[useExecutionWebSocket] Connection status:', status);
+    console.warn('[useExecutionWebSocket] Connection status:', status);
     setConnectionStatus(status);
   }, []);
 
   const handleExecutionUpdate = useCallback((execId: string, data: ExecutionUpdate) => {
-    console.log('[useExecutionWebSocket] Execution update:', execId, data.status);
+    console.warn('[useExecutionWebSocket] Execution update:', execId, data.status);
     setExecutionStatus(data.status);
     
     // Если execution завершен, можно показать уведомление
     if (data.status === 'success' || data.status === 'failed') {
-      console.log(`[useExecutionWebSocket] Execution ${execId} finished with status: ${data.status}`);
+      console.warn(`[useExecutionWebSocket] Execution ${execId} finished with status: ${data.status}`);
     }
   }, []);
 
   const handleNodeLog = useCallback((execId: string, log: NodeLog) => {
-    console.log('[useExecutionWebSocket] Node log:', execId, log.nodeId, log.status);
+    console.warn('[useExecutionWebSocket] Node log:', execId, log.nodeId, log.status);
     setLogs((prevLogs) => {
       // Проверяем, есть ли уже лог с таким ID
       const existingIndex = prevLogs.findIndex(l => l.id === log.id);
@@ -95,6 +95,7 @@ export function useExecutionWebSocket(
       subscribedExecutionsRef.current.forEach(execId => {
         service.unsubscribe(execId);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
       subscribedExecutionsRef.current.clear();
     };
   }, [autoConnect, handleConnectionChange, handleExecutionUpdate, handleNodeLog, handleError]);
@@ -102,15 +103,16 @@ export function useExecutionWebSocket(
   // Автоматическая подписка на executionId
   useEffect(() => {
     if (executionId && autoSubscribe && wsServiceRef.current.isConnected()) {
-      console.log('[useExecutionWebSocket] Auto-subscribing to:', executionId);
+      console.warn('[useExecutionWebSocket] Auto-subscribing to:', executionId);
       wsServiceRef.current.subscribe(executionId);
       subscribedExecutionsRef.current.add(executionId);
 
       return () => {
         if (subscribedExecutionsRef.current.has(executionId)) {
-          console.log('[useExecutionWebSocket] Auto-unsubscribing from:', executionId);
+          console.warn('[useExecutionWebSocket] Auto-unsubscribing from:', executionId);
           wsServiceRef.current.unsubscribe(executionId);
           subscribedExecutionsRef.current.delete(executionId);
+     
         }
       };
     }
@@ -125,7 +127,7 @@ export function useExecutionWebSocket(
   }, []);
 
   const subscribe = useCallback((execId: string) => {
-    console.log('[useExecutionWebSocket] Subscribing to:', execId);
+    console.warn('[useExecutionWebSocket] Subscribing to:', execId);
     wsServiceRef.current.subscribe(execId);
     subscribedExecutionsRef.current.add(execId);
     
@@ -136,7 +138,7 @@ export function useExecutionWebSocket(
   }, []);
 
   const unsubscribe = useCallback((execId: string) => {
-    console.log('[useExecutionWebSocket] Unsubscribing from:', execId);
+    console.warn('[useExecutionWebSocket] Unsubscribing from:', execId);
     wsServiceRef.current.unsubscribe(execId);
     subscribedExecutionsRef.current.delete(execId);
   }, []);

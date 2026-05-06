@@ -32,6 +32,7 @@ export function useLogin() {
       showFeedback('Успешный вход!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showFeedback(error.message || 'Неверный Email или пароль', 'error');
       return false;

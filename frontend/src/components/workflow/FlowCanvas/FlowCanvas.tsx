@@ -4,6 +4,7 @@ import {
   Background,
   Controls,
   MiniMap,
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
   addEdge,
   useNodesState,
   useEdgesState,
@@ -21,7 +22,9 @@ import { TriggerNode } from "../CustomNodes/TriggerNode";
 import { DefaultNode } from "../CustomNodes/DefaultNode";
 import { CustomEdge } from "../CustomEdges/CustomEdge";
 import { workflowApi } from "../../../services/api";
+   
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -70,7 +73,7 @@ export function FlowCanvas({
   initialEdges = [],
   onNodesChange,
   onEdgesChange,
-  onAddNode,
+  _onAddNode,
   onDeleteEdge,
   executionState,
 }: FlowCanvasProps): JSX.Element {
@@ -229,6 +232,7 @@ export function FlowCanvas({
           data: { ...edge.data, onDelete: handleDeleteEdge }
         }))
       );
+     
     }
   }, [setEdges]);
 
@@ -257,6 +261,7 @@ export function FlowCanvas({
           },
         };
 
+     
         setEdges((prevEdges) => [...prevEdges, flowEdge]);
         onEdgesChange?.([...edges, flowEdge]);
       } catch (error) {
@@ -264,7 +269,9 @@ export function FlowCanvas({
       }
     },
     [workflowId, edges, setEdges, onEdgesChange, handleDeleteEdge]
+     
   );
+     
 
   const handleNodesChange = useCallback(
     async (changes: any) => {
@@ -275,8 +282,10 @@ export function FlowCanvas({
           try {
             await workflowApi.deleteNode(workflowId, change.id);
           } catch (error) {
+            console.error('Failed to delete node:', error);
           }
         }
+     
       }
 
       onNodesChangeInternal(changes);
@@ -302,6 +311,7 @@ export function FlowCanvas({
             return boundedNodes;
           });
         }, 0);
+     
       }
     },
     [workflowId, onNodesChangeInternal, setNodes, debouncedSavePositions]

@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface TransformConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -26,11 +30,12 @@ interface TransformConfigProps {
 
 export function TransformConfig({ 
   config, 
-  onSave,
+  _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
 }: TransformConfigProps): JSX.Element {
+   
   const [localConfig, setLocalConfig] = useState(config || { script: 'return input;' });
 
   const handleChange = (newConfig: any) => {

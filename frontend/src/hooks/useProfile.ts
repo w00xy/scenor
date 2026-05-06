@@ -141,11 +141,13 @@ export function useProfile() {
       const decoded = jwtDecode<{ sub: string }>(token);
       setUserId(decoded.sub);
       loadData(decoded.sub);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       showFeedback("Ошибка загрузки профиля", "error");
       setIsLoading(false);
     }
   }, [showFeedback]);
+     
 
   const handleSave = async () => {
     if (!canSave) return;

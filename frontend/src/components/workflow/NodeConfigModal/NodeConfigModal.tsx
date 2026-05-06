@@ -7,19 +7,21 @@ interface NodeConfigModalProps {
   isOpen: boolean;
   nodeId: string;
   nodeType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   nodeData: any;
   onClose: () => void;
   onSave: (nodeId: string, config: any) => void;
+   
   children: React.ReactNode;
 }
 
 export function NodeConfigModal({
   isOpen,
-  nodeId,
+  _nodeId,
   nodeType,
-  nodeData,
+  _nodeData,
   onClose,
-  onSave,
+  _onSave,
   children,
 }: NodeConfigModalProps): JSX.Element | null {
   useEffect(() => {

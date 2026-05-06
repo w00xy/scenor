@@ -70,7 +70,8 @@ export class CreateWorkflowNodeDto {
 
   @ApiPropertyOptional({
     example: 'f9d47356-59f6-48cc-8e5c-72b1220837d6',
-    description: 'Credential id from credentials table (must belong to workflow project)',
+    description:
+      'Credential id from credentials table (must belong to workflow project)',
   })
   @IsOptional()
   @IsUUID()

@@ -30,14 +30,14 @@ export class ExecutionLogResponseDto {
     description: 'Входные данные узла',
     nullable: true,
   })
-  inputDataJson!: any | null;
+  inputDataJson!: Record<string, unknown> | null;
 
   @ApiProperty({
     example: { statusCode: 200, body: { success: true } },
     description: 'Выходные данные узла',
     nullable: true,
   })
-  outputDataJson!: any | null;
+  outputDataJson!: Record<string, unknown> | null;
 
   @ApiProperty({
     example: 'Connection timeout',

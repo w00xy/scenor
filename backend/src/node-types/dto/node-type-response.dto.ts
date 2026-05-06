@@ -36,14 +36,14 @@ export class NodeTypeResponseDto {
     example: { url: '', method: 'GET', headers: {} },
     description: 'Конфигурация по умолчанию для узла',
   })
-  defaultConfigJson!: any;
+  defaultConfigJson!: Record<string, unknown>;
 
   @ApiProperty({
     example: { type: 'object', properties: { url: { type: 'string' } } },
     description: 'JSON Schema для валидации конфигурации',
     nullable: true,
   })
-  schemaJson!: any | null;
+  schemaJson!: Record<string, unknown> | null;
 
   @ApiProperty({
     example: true,

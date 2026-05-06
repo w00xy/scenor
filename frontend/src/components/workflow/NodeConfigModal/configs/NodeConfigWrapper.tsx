@@ -11,6 +11,7 @@ import { CodeConfig } from "./CodeConfig";
 import { DelayConfig } from "./DelayConfig";
 import { DbSelectConfig } from "./DbSelectConfig";
 import { DbInsertConfig } from "./DbInsertConfig";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { nodeDisplayNames } from "../../nodeIconMap";
 import { Edge, Node } from "reactflow";
 
@@ -23,7 +24,9 @@ interface ConnectionInfo {
 interface ExecutionResult {
   status: string;
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
+   
   errorMessage: string | null;
   finishedAt: string | null;
 }
@@ -31,10 +34,13 @@ interface ExecutionResult {
 interface NodeConfigWrapperProps {
   isOpen: boolean;
   nodeId: string;
+   
   nodeType: string;
   nodeData: any;
+   
   onClose: () => void;
   onSave: (nodeId: string, config: any) => void;
+   
   edges?: Edge[];
   nodes?: Node[];
   executionLogs?: any[];
@@ -49,6 +55,7 @@ export function NodeConfigWrapper({
   onSave,
   edges = [],
   nodes = [],
+   
   executionLogs = [],
 }: NodeConfigWrapperProps): JSX.Element {
 
@@ -86,7 +93,7 @@ export function NodeConfigWrapper({
     ? (() => {
         const nodeLog = executionLogs.find(log => log.nodeId === nodeId);
         if (nodeLog) {
-          console.log('[NodeConfigWrapper] Found log for node:', nodeId, nodeLog);
+          console.warn('[NodeConfigWrapper] Found log for node:', nodeId, nodeLog);
           return {
             status: nodeLog.status,
             inputDataJson: nodeLog.inputJson || nodeLog.inputDataJson,

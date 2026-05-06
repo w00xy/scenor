@@ -23,7 +23,7 @@ export function CreateMenu({
   const [openSubmenu, setOpenSubmenu] = useState<
     "scenarios" | "credentials" | null
   >(null);
-  const { personalProjectId, createProject, teamProjects } = useProjects();
+  const { personalProjectId: _personalProjectId, createProject, teamProjects } = useProjects();
   const navigate = useNavigate();
   const positionClass = collapsed
     ? "create-menu--right"

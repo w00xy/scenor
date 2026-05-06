@@ -71,6 +71,7 @@ export function ProjectsProvider({
     }
 
     void refreshProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const personalProject =
@@ -118,6 +119,7 @@ export function ProjectsProvider({
 }
 
 export function useProjects() {
+ 
   const context = useContext(ProjectsContext);
 
   if (!context) {

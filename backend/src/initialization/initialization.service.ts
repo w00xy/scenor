@@ -32,8 +32,12 @@ export class InitializationService {
 
   private async createAdminUser() {
     const adminEmail = this.configService.get('ADMIN_EMAIL', { infer: true });
-    const adminUsername = this.configService.get('ADMIN_USERNAME', { infer: true });
-    const adminPassword = this.configService.get('ADMIN_PASSWORD', { infer: true });
+    const adminUsername = this.configService.get('ADMIN_USERNAME', {
+      infer: true,
+    });
+    const adminPassword = this.configService.get('ADMIN_PASSWORD', {
+      infer: true,
+    });
 
     const existingAdmin = await this.prisma.user.findFirst({
       where: {

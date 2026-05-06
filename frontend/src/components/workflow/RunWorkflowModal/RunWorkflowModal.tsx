@@ -26,6 +26,7 @@ export function RunWorkflowModal({ isOpen, onClose, onRun, workflowName }: RunWo
     try {
       JSON.parse(value);
       setJsonError(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       setJsonError("Некорректный JSON");
     }
@@ -42,6 +43,7 @@ export function RunWorkflowModal({ isOpen, onClose, onRun, workflowName }: RunWo
       try {
         parsedData = JSON.parse(inputJson);
       } catch (e) {
+     
         setJsonError("Некорректный JSON");
         return;
       }
@@ -102,7 +104,7 @@ export function RunWorkflowModal({ isOpen, onClose, onRun, workflowName }: RunWo
             <textarea
               className={`run-workflow-modal__textarea ${jsonError ? 'error' : ''}`}
               value={inputJson}
-              onChange={(e) => handleInputChange(e.target.value)}
+              onChange={(_e) => handleInputChange(e.target.value)}
               placeholder='{"key": "value"}'
               rows={10}
             />

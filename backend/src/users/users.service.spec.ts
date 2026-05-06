@@ -29,6 +29,7 @@ describe('UsersService', () => {
   });
 
   const toPublicUser = (user: User) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, role, ...publicUser } = user;
     return {
       ...publicUser,
@@ -76,13 +77,9 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    usersRepository = module.get(
-      UsersRepository,
-    ) as jest.Mocked<UsersRepository>;
-    usersUtils = module.get(UsersUtils) as jest.Mocked<UsersUtils>;
-    authTokenService = module.get(
-      AuthTokenService,
-    ) as jest.Mocked<AuthTokenService>;
+    usersRepository = module.get(UsersRepository);
+    usersUtils = module.get(UsersUtils);
+    authTokenService = module.get(AuthTokenService);
   });
 
   it('should be defined', () => {
@@ -113,15 +110,19 @@ describe('UsersService', () => {
         password: 'strongpass123',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByEmail).toHaveBeenCalledWith(
         'alex@example.com',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByUsername).toHaveBeenCalledWith('Alex');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.create).toHaveBeenCalledWith({
         username: 'Alex',
         email: 'alex@example.com',
         password: 'new-hash',
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authTokenService.generateTokens).toHaveBeenCalledWith(
         createdUser.id,
         createdUser.role,
@@ -161,7 +162,9 @@ describe('UsersService', () => {
           password: 'strongpass123',
         }),
       ).rejects.toThrow(ConflictException);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersUtils.hashPassword).not.toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.create).not.toHaveBeenCalled();
     });
   });
@@ -183,13 +186,16 @@ describe('UsersService', () => {
         password: 'strongpass123',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByEmail).toHaveBeenCalledWith(
         'alex@example.com',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersUtils.comparePassword).toHaveBeenCalledWith(
         'strongpass123',
         user.passwordHash,
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authTokenService.generateTokens).toHaveBeenCalledWith(
         user.id,
         user.role,
@@ -246,9 +252,11 @@ describe('UsersService', () => {
 
       const result = await service.refreshTokens('  valid-refresh-token  ');
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authTokenService.verifyRefreshToken).toHaveBeenCalledWith(
         'valid-refresh-token',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
       expect(result).toEqual(tokens);
     });
@@ -288,6 +296,7 @@ describe('UsersService', () => {
 
       const result = await service.getAllUsers(2, 0);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findAll).toHaveBeenCalledWith(2, 0);
       expect(result).toEqual([
         toPublicUser(firstUser),
@@ -314,6 +323,7 @@ describe('UsersService', () => {
 
       const result = await service.getUserById(user.id);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
       expect(result).toEqual(toPublicUser(user));
       expect(result).not.toHaveProperty('passwordHash');
@@ -349,12 +359,15 @@ describe('UsersService', () => {
         password: 'newstrongpass123',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByUsername).toHaveBeenCalledWith(
         'Alex Updated',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByEmail).toHaveBeenCalledWith(
         'alex.updated@example.com',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.update).toHaveBeenCalledWith(user.id, {
         username: 'Alex Updated',
         email: 'alex.updated@example.com',
@@ -383,7 +396,9 @@ describe('UsersService', () => {
 
       const result = await service.deleteUser(user.id);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.delete).toHaveBeenCalledWith(user.id);
       expect(result).toEqual(toPublicUser(user));
       expect(result).not.toHaveProperty('passwordHash');
@@ -406,7 +421,9 @@ describe('UsersService', () => {
 
       const result = await service.checkPassword(user.id, '  strongpass123  ');
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersUtils.comparePassword).toHaveBeenCalledWith(
         'strongpass123',
         user.passwordHash,
@@ -437,7 +454,10 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.checkPassword('f8eb17aa-c986-4309-9f20-4f658ec859d0', 'password'),
+        service.checkPassword(
+          'f8eb17aa-c986-4309-9f20-4f658ec859d0',
+          'password',
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });

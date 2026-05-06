@@ -13,6 +13,7 @@ class ApiError extends Error {
   }
 }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parseJsonSafe = async (response: Response): Promise<any> => {
   if (response.status === 204) {
     return null;
@@ -89,6 +90,7 @@ export const authApi = {
     password: string;
   }) =>
     request<{ accessToken: string; refreshToken: string; user: any }>(
+   
       "/users/login",
       { method: "POST", body: JSON.stringify(credentials) },
     ),
@@ -317,6 +319,7 @@ export const workflowApi = {
         label: string | null;
         posX: number;
         posY: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
         configJson: any;
         credentialsId: string | null;
         notes: string | null;
@@ -342,6 +345,7 @@ export const workflowApi = {
     name?: string;
     label?: string;
     posX: number;
+   
     posY: number;
     configJson?: any;
   }) =>
@@ -351,6 +355,7 @@ export const workflowApi = {
       typeCode: string;
       name: string | null;
       label: string | null;
+   
       posX: number;
       posY: number;
       configJson: any;
@@ -360,6 +365,7 @@ export const workflowApi = {
 
   updateNode: (workflowId: string, nodeId: string, data: {
     name?: string;
+   
     label?: string;
     posX?: number;
     posY?: number;
@@ -370,6 +376,7 @@ export const workflowApi = {
       id: string;
       workflowId: string;
       typeCode: string;
+   
       name: string | null;
       label: string | null;
       posX: number;
@@ -407,7 +414,9 @@ export const workflowApi = {
     request<{
       id: string;
       workflowId: string;
+   
       startedByUserId: string;
+   
       triggerType: string;
       status: string;
       startedAt: string;
@@ -425,7 +434,9 @@ export const workflowApi = {
 
   getExecutions: (workflowId: string, params?: { limit?: number; offset?: number }) =>
     request<Array<{
+   
       id: string;
+   
       workflowId: string;
       startedByUserId: string;
       triggerType: string;
@@ -437,7 +448,9 @@ export const workflowApi = {
       errorMessage: string | null;
     }>>(`/workflows/${workflowId}/executions?limit=${params?.limit || 50}&offset=${params?.offset || 0}`, { method: "GET" }, true),
 
+   
   getExecution: (workflowId: string, executionId: string) =>
+   
     request<{
       id: string;
       workflowId: string;
@@ -448,7 +461,9 @@ export const workflowApi = {
       finishedAt: string | null;
       inputDataJson: any;
       outputDataJson: any;
+   
       errorMessage: string | null;
+   
     }>(`/workflows/${workflowId}/executions/${executionId}`, { method: "GET" }, true),
 
   getExecutionLogs: (workflowId: string, executionId: string, params?: { limit?: number; offset?: number }) =>

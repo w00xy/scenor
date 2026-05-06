@@ -35,6 +35,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMenu = () => {
   const context = useContext(MenuContext);
   if (!context) throw new Error("useMenu must be used within MenuProvider");

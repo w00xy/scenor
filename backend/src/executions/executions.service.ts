@@ -139,7 +139,11 @@ export class ExecutionsService {
     });
   }
 
-  async getWorkflowExecution(userId: string, workflowId: string, executionId: string) {
+  async getWorkflowExecution(
+    userId: string,
+    workflowId: string,
+    executionId: string,
+  ) {
     await this.requireWorkflowGraphAccess(userId, workflowId, [
       ProjectMemberRole.OWNER,
       ProjectMemberRole.EDITOR,
@@ -219,11 +223,15 @@ export class ExecutionsService {
       );
     }
 
-    const triggerNodes = nodes.filter((node) => node.typeCode === 'manual_trigger');
+    const triggerNodes = nodes.filter(
+      (node) => node.typeCode === 'manual_trigger',
+    );
     const startNodes =
       triggerNodes.length > 0
         ? triggerNodes
-        : nodes.filter((node) => (incomingCountByNodeId.get(node.id) ?? 0) === 0);
+        : nodes.filter(
+            (node) => (incomingCountByNodeId.get(node.id) ?? 0) === 0,
+          );
 
     if (startNodes.length === 0) {
       throw new BadRequestException(
@@ -329,7 +337,8 @@ export class ExecutionsService {
           });
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Node execution failed';
+        const message =
+          error instanceof Error ? error.message : 'Node execution failed';
 
         const failedLog = await this.prisma.executionNodeLog.update({
           where: { id: log.id },
@@ -404,7 +413,9 @@ export class ExecutionsService {
       typeof config.script === 'string' && config.script.trim().length > 0
         ? config.script
         : 'return input;';
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const fn = new Function('input', script);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const output = fn(input);
     return { output };
   }
@@ -435,8 +446,14 @@ export class ExecutionsService {
     input: unknown,
     config: Record<string, unknown>,
   ): NodeExecutionResult {
-    const rawExpression = String(config.expression ?? '{{input}}');
-    const expressionValue = this.resolveTemplateValue(rawExpression, input);
+    const rawExpression = config.expression ?? '{{input}}';
+    const expressionStr =
+      typeof rawExpression === 'string' ||
+      typeof rawExpression === 'number' ||
+      typeof rawExpression === 'boolean'
+        ? String(rawExpression)
+        : '{{input}}';
+    const expressionValue = this.resolveTemplateValue(expressionStr, input);
     const cases = Array.isArray(config.cases) ? config.cases : [];
 
     for (let index = 0; index < cases.length; index += 1) {
@@ -471,8 +488,16 @@ export class ExecutionsService {
     config: Record<string, unknown>,
     executionId: string,
   ): NodeExecutionResult {
-    const source = String(config.source ?? 'return input;');
-    const fn = new Function('input', 'config', 'context', source);
+    const source = config.source ?? 'return input;';
+    const sourceStr =
+      typeof source === 'string' ||
+      typeof source === 'number' ||
+      typeof source === 'boolean'
+        ? String(source)
+        : 'return input;';
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const fn = new Function('input', 'config', 'context', sourceStr);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const output = fn(input, config, { executionId });
     return { output };
   }
@@ -481,11 +506,24 @@ export class ExecutionsService {
     input: unknown,
     config: Record<string, unknown>,
   ): Promise<NodeExecutionResult> {
-    const urlRaw = String(config.url ?? '').trim();
-    if (!urlRaw) {
+    const urlRaw = config.url ?? '';
+    const urlStr =
+      typeof urlRaw === 'string' ||
+      typeof urlRaw === 'number' ||
+      typeof urlRaw === 'boolean'
+        ? String(urlRaw).trim()
+        : '';
+    if (!urlStr) {
       throw new BadRequestException('HTTP node requires config.url');
     }
-    const method = String(config.method ?? 'GET').toUpperCase();
+    const methodRaw = config.method ?? 'GET';
+    const method = (
+      typeof methodRaw === 'string' ||
+      typeof methodRaw === 'number' ||
+      typeof methodRaw === 'boolean'
+        ? String(methodRaw)
+        : 'GET'
+    ).toUpperCase();
     const headers = this.toStringRecord(config.headers);
     const query = this.toRecord(config.query);
     const timeoutRaw = Number(config.timeout ?? 10000);
@@ -493,12 +531,18 @@ export class ExecutionsService {
       ? Math.max(100, Math.min(120000, Math.floor(timeoutRaw)))
       : 10000;
 
-    const url = new URL(urlRaw);
+    const url = new URL(urlStr);
     for (const [key, value] of Object.entries(query)) {
       if (value === undefined || value === null) {
         continue;
       }
-      url.searchParams.set(key, String(value));
+      const valueStr =
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+          ? String(value)
+          : JSON.stringify(value);
+      url.searchParams.set(key, valueStr);
     }
 
     const controller = new AbortController();
@@ -519,6 +563,7 @@ export class ExecutionsService {
       });
 
       const contentType = response.headers.get('content-type') ?? '';
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const responseBody = contentType.includes('application/json')
         ? await response.json()
         : await response.text();
@@ -569,12 +614,17 @@ export class ExecutionsService {
 
   private evaluateCondition(condition: unknown, input: unknown): boolean {
     const item = this.toRecord(condition);
-    const left = this.resolveTemplateValue(String(item.left ?? ''), input);
+    const leftRaw = item.left ?? '';
+    const leftStr = typeof leftRaw === 'string' ? leftRaw : String(leftRaw);
+    const left = this.resolveTemplateValue(leftStr, input);
     const right =
       typeof item.right === 'string'
         ? this.resolveTemplateValue(item.right, input)
         : item.right;
-    const operator = String(item.operator ?? 'equals').toLowerCase();
+    const operatorRaw = item.operator ?? 'equals';
+    const operator = (
+      typeof operatorRaw === 'string' ? operatorRaw : String(operatorRaw)
+    ).toLowerCase();
 
     switch (operator) {
       case 'equals':
@@ -596,17 +646,53 @@ export class ExecutionsService {
       case '<=':
         return Number(left) <= Number(right);
       case 'contains':
-        return String(left).includes(String(right ?? ''));
+        return (typeof left === 'string' ? left : String(left)).includes(
+          typeof right === 'string' ||
+            typeof right === 'number' ||
+            typeof right === 'boolean'
+            ? String(right)
+            : '',
+        );
       case 'not_contains':
-        return !String(left).includes(String(right ?? ''));
+        return !(typeof left === 'string' ? left : String(left)).includes(
+          typeof right === 'string' ||
+            typeof right === 'number' ||
+            typeof right === 'boolean'
+            ? String(right)
+            : '',
+        );
       case 'in':
-        return Array.isArray(right) && right.some((itemValue) => this.areValuesEqual(itemValue, left));
+        return (
+          Array.isArray(right) &&
+          right.some((itemValue) => this.areValuesEqual(itemValue, left))
+        );
       case 'not_in':
-        return Array.isArray(right) && !right.some((itemValue) => this.areValuesEqual(itemValue, left));
+        return (
+          Array.isArray(right) &&
+          !right.some((itemValue) => this.areValuesEqual(itemValue, left))
+        );
       case 'is_empty':
-        return left === null || left === undefined || String(left).trim() === '';
+        return (
+          left === null ||
+          left === undefined ||
+          (typeof left === 'string' ||
+          typeof left === 'number' ||
+          typeof left === 'boolean'
+            ? String(left).trim()
+            : ''
+          ).length === 0
+        );
       case 'is_not_empty':
-        return !(left === null || left === undefined || String(left).trim() === '');
+        return !(
+          left === null ||
+          left === undefined ||
+          (typeof left === 'string' ||
+          typeof left === 'number' ||
+          typeof left === 'boolean'
+            ? String(left).trim()
+            : ''
+          ).length === 0
+        );
       default:
         return this.areValuesEqual(left, right);
     }
@@ -667,7 +753,12 @@ export class ExecutionsService {
       if (item === undefined || item === null) {
         continue;
       }
-      result[key] = String(item);
+      result[key] =
+        typeof item === 'string' ||
+        typeof item === 'number' ||
+        typeof item === 'boolean'
+          ? String(item)
+          : JSON.stringify(item);
     }
     return result;
   }
@@ -886,9 +977,7 @@ export class ExecutionsService {
     const isEditor = projectRole === ProjectMemberRole.EDITOR;
 
     const canDelete =
-      isSuperAdmin ||
-      isOwner ||
-      (isEditor && isExecutionInitiator);
+      isSuperAdmin || isOwner || (isEditor && isExecutionInitiator);
 
     if (!canDelete) {
       throw new ForbiddenException(
@@ -969,4 +1058,3 @@ export class ExecutionsService {
     return workflow;
   }
 }
-

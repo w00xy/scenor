@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkflowSharesService } from './workflow-shares.service';
 import { DatabaseService } from '../database/database.service';
-import { ProjectMemberRole } from '@prisma/client';
 
 describe('WorkflowSharesService', () => {
   let service: WorkflowSharesService;
@@ -39,7 +38,7 @@ describe('WorkflowSharesService', () => {
     }).compile();
 
     service = module.get<WorkflowSharesService>(WorkflowSharesService);
-    prisma = module.get(DatabaseService) as jest.Mocked<DatabaseService>;
+    prisma = module.get(DatabaseService);
   });
 
   it('should be defined', () => {
@@ -71,11 +70,16 @@ describe('WorkflowSharesService', () => {
       (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow);
       (prisma.workflowShare.create as jest.Mock).mockResolvedValue(mockShare);
 
-      const result = await service.createWorkflowShare(mockUserId, mockWorkflowId, {
-        isPublic: true,
-      });
+      const result = await service.createWorkflowShare(
+        mockUserId,
+        mockWorkflowId,
+        {
+          isPublic: true,
+        },
+      );
 
       expect(result).toEqual(mockShare);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.workflowShare.create).toHaveBeenCalled();
     });
   });
@@ -105,11 +109,17 @@ describe('WorkflowSharesService', () => {
       ];
 
       (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow);
-      (prisma.workflowShare.findMany as jest.Mock).mockResolvedValue(mockShares);
+      (prisma.workflowShare.findMany as jest.Mock).mockResolvedValue(
+        mockShares,
+      );
 
-      const result = await service.listWorkflowShares(mockUserId, mockWorkflowId);
+      const result = await service.listWorkflowShares(
+        mockUserId,
+        mockWorkflowId,
+      );
 
       expect(result).toEqual(mockShares);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.workflowShare.findMany).toHaveBeenCalledWith({
         where: { workflowId: mockWorkflowId },
         orderBy: { createdAt: 'desc' },
@@ -139,12 +149,15 @@ describe('WorkflowSharesService', () => {
         },
       };
 
-      (prisma.workflowShare.findUnique as jest.Mock).mockResolvedValue(mockShare);
+      (prisma.workflowShare.findUnique as jest.Mock).mockResolvedValue(
+        mockShare,
+      );
       (prisma.workflowShare.delete as jest.Mock).mockResolvedValue(mockShare);
 
       const result = await service.deleteWorkflowShare(mockUserId, mockShareId);
 
       expect(result).toEqual(mockShare);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.workflowShare.delete).toHaveBeenCalledWith({
         where: { id: mockShareId },
       });

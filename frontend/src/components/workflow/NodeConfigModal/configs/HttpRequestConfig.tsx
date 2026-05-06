@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface HttpRequestConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -66,6 +70,7 @@ export function HttpRequestConfig({
       console.error('JSON parse error:', error);
     }
   };
+   
 
   // Обновление локального состояния без сохранения
   const handleChange = (newConfig: any) => {

@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface SetConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -26,9 +30,10 @@ interface SetConfigProps {
 
 export function SetConfig({ 
   config, 
-  onSave,
+  _onSave,
   inputConnections = [],
   outputConnections = [],
+     
   executionResult = null
 }: SetConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || { values: {} });

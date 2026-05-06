@@ -73,6 +73,7 @@ export function CurrentUserProvider({
     }
 
     void refreshCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -91,6 +92,7 @@ export function CurrentUserProvider({
 }
 
 export function useCurrentUser() {
+ 
   const context = useContext(CurrentUserContext);
 
   if (!context) {

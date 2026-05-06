@@ -12,4 +12,3 @@ import { ExecutionGateway } from './gateways/execution.gateway.js';
   exports: [ExecutionsService, ExecutionGateway],
 })
 export class ExecutionsModule {}
-

@@ -191,7 +191,9 @@ export class UsersService {
 
     let updateData: UpdateUserDto = data;
     if (updateData.password) {
-      const passwordHash = await this.usersUtils.hashPassword(updateData.password);
+      const passwordHash = await this.usersUtils.hashPassword(
+        updateData.password,
+      );
 
       updateData = {
         ...updateData,
@@ -281,7 +283,10 @@ export class UsersService {
     return { ok: isPasswordValid };
   }
 
-  private toPublicUser(user: User): Omit<User, 'passwordHash' | 'role'> & { globalRole: Role } {
+  private toPublicUser(
+    user: User,
+  ): Omit<User, 'passwordHash' | 'role'> & { globalRole: Role } {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, role, ...publicUser } = user;
     return {
       ...publicUser,

@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface DelayConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -31,6 +35,7 @@ export function DelayConfig({
   outputConnections = [],
   executionResult = null
 }: DelayConfigProps): JSX.Element {
+   
   const [localConfig, setLocalConfig] = useState(config || { durationMs: 1000 });
 
   const handleChange = (newConfig: any) => {

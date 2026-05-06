@@ -36,7 +36,7 @@ export function Overview_scen(): JSX.Element {
         setIsLoading(true);
         const workflowsPromises = projects.map(async (project) => {
           try {
-            const workflows = await getProjectWorkflows(project.id);
+            const _workflows = await getProjectWorkflows(project.id);
             return workflows.map((workflow) => ({
               ...workflow,
               projectName: project.name,
@@ -56,6 +56,7 @@ export function Overview_scen(): JSX.Element {
     };
 
     void loadAllWorkflows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects.length]);
 
   const formatDate = (dateString: string): string => {

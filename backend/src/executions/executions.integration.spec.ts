@@ -4,7 +4,6 @@ import { DatabaseService } from '../database/database.service';
 import {
   ExecutionStatus,
   NodeExecutionStatus,
-  ProjectMemberRole,
   WorkflowNode,
   WorkflowEdge,
 } from '@prisma/client';
@@ -44,7 +43,7 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
     }).compile();
 
     service = module.get<ExecutionsService>(ExecutionsService);
-    prisma = module.get(DatabaseService) as jest.Mocked<DatabaseService>;
+    prisma = module.get(DatabaseService);
   });
 
   describe('Complete Workflow Chain: Data Processing Pipeline', () => {
@@ -89,7 +88,8 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
           posX: 200,
           posY: 0,
           configJson: {
-            script: 'return { ...input, total: input.price * input.quantity, processed: true };',
+            script:
+              'return { ...input, total: input.price * input.quantity, processed: true };',
           },
           isDisabled: false,
           createdAt: new Date(),
@@ -197,7 +197,9 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -222,6 +224,7 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
       );
 
       expect(result.status).toBe(ExecutionStatus.success);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.executionNodeLog.create).toHaveBeenCalledTimes(5);
     });
   });
@@ -377,7 +380,9 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -402,6 +407,7 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
       );
 
       expect(result.status).toBe(ExecutionStatus.success);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.executionNodeLog.create).toHaveBeenCalledTimes(3);
     });
   });
@@ -545,7 +551,9 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -570,6 +578,7 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
       );
 
       expect(result.status).toBe(ExecutionStatus.success);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.executionNodeLog.create).toHaveBeenCalledTimes(4);
     });
   });
@@ -699,7 +708,9 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -724,8 +735,12 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
       );
 
       expect(result.status).toBe(ExecutionStatus.success);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.executionNodeLog.create).toHaveBeenCalled();
-      expect(prisma.executionNodeLog.create.mock.calls.length).toBeGreaterThanOrEqual(2);
+      expect(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        prisma.executionNodeLog.create.mock.calls.length,
+      ).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -868,7 +883,9 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -896,6 +913,7 @@ describe('ExecutionsService - Integration Tests (Workflow Chains)', () => {
 
       expect(result.status).toBe(ExecutionStatus.success);
       expect(endTime - startTime).toBeGreaterThanOrEqual(200);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.executionNodeLog.create).toHaveBeenCalledTimes(5);
     });
   });

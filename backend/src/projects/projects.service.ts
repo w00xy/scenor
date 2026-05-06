@@ -76,7 +76,11 @@ export class ProjectsService {
     return project;
   }
 
-  async updateProject(userId: string, projectId: string, data: UpdateProjectDto) {
+  async updateProject(
+    userId: string,
+    projectId: string,
+    data: UpdateProjectDto,
+  ) {
     await this.requireProjectAccess(userId, projectId, [
       ProjectMemberRole.OWNER,
       ProjectMemberRole.EDITOR,
@@ -119,7 +123,7 @@ export class ProjectsService {
     await this.requireProjectAccess(userId, projectId, [
       ProjectMemberRole.OWNER,
     ]);
-    
+
     return this.prisma.project.delete({
       where: { id: projectId },
     });

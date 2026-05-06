@@ -6,4 +6,3 @@ export const WORKFLOW_STATUSES = [
 ] as const;
 
 export type WorkflowStatusValue = (typeof WORKFLOW_STATUSES)[number];
-

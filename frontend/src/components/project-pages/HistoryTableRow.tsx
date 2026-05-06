@@ -49,7 +49,7 @@ export function HistoryTableRow({
     }
 
     try {
-      console.log("Deleting execution:", executionId);
+      console.warn("Deleting execution:", executionId);
       setShowMenu(false);
     } catch (error) {
       console.error("Failed to delete execution:", error);

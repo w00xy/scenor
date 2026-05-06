@@ -28,6 +28,7 @@ export const FieldFeedbackProvider: React.FC<{ children: ReactNode }> = ({ child
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFieldFeedbackContext = (): FieldFeedbackContextType => {
   const context = useContext(FieldFeedbackContext);
   if (!context) {

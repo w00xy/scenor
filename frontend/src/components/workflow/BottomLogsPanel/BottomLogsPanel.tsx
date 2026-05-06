@@ -18,7 +18,9 @@ interface ExecutionLog {
   status: string;
   startedAt: string;
   finishedAt: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
 }
@@ -45,6 +47,7 @@ export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, n
     if (lastExecutionId && isExpanded) {
       loadLogs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastExecutionId, isExpanded]);
 
   // Обновляем логи из WebSocket в реальном времени

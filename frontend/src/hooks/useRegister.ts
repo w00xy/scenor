@@ -36,6 +36,7 @@ export function useRegister() {
       showFeedback('Регистрация успешна!', 'success');
       navigate('/overview/scenario', { replace: true });
       return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       showFeedback(error.message || 'Ошибка регистрации', 'error');
       return false;

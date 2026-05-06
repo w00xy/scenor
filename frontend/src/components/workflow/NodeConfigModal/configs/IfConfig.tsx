@@ -10,19 +10,24 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface IfConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
 }
+   
 
 interface Condition {
   left: string;
@@ -51,6 +56,7 @@ export function IfConfig({
     onSave(newConfig);
   };
 
+   
   const removeCondition = (index: number) => {
     const newConfig = {
       ...localConfig,

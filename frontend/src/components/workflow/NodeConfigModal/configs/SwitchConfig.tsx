@@ -10,13 +10,17 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
 
 interface SwitchConfigProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: any;
   onSave: (config: any) => void;
   inputConnections?: ConnectionInfo[];
@@ -31,7 +35,7 @@ interface SwitchCase {
 
 export function SwitchConfig({ 
   config, 
-  onSave,
+  _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
@@ -51,6 +55,7 @@ export function SwitchConfig({
   };
 
   const removeCase = (index: number) => {
+   
     const newConfig = {
       ...localConfig,
       cases: localConfig.cases.filter((_: any, i: number) => i !== index)

@@ -48,7 +48,10 @@ describe('UsersRepository', () => {
       },
     };
 
-    prisma.$transaction.mockImplementation(async (callback) => callback(tx as any));
+    prisma.$transaction.mockImplementation(async (callback) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      callback(tx as any),
+    );
 
     const result = await repository.create({
       username: createdUser.username!,
@@ -136,7 +139,9 @@ describe('UsersRepository', () => {
       },
     };
 
-    prisma.$transaction.mockImplementation(async (callback) => callback(tx as any));
+    prisma.$transaction.mockImplementation(async (callback) =>
+      callback(tx as any),
+    );
 
     await repository.create({
       username: createdUser.username!,
@@ -191,12 +196,15 @@ describe('UsersRepository', () => {
 
       const tx = {
         user: {
+          // eslint-disable-next-line @typescript-eslint/require-await
           create: jest.fn().mockImplementation(async () => {
             stagedState.users += 1;
             return createdUser;
           }),
         },
+
         userProfile: {
+          // eslint-disable-next-line @typescript-eslint/require-await
           upsert: jest.fn().mockImplementation(async () => {
             throw new Error('profile create failed');
           }),
@@ -257,6 +265,7 @@ describe('UsersRepository', () => {
         user: {
           create: jest.fn().mockImplementation(async () => {
             stagedState.users += 1;
+
             return createdUser;
           }),
         },
@@ -272,11 +281,13 @@ describe('UsersRepository', () => {
           findFirst: jest.fn().mockResolvedValue(null),
           create: jest.fn().mockImplementation(async () => {
             stagedState.projects += 1;
+
             return {
               id: '4f9de1aa-8b24-43de-aeec-0d0e398e3e5b',
             };
           }),
         },
+
         projectMember: {
           upsert: jest.fn().mockImplementation(async () => {
             throw new Error('membership create failed');

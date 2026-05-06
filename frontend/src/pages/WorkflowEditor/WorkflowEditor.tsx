@@ -24,11 +24,12 @@ export function WorkflowEditor(): JSX.Element {
   const { getWorkflow } = useWorkflows();
   const { projects } = useProjects();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [workflow, setWorkflow] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, _onNodesChange] = useNodesState([]);
+  const [edges, setEdges, _onEdgesChange] = useEdgesState([]);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
@@ -50,12 +51,14 @@ export function WorkflowEditor(): JSX.Element {
     lastExecutionId: null,
   });
 
-  const [logsPanelHeight, setLogsPanelHeight] = useState(40);
+  const [logsPanelHeight, _setLogsPanelHeight] = useState(40);
+   
 
   const [configModal, setConfigModal] = useState<{
     isOpen: boolean;
     nodeId: string | null;
     nodeType: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
     nodeData: any;
   }>({
     isOpen: false,
@@ -64,17 +67,18 @@ export function WorkflowEditor(): JSX.Element {
     nodeData: null,
   });
 
+   
   // Состояние для хранения загруженных логов выполнения
   const [executionLogs, setExecutionLogs] = useState<any[]>([]);
 
   // WebSocket для real-time обновлений
   const { 
     connectionStatus, 
-    isConnected, 
-    executionStatus: wsExecutionStatus,
+    isConnected: _isConnected, 
+    executionStatus: _wsExecutionStatus,
     logs: wsLogs,
     subscribe: wsSubscribe,
-    unsubscribe: wsUnsubscribe,
+    unsubscribe: _wsUnsubscribe,
   } = useExecutionWebSocket({
     autoConnect: true,
     autoSubscribe: false,
@@ -135,7 +139,7 @@ export function WorkflowEditor(): JSX.Element {
   }, [allLogs]);
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
-    console.log('Double click on node:', nodeId);
+    // console.warn('Double click on node:', nodeId);
     
     // Загружаем логи перед открытием модального окна
     if (executionState.lastExecutionId) {
@@ -144,9 +148,9 @@ export function WorkflowEditor(): JSX.Element {
     
     setNodes((currentNodes) => {
       const node = currentNodes.find(n => n.id === nodeId);
-      console.log('Found node:', node);
+      // console.warn('Found node:', node);
       if (node) {
-        console.log('Opening modal for node type:', node.data.typeCode);
+        // console.warn('Opening modal for node type:', node.data.typeCode);
         setConfigModal({
           isOpen: true,
           nodeId: nodeId,
@@ -154,6 +158,7 @@ export function WorkflowEditor(): JSX.Element {
           nodeData: node.data,
         });
       }
+     
       return currentNodes;
     });
   }, [executionState.lastExecutionId, loadExecutionLogs]);
@@ -164,6 +169,7 @@ export function WorkflowEditor(): JSX.Element {
       nodeId: null,
       nodeType: null,
       nodeData: null,
+   
     });
   }, []);
 
@@ -182,6 +188,7 @@ export function WorkflowEditor(): JSX.Element {
             : node
         )
       );
+     
     } catch (error) {
       console.error("Failed to save node config:", error);
       alert("Не удалось сохранить конфигурацию узла");
@@ -204,6 +211,7 @@ export function WorkflowEditor(): JSX.Element {
         prevEdges.filter((edge) => 
           edge.source !== nodeId && edge.target !== nodeId
         )
+     
       );
     } catch (error) {
       console.error("Failed to delete node:", error);
@@ -274,6 +282,7 @@ export function WorkflowEditor(): JSX.Element {
       } catch (err) {
         console.error("Failed to load workflow:", err);
         setError("Не удалось загрузить сценарий");
+     
       } finally {
         setIsLoading(false);
       }
@@ -305,6 +314,7 @@ export function WorkflowEditor(): JSX.Element {
         }
         return Promise.resolve();
       });
+     
 
       await Promise.all(updatePromises);
     } catch (error) {
@@ -313,6 +323,7 @@ export function WorkflowEditor(): JSX.Element {
   }, [workflowId]);
 
   const handleEdgesChange = useCallback(async (updatedEdges: Edge[]) => {
+   
     if (!workflowId) return;
   }, [workflowId]);
 
@@ -339,8 +350,8 @@ export function WorkflowEditor(): JSX.Element {
 
     const isTriggerNode = typeCode === 'manual_trigger' || typeCode === 'webhook_trigger';
 
-    let posX = 250;
-    let posY = 250;
+    const posX = 250;
+    const posY = 250;
 
     const getDefaultConfig = (type: string): Record<string, unknown> => {
       switch (type) {
@@ -402,6 +413,7 @@ export function WorkflowEditor(): JSX.Element {
           configJson: createdNode.configJson,
           onDelete: handleDeleteNode,
           onPlay: isTriggerNode ? handleRunWorkflow : undefined,
+     
           onDoubleClick: handleNodeDoubleClick,
         },
       };
@@ -547,12 +559,14 @@ export function WorkflowEditor(): JSX.Element {
           lastExecutionId: result.id,
         });
       }, 3000);
+     
     } catch (error) {
       console.error("Failed to execute workflow:", error);
       alert("Не удалось запустить сценарий");
       setExecutionState({
         isExecuting: false,
         triggeredNodeId: null,
+     
         executedEdges: [],
         lastExecutionId: null,
       });

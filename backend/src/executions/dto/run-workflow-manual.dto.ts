@@ -10,4 +10,3 @@ export class RunWorkflowManualDto {
   @IsObject()
   inputDataJson?: Record<string, unknown>;
 }
-

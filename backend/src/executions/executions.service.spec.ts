@@ -11,7 +11,6 @@ import {
   NodeExecutionStatus,
   ProjectMemberRole,
   Role,
-  TriggerType,
   WorkflowNode,
   WorkflowEdge,
 } from '@prisma/client';
@@ -63,7 +62,7 @@ describe('ExecutionsService', () => {
     }).compile();
 
     service = module.get<ExecutionsService>(ExecutionsService);
-    prisma = module.get(DatabaseService) as jest.Mocked<DatabaseService>;
+    prisma = module.get(DatabaseService);
   });
 
   it('should be defined', () => {
@@ -101,7 +100,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -114,7 +115,9 @@ describe('ExecutionsService', () => {
           nodeId: 'node-1',
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -127,8 +130,10 @@ describe('ExecutionsService', () => {
         );
 
         expect(result.status).toBe(ExecutionStatus.success);
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(prisma.executionNodeLog.create).toHaveBeenCalledWith(
           expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             data: expect.objectContaining({
               nodeId: 'node-1',
               status: NodeExecutionStatus.running,
@@ -195,7 +200,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -207,7 +214,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -245,7 +254,8 @@ describe('ExecutionsService', () => {
             posX: 100,
             posY: 0,
             configJson: {
-              script: 'return { ...input, transformed: true, doubled: input.value * 2 };',
+              script:
+                'return { ...input, transformed: true, doubled: input.value * 2 };',
             },
             isDisabled: false,
             createdAt: new Date(),
@@ -277,7 +287,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -289,7 +301,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -366,7 +380,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -378,7 +394,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -453,7 +471,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -465,7 +485,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -539,7 +561,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -551,7 +575,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -621,7 +647,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -633,7 +661,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -674,7 +704,8 @@ describe('ExecutionsService', () => {
             posX: 100,
             posY: 0,
             configJson: {
-              source: 'return { result: input.a + input.b, executionId: context.executionId };',
+              source:
+                'return { result: input.a + input.b, executionId: context.executionId };',
             },
             isDisabled: false,
             createdAt: new Date(),
@@ -706,7 +737,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -718,7 +751,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -792,7 +827,9 @@ describe('ExecutionsService', () => {
           },
         };
 
-        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+        (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+          mockWorkflow as any,
+        );
         (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           workflowId: mockWorkflowId,
@@ -804,7 +841,9 @@ describe('ExecutionsService', () => {
           executionId: mockExecutionId,
           status: NodeExecutionStatus.running,
         } as any);
-        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue({} as any);
+        (prisma.executionNodeLog.update as jest.Mock).mockResolvedValue(
+          {} as any,
+        );
         (prisma.workflowExecution.update as jest.Mock).mockResolvedValue({
           id: mockExecutionId,
           status: ExecutionStatus.success,
@@ -843,7 +882,9 @@ describe('ExecutionsService', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
 
       await expect(
         service.runManualWorkflow(mockUserId, mockWorkflowId, {}),
@@ -863,7 +904,9 @@ describe('ExecutionsService', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow as any);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        mockWorkflow as any,
+      );
       (prisma.workflowExecution.create as jest.Mock).mockResolvedValue({
         id: mockExecutionId,
         workflowId: mockWorkflowId,
@@ -918,21 +961,25 @@ describe('ExecutionsService', () => {
     beforeEach(() => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(mockWorkflow);
-      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(mockExecution);
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(
+        mockExecution,
+      );
     });
 
     it('should allow OWNER to delete any execution', async () => {
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          executionDeletionAudit: {
-            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
-          },
-          workflowExecution: {
-            delete: jest.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        (callback: (tx: unknown) => Promise<unknown>) => {
+          const txMock = {
+            executionDeletionAudit: {
+              create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+            },
+            workflowExecution: {
+              delete: jest.fn().mockResolvedValue({}),
+            },
+          };
+          return Promise.resolve(callback(txMock));
+        },
+      );
 
       const result = await service.deleteWorkflowExecution(
         mockUserId,
@@ -956,18 +1003,22 @@ describe('ExecutionsService', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(editorWorkflow);
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          executionDeletionAudit: {
-            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
-          },
-          workflowExecution: {
-            delete: jest.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        editorWorkflow,
+      );
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        (callback: (tx: unknown) => Promise<unknown>) => {
+          const txMock = {
+            executionDeletionAudit: {
+              create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+            },
+            workflowExecution: {
+              delete: jest.fn().mockResolvedValue({}),
+            },
+          };
+          return callback(txMock);
+        },
+      );
 
       const result = await service.deleteWorkflowExecution(
         mockUserId,
@@ -992,8 +1043,12 @@ describe('ExecutionsService', () => {
         startedByUserId: 'other-user-id',
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(editorWorkflow);
-      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(othersExecution);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        editorWorkflow,
+      );
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(
+        othersExecution,
+      );
 
       await expect(
         service.deleteWorkflowExecution(
@@ -1013,7 +1068,9 @@ describe('ExecutionsService', () => {
         },
       };
 
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(viewerWorkflow);
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        viewerWorkflow,
+      );
 
       await expect(
         service.deleteWorkflowExecution(
@@ -1039,18 +1096,22 @@ describe('ExecutionsService', () => {
       };
 
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(superAdminUser);
-      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(othersWorkflow);
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          executionDeletionAudit: {
-            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
-          },
-          workflowExecution: {
-            delete: jest.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
+      (prisma.workflow.findUnique as jest.Mock).mockResolvedValue(
+        othersWorkflow,
+      );
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        (callback: (tx: unknown) => Promise<unknown>) => {
+          const txMock = {
+            executionDeletionAudit: {
+              create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+            },
+            workflowExecution: {
+              delete: jest.fn().mockResolvedValue({}),
+            },
+          };
+          return Promise.resolve(callback(txMock));
+        },
+      );
 
       await expect(
         service.deleteWorkflowExecution(
@@ -1067,7 +1128,9 @@ describe('ExecutionsService', () => {
         status: ExecutionStatus.running,
       };
 
-      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(runningExecution);
+      (prisma.workflowExecution.findFirst as jest.Mock).mockResolvedValue(
+        runningExecution,
+      );
 
       await expect(
         service.deleteWorkflowExecution(
@@ -1115,22 +1178,28 @@ describe('ExecutionsService', () => {
     });
 
     it('should create audit record with correct data', async () => {
-      let capturedAuditData: any;
+      let capturedAuditData: Record<string, unknown> | undefined;
 
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          executionDeletionAudit: {
-            create: jest.fn().mockImplementation((params) => {
-              capturedAuditData = params.data;
-              return Promise.resolve({ id: mockAuditId });
-            }),
-          },
-          workflowExecution: {
-            delete: jest.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        (callback: (tx: unknown) => Promise<unknown>) => {
+          const txMock = {
+            executionDeletionAudit: {
+              create: jest
+                .fn()
+                .mockImplementation(
+                  (params: { data: Record<string, unknown> }) => {
+                    capturedAuditData = params.data;
+                    return Promise.resolve({ id: mockAuditId });
+                  },
+                ),
+            },
+            workflowExecution: {
+              delete: jest.fn().mockResolvedValue({}),
+            },
+          };
+          return Promise.resolve(callback(txMock));
+        },
+      );
 
       await service.deleteWorkflowExecution(
         mockUserId,
@@ -1152,17 +1221,19 @@ describe('ExecutionsService', () => {
     });
 
     it('should handle deletion without reason', async () => {
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          executionDeletionAudit: {
-            create: jest.fn().mockResolvedValue({ id: mockAuditId }),
-          },
-          workflowExecution: {
-            delete: jest.fn().mockResolvedValue({}),
-          },
-        };
-        return callback(txMock);
-      });
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        (callback: (tx: unknown) => Promise<unknown>) => {
+          const txMock = {
+            executionDeletionAudit: {
+              create: jest.fn().mockResolvedValue({ id: mockAuditId }),
+            },
+            workflowExecution: {
+              delete: jest.fn().mockResolvedValue({}),
+            },
+          };
+          return callback(txMock);
+        },
+      );
 
       const result = await service.deleteWorkflowExecution(
         mockUserId,

@@ -11,7 +11,9 @@ interface ExecutionResult {
   status: string;
   inputDataJson: any;
   outputDataJson: any;
+   
   errorMessage: string | null;
+   
   finishedAt: string | null;
 }
 

@@ -11,4 +11,3 @@ import { NodeTypesService } from './node-types.service.js';
   exports: [NodeTypesService],
 })
 export class NodeTypesModule {}
-
