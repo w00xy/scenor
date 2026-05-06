@@ -1,24 +1,23 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../database/database.module.js';
-import { AuthModule } from '../auth/auth.module.js';
+import { DatabaseModule } from '../database/database.module';
 
 // Guards
-import { AdminGuard } from './guards/admin.guard.js';
+import { AdminGuard } from './guards/admin.guard';
 
 // Services
-import { AdminAuditService } from './services/admin-audit.service.js';
-import { AdminUsersService } from './services/admin-users.service.js';
-import { AdminProjectsService } from './services/admin-projects.service.js';
-import { AdminAnalyticsService } from './services/admin-analytics.service.js';
+import { AdminAuditService } from './services/admin-audit.service';
+import { AdminUsersService } from './services/admin-users.service';
+import { AdminProjectsService } from './services/admin-projects.service';
+import { AdminAnalyticsService } from './services/admin-analytics.service';
 
 // Controllers
-import { AdminUsersController } from './users/admin-users.controller.js';
-import { AdminProjectsController } from './projects/admin-projects.controller.js';
-import { AdminAnalyticsController } from './analytics/admin-analytics.controller.js';
-import { AdminAuditController } from './audit/admin-audit.controller.js';
+import { AdminUsersController } from './users/admin-users.controller';
+import { AdminProjectsController } from './projects/admin-projects.controller';
+import { AdminAnalyticsController } from './analytics/admin-analytics.controller';
+import { AdminAuditController } from './audit/admin-audit.controller';
 
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule],
   providers: [
     AdminGuard,
     AdminAuditService,

@@ -10,17 +10,17 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '../../auth/auth.guard.js';
-import { AdminGuard } from '../guards/admin.guard.js';
-import { AdminUsersService } from '../services/admin-users.service.js';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../guards/admin.guard';
+import { AdminUsersService } from '../services/admin-users.service';
 import {
   GetUsersQueryDto,
   UpdateUserDto,
   ResetPasswordDto,
-} from '../dto/admin-users.dto.js';
+} from '../dto/admin-users.dto';
 
 @Controller('admin/users')
-@UseGuards(AuthGuard, AdminGuard)
+@UseGuards(AuthGuard('jwt'), AdminGuard)
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
@@ -40,7 +40,7 @@ export class AdminUsersController {
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: any,
   ) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
@@ -78,7 +78,7 @@ export class AdminUsersController {
 
   @Delete(':id')
   async deleteUser(@Param('id') id: string, @Req() req: any) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
@@ -96,7 +96,7 @@ export class AdminUsersController {
     @Body() resetPasswordDto: ResetPasswordDto,
     @Req() req: any,
   ) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 

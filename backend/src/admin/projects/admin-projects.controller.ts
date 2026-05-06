@@ -10,17 +10,17 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '../../auth/auth.guard.js';
-import { AdminGuard } from '../guards/admin.guard.js';
-import { AdminProjectsService } from '../services/admin-projects.service.js';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../guards/admin.guard';
+import { AdminProjectsService } from '../services/admin-projects.service';
 import {
   GetProjectsQueryDto,
   UpdateProjectDto,
   TransferOwnershipDto,
-} from '../dto/admin-projects.dto.js';
+} from '../dto/admin-projects.dto';
 
 @Controller('admin/projects')
-@UseGuards(AuthGuard, AdminGuard)
+@UseGuards(AuthGuard('jwt'), AdminGuard)
 export class AdminProjectsController {
   constructor(private readonly adminProjectsService: AdminProjectsService) {}
 
@@ -40,7 +40,7 @@ export class AdminProjectsController {
     @Body() updateProjectDto: UpdateProjectDto,
     @Req() req: any,
   ) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
@@ -55,7 +55,7 @@ export class AdminProjectsController {
 
   @Delete(':id')
   async deleteProject(@Param('id') id: string, @Req() req: any) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
@@ -73,7 +73,7 @@ export class AdminProjectsController {
     @Body() transferDto: TransferOwnershipDto,
     @Req() req: any,
   ) {
-    const adminId = req.user.id;
+    const adminId = req.user.sub;
     const ipAddress = req.ip;
     const userAgent = req.headers['user-agent'];
 
