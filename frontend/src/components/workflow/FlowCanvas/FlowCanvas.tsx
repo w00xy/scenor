@@ -111,6 +111,24 @@ export function FlowCanvas({
       setNodes(initialNodes);
       prevNodesLengthRef.current = initialNodes.length;
     }
+    else {
+      // Синхронизируем данные узлов (например, executionStatus)
+      setNodes((currentNodes) => 
+        currentNodes.map((node) => {
+          const initialNode = initialNodes.find(n => n.id === node.id);
+          if (initialNode && initialNode.data.executionStatus !== node.data.executionStatus) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                executionStatus: initialNode.data.executionStatus,
+              },
+            };
+          }
+          return node;
+        })
+      );
+    }
   }, [initialNodes, setNodes]);
 
   // Обновляем узлы при изменении executionState

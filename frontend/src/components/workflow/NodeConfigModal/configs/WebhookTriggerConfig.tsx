@@ -2,12 +2,35 @@ import { JSX, useState } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
 
+interface ConnectionInfo {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  inputDataJson: any;
+  outputDataJson: any;
+  errorMessage: string | null;
+  finishedAt: string | null;
+}
+
 interface WebhookTriggerConfigProps {
   config: any;
   onSave: (config: any) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
 }
 
-export function WebhookTriggerConfig({ config, onSave }: WebhookTriggerConfigProps): JSX.Element {
+export function WebhookTriggerConfig({ 
+  config, 
+  onSave,
+  inputConnections = [],
+  outputConnections = [],
+  executionResult = null
+}: WebhookTriggerConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || { path: '/hook', method: 'POST' });
 
   const handleChange = (newConfig: any) => {
@@ -16,7 +39,13 @@ export function WebhookTriggerConfig({ config, onSave }: WebhookTriggerConfigPro
   };
 
   return (
-    <ResizableNodeConfig hasInput={false} hasOutput={true}>
+    <ResizableNodeConfig 
+      hasInput={false} 
+      hasOutput={true}
+      inputConnections={inputConnections}
+      outputConnections={outputConnections}
+      executionResult={executionResult}
+    >
       <div className="node-config__section node-config__section--params-trigger">
         <h3 className="node-config__section-title">Параметры</h3>
         

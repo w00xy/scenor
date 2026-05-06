@@ -1,5 +1,6 @@
 import { JSX, useState, useRef, useEffect } from "react";
 import { workflowApi } from "../../../services/api";
+import { NodeLog } from "../../../services/websocket";
 import "./BottomLogsPanel.scss";
 
 interface BottomLogsPanelProps {
@@ -7,6 +8,7 @@ interface BottomLogsPanelProps {
   lastExecutionId: string | null;
   onHeightChange?: (height: number) => void;
   nodes?: Array<{ id: string; data: { label?: string; typeCode?: string } }>;
+  realtimeLogs?: NodeLog[];
 }
 
 interface ExecutionLog {
@@ -21,7 +23,7 @@ interface ExecutionLog {
   errorMessage: string | null;
 }
 
-export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, nodes = [] }: BottomLogsPanelProps): JSX.Element {
+export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, nodes = [], realtimeLogs = [] }: BottomLogsPanelProps): JSX.Element {
   const [isExpanded, setIsExpanded] = useState(false);
   const [height, setHeight] = useState(40);
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
@@ -44,6 +46,49 @@ export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, n
       loadLogs();
     }
   }, [lastExecutionId, isExpanded]);
+
+  // Обновляем логи из WebSocket в реальном времени
+  useEffect(() => {
+    if (realtimeLogs.length > 0) {
+      setLogs((prevLogs) => {
+        const updatedLogs = [...prevLogs];
+        
+        realtimeLogs.forEach((wsLog) => {
+          const existingIndex = updatedLogs.findIndex(log => log.id === wsLog.id);
+          
+          // Преобразуем NodeLog в ExecutionLog
+          const executionLog: ExecutionLog = {
+            id: wsLog.id,
+            executionId: lastExecutionId || '',
+            nodeId: wsLog.nodeId,
+            status: wsLog.status,
+            startedAt: wsLog.startedAt,
+            finishedAt: wsLog.finishedAt,
+            inputDataJson: wsLog.inputDataJson,
+            outputDataJson: wsLog.outputDataJson,
+            errorMessage: wsLog.errorMessage,
+          };
+          
+          if (existingIndex >= 0) {
+            // Обновляем существующий лог
+            updatedLogs[existingIndex] = executionLog;
+          } else {
+            // Добавляем новый лог
+            updatedLogs.push(executionLog);
+          }
+        });
+        
+        return updatedLogs;
+      });
+      
+      // Автоматически раскрываем панель только при первом логе
+      // и только если панель была свёрнута (не была вручную закрыта)
+      if (!isExpanded && realtimeLogs.length === 1) {
+        setIsExpanded(true);
+        setHeight(300);
+      }
+    }
+  }, [realtimeLogs, lastExecutionId, isExpanded]);
 
   const loadLogs = async () => {
     if (!lastExecutionId) return;

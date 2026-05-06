@@ -1,4 +1,4 @@
-@import '../../../../styles/variables/variables';
+@use '../../../../styles/variables/variables' as *;
 
 .node-config {
   display: flex;
@@ -291,4 +291,188 @@
     background-color: #4a2a2a;
     border-color: #755;
   }
+}
+
+// Стили для отображения подключений
+.node-config__connections {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #444;
+}
+
+.node-config__connections-title {
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin: 0 0 8px 0;
+}
+
+.node-config__connections-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.node-config__connection-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background-color: #2a2a2a;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-family: $font-family;
+  font-size: 13px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.node-config__connection-type {
+  color: #ff4b33;
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background-color: rgba(255, 75, 51, 0.1);
+  border-radius: 3px;
+}
+
+.node-config__connection-name {
+  color: #ADADAD;
+  flex: 1;
+}
+
+// Стили для результатов выполнения
+.node-config__execution-result {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #444;
+}
+
+.node-config__execution-title {
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin: 0 0 8px 0;
+}
+
+.node-config__execution-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.node-config__status-badge {
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.node-config__execution-time {
+  font-family: $font-family;
+  font-size: 12px;
+  color: #777;
+}
+
+.node-config__execution-error {
+  padding: 8px 12px;
+  background-color: rgba(255, 75, 51, 0.1);
+  border-left: 3px solid #FF4B33;
+  border-radius: 4px;
+  color: #ff6b6b;
+  font-family: $font-family;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.node-config__execution-output {
+  margin-top: 8px;
+
+  summary {
+    cursor: pointer;
+    color: #4CAF50;
+    font-family: $font-family;
+    font-size: 12px;
+    font-weight: 500;
+    user-select: none;
+    padding: 4px 0;
+
+    &:hover {
+      color: #66BB6A;
+    }
+  }
+
+  pre {
+    margin-top: 8px;
+    padding: 12px;
+    background: #1a1a1a;
+    border-radius: 4px;
+    color: #ccc;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    max-height: 300px;
+    overflow-y: auto;
+    line-height: 1.5;
+  }
+}
+
+// Стили для отображения входных/выходных данных
+.node-config__data-display {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #444;
+}
+
+.node-config__data-title {
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin: 0 0 8px 0;
+}
+
+.node-config__data-details {
+  margin-top: 8px;
+
+  summary {
+    cursor: pointer;
+    color: #2196F3;
+    font-family: $font-family;
+    font-size: 12px;
+    font-weight: 500;
+    user-select: none;
+    padding: 4px 0;
+
+    &:hover {
+      color: #42A5F5;
+    }
+  }
+}
+
+.node-config__data-json {
+  margin-top: 8px;
+  padding: 12px;
+  background: #1a1a1a;
+  border-radius: 4px;
+  color: #ccc;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  line-height: 1.5;
+  border: 1px solid #333;
+}
+
+.node-config__error {
+  color: #ff6b6b;
+  font-family: $font-family;
+  font-size: 12px;
+  margin-top: 4px;
 }

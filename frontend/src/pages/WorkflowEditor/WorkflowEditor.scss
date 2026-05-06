@@ -25,6 +25,96 @@
     justify-content: space-between;
   }
 
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__ws-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: $font-family;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+
+    &--connected {
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      color: #4CAF50;
+
+      .workflow-editor__ws-dot {
+        background: #4CAF50;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+        animation: pulse 2s infinite;
+      }
+    }
+
+    &--connecting {
+      background: rgba(255, 167, 38, 0.1);
+      border: 1px solid rgba(255, 167, 38, 0.3);
+      color: #FFA726;
+
+      .workflow-editor__ws-dot {
+        background: #FFA726;
+        animation: blink 1s infinite;
+      }
+    }
+
+    &--disconnected {
+      background: rgba(153, 153, 153, 0.1);
+      border: 1px solid rgba(153, 153, 153, 0.3);
+      color: #999;
+
+      .workflow-editor__ws-dot {
+        background: #999;
+      }
+    }
+
+    &--error {
+      background: rgba(255, 75, 51, 0.1);
+      border: 1px solid rgba(255, 75, 51, 0.3);
+      color: #FF4B33;
+
+      .workflow-editor__ws-dot {
+        background: #FF4B33;
+      }
+    }
+  }
+
+  &__ws-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+
+  &__ws-text {
+    font-weight: 500;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes blink {
+    0%, 50%, 100% {
+      opacity: 1;
+    }
+    25%, 75% {
+      opacity: 0.3;
+    }
+  }
+
   &__title-wrapper {
     display: flex;
     align-items: center;

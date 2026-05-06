@@ -2,12 +2,35 @@ import { JSX, useState } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
 
+interface ConnectionInfo {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  inputDataJson: any;
+  outputDataJson: any;
+  errorMessage: string | null;
+  finishedAt: string | null;
+}
+
 interface HttpRequestConfigProps {
   config: any;
   onSave: (config: any) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
 }
 
-export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): JSX.Element {
+export function HttpRequestConfig({ 
+  config, 
+  onSave,
+  inputConnections = [],
+  outputConnections = [],
+  executionResult = null
+}: HttpRequestConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || {
     url: 'https://api.example.com/resource',
     method: 'GET',
@@ -55,7 +78,13 @@ export function HttpRequestConfig({ config, onSave }: HttpRequestConfigProps): J
   };
 
   return (
-    <ResizableNodeConfig hasInput={true} hasOutput={true}>
+    <ResizableNodeConfig 
+      hasInput={true} 
+      hasOutput={true}
+      inputConnections={inputConnections}
+      outputConnections={outputConnections}
+      executionResult={executionResult}
+    >
       <div className="node-config__section node-config__section--input">
         <h3 className="node-config__section-title">Вход</h3>
         <div className="node-config__info">

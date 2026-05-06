@@ -2,12 +2,35 @@ import { JSX, useState } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
 
+interface ConnectionInfo {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  inputDataJson: any;
+  outputDataJson: any;
+  errorMessage: string | null;
+  finishedAt: string | null;
+}
+
 interface CodeConfigProps {
   config: any;
   onSave: (config: any) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
 }
 
-export function CodeConfig({ config, onSave }: CodeConfigProps): JSX.Element {
+export function CodeConfig({ 
+  config, 
+  onSave,
+  inputConnections = [],
+  outputConnections = [],
+  executionResult = null
+}: CodeConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || { 
     language: 'javascript', 
     source: 'return input;' 
@@ -28,7 +51,13 @@ export function CodeConfig({ config, onSave }: CodeConfigProps): JSX.Element {
   };
 
   return (
-    <ResizableNodeConfig hasInput={true} hasOutput={true}>
+    <ResizableNodeConfig 
+      hasInput={true} 
+      hasOutput={true}
+      inputConnections={inputConnections}
+      outputConnections={outputConnections}
+      executionResult={executionResult}
+    >
       <div className="node-config__section node-config__section--input">
         <h3 className="node-config__section-title">Вход</h3>
         <div className="node-config__info">

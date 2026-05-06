@@ -12,6 +12,21 @@ import { DelayConfig } from "./DelayConfig";
 import { DbSelectConfig } from "./DbSelectConfig";
 import { DbInsertConfig } from "./DbInsertConfig";
 import { nodeDisplayNames } from "../../nodeIconMap";
+import { Edge, Node } from "reactflow";
+
+interface ConnectionInfo {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  inputDataJson: any;
+  outputDataJson: any;
+  errorMessage: string | null;
+  finishedAt: string | null;
+}
 
 interface NodeConfigWrapperProps {
   isOpen: boolean;
@@ -20,6 +35,9 @@ interface NodeConfigWrapperProps {
   nodeData: any;
   onClose: () => void;
   onSave: (nodeId: string, config: any) => void;
+  edges?: Edge[];
+  nodes?: Node[];
+  executionLogs?: any[];
 }
 
 export function NodeConfigWrapper({
@@ -29,42 +47,92 @@ export function NodeConfigWrapper({
   nodeData,
   onClose,
   onSave,
+  edges = [],
+  nodes = [],
+  executionLogs = [],
 }: NodeConfigWrapperProps): JSX.Element {
-  console.log('NodeConfigWrapper render:', { isOpen, nodeId, nodeType, nodeData });
 
   const handleSave = (config: any) => {
     onSave(nodeId, config);
     // Не закрываем модалку автоматически - пользователь закроет сам
   };
 
+  // Вычисляем входящие подключения
+  const inputConnections: ConnectionInfo[] = edges
+    .filter(edge => edge.target === nodeId)
+    .map(edge => {
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      return {
+        nodeId: edge.source,
+        nodeName: sourceNode?.data?.label || sourceNode?.data?.typeCode || edge.source,
+        nodeType: sourceNode?.data?.typeCode || 'unknown',
+      };
+    });
+
+  // Вычисляем исходящие подключения
+  const outputConnections: ConnectionInfo[] = edges
+    .filter(edge => edge.source === nodeId)
+    .map(edge => {
+      const targetNode = nodes.find(n => n.id === edge.target);
+      return {
+        nodeId: edge.target,
+        nodeName: targetNode?.data?.label || targetNode?.data?.typeCode || edge.target,
+        nodeType: targetNode?.data?.typeCode || 'unknown',
+      };
+    });
+
+  // Получаем результат последнего выполнения для этого узла
+  const executionResult: ExecutionResult | null = executionLogs.length > 0 && isOpen && nodeId
+    ? (() => {
+        const nodeLog = executionLogs.find(log => log.nodeId === nodeId);
+        if (nodeLog) {
+          console.log('[NodeConfigWrapper] Found log for node:', nodeId, nodeLog);
+          return {
+            status: nodeLog.status,
+            inputDataJson: nodeLog.inputJson || nodeLog.inputDataJson,
+            outputDataJson: nodeLog.outputJson || nodeLog.outputDataJson,
+            errorMessage: nodeLog.errorMessage,
+            finishedAt: nodeLog.finishedAt,
+          };
+        }
+        return null;
+      })()
+    : null;
+
   const renderConfig = () => {
     const config = nodeData?.configJson || {};
 
-    console.log('Rendering config for type:', nodeType, 'with config:', config);
+    const commonProps = {
+      config,
+      onSave: handleSave,
+      inputConnections,
+      outputConnections,
+      executionResult,
+    };
 
     switch (nodeType) {
       case 'manual_trigger':
-        return <ManualTriggerConfig config={config} onSave={handleSave} />;
+        return <ManualTriggerConfig {...commonProps} />;
       case 'webhook_trigger':
-        return <WebhookTriggerConfig config={config} onSave={handleSave} />;
+        return <WebhookTriggerConfig {...commonProps} />;
       case 'http_request':
-        return <HttpRequestConfig config={config} onSave={handleSave} />;
+        return <HttpRequestConfig {...commonProps} />;
       case 'if':
-        return <IfConfig config={config} onSave={handleSave} />;
+        return <IfConfig {...commonProps} />;
       case 'switch':
-        return <SwitchConfig config={config} onSave={handleSave} />;
+        return <SwitchConfig {...commonProps} />;
       case 'set':
-        return <SetConfig config={config} onSave={handleSave} />;
+        return <SetConfig {...commonProps} />;
       case 'transform':
-        return <TransformConfig config={config} onSave={handleSave} />;
+        return <TransformConfig {...commonProps} />;
       case 'code':
-        return <CodeConfig config={config} onSave={handleSave} />;
+        return <CodeConfig {...commonProps} />;
       case 'delay':
-        return <DelayConfig config={config} onSave={handleSave} />;
+        return <DelayConfig {...commonProps} />;
       case 'db_select':
-        return <DbSelectConfig config={config} onSave={handleSave} />;
+        return <DbSelectConfig {...commonProps} />;
       case 'db_insert':
-        return <DbInsertConfig config={config} onSave={handleSave} />;
+        return <DbInsertConfig {...commonProps} />;
       default:
         return (
           <div style={{ padding: '24px', color: '#999' }}>

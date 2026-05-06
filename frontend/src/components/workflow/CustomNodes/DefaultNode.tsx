@@ -1,4 +1,4 @@
-import { JSX, memo } from "react";
+import { JSX } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import PlaySVG from "../../../assets/common/Play.svg?react";
 import TrashSVG from "../../../assets/common/Trash.svg?react";
@@ -6,7 +6,7 @@ import MMDotsSVG from "../../../assets/common/Dots.svg?react";
 import { nodeIconMap, nodeDisplayNames } from "../nodeIconMap";
 import "./DefaultNode.scss";
 
-export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element => {
+export function DefaultNode({ data, selected, id }: NodeProps): JSX.Element {
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -35,10 +35,19 @@ export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element
   const nodeType = data?.typeCode || data?.type || "";
   const NodeIcon = nodeIconMap[nodeType];
   const displayName = nodeDisplayNames[nodeType] || data.label || "Node";
+  const executionStatus = data?.executionStatus || null;
+
+  // Определяем CSS класс на основе статуса выполнения
+  const getStatusClass = () => {
+    if (executionStatus === 'success') return 'success';
+    if (executionStatus === 'failed') return 'failed';
+    if (executionStatus === 'running') return 'running';
+    return '';
+  };
 
   return (
     <div 
-      className={`default-node ${selected ? 'selected' : ''}`}
+      className={`default-node ${selected ? 'selected' : ''} ${getStatusClass()}`}
       onDoubleClick={handleDoubleClick}
     >
       <Handle type="target" position={Position.Left} id="left" />
@@ -71,6 +80,4 @@ export const DefaultNode = memo(({ data, selected, id }: NodeProps): JSX.Element
       </div>
     </div>
   );
-});
-
-DefaultNode.displayName = "DefaultNode";
+}

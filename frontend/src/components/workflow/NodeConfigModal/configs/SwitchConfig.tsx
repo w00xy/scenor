@@ -2,9 +2,26 @@ import { JSX, useState } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
 
+interface ConnectionInfo {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  inputDataJson: any;
+  outputDataJson: any;
+  errorMessage: string | null;
+  finishedAt: string | null;
+}
+
 interface SwitchConfigProps {
   config: any;
   onSave: (config: any) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
 }
 
 interface SwitchCase {
@@ -12,7 +29,13 @@ interface SwitchCase {
   output: string;
 }
 
-export function SwitchConfig({ config, onSave }: SwitchConfigProps): JSX.Element {
+export function SwitchConfig({ 
+  config, 
+  onSave,
+  inputConnections = [],
+  outputConnections = [],
+  executionResult = null
+}: SwitchConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || { 
     expression: '{{input.value}}', 
     cases: [] as SwitchCase[] 
@@ -51,7 +74,13 @@ export function SwitchConfig({ config, onSave }: SwitchConfigProps): JSX.Element
   };
 
   return (
-    <ResizableNodeConfig hasInput={true} hasOutput={true}>
+    <ResizableNodeConfig 
+      hasInput={true} 
+      hasOutput={true}
+      inputConnections={inputConnections}
+      outputConnections={outputConnections}
+      executionResult={executionResult}
+    >
       <div className="node-config__section node-config__section--input">
         <h3 className="node-config__section-title">Вход</h3>
         <div className="node-config__info">

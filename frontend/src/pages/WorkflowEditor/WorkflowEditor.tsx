@@ -9,11 +9,11 @@ import { NodesPalette } from "../../components/workflow/NodesPalette/NodesPalett
 import { WorkflowActionsMenu } from "../../components/overview/pages_overview/overview_scen/MM_overview_scen_component/WorkflowActionsMenu";
 import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/BottomLogsPanel";
 import { NodeConfigWrapper } from "../../components/workflow/NodeConfigModal/configs/NodeConfigWrapper";
-import { RunWorkflowModal } from "../../components/workflow/RunWorkflowModal";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { workflowApi } from "../../services/api";
-import { Node, Edge } from "reactflow";
+import { useExecutionWebSocket } from "../../hooks/useExecutionWebSocket";
+import { Node, Edge, useNodesState, useEdgesState } from "reactflow";
 import PlusSVG from "../../assets/common/Plus.svg?react";
 import MM_DotsSVG from "../../assets/common/Dots.svg?react";
 import "./WorkflowEditor.scss";
@@ -27,8 +27,8 @@ export function WorkflowEditor(): JSX.Element {
   const [workflow, setWorkflow] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
@@ -64,14 +64,84 @@ export function WorkflowEditor(): JSX.Element {
     nodeData: null,
   });
 
-  const [runModal, setRunModal] = useState<{
-    isOpen: boolean;
-  }>({
-    isOpen: false,
+  // Состояние для хранения загруженных логов выполнения
+  const [executionLogs, setExecutionLogs] = useState<any[]>([]);
+
+  // WebSocket для real-time обновлений
+  const { 
+    connectionStatus, 
+    isConnected, 
+    executionStatus: wsExecutionStatus,
+    logs: wsLogs,
+    subscribe: wsSubscribe,
+    unsubscribe: wsUnsubscribe,
+  } = useExecutionWebSocket({
+    autoConnect: true,
+    autoSubscribe: false,
   });
+
+  // Объединяем логи из WebSocket и загруженные логи
+  const allLogs = [...executionLogs, ...wsLogs];
+
+  // Загрузка логов последнего выполнения
+  const loadExecutionLogs = useCallback(async () => {
+    if (!workflowId || !executionState.lastExecutionId) {
+      return;
+    }
+
+    try {
+      const logs = await workflowApi.getExecutionLogs(workflowId, executionState.lastExecutionId);
+      setExecutionLogs(logs);
+    } catch (error) {
+      console.error('[WorkflowEditor] Failed to load execution logs:', error);
+    }
+  }, [workflowId, executionState.lastExecutionId]);
+
+  // Загружаем логи при изменении lastExecutionId
+  useEffect(() => {
+    if (executionState.lastExecutionId) {
+      loadExecutionLogs();
+    }
+  }, [executionState.lastExecutionId, loadExecutionLogs]);
+
+  // Обновляем статус узлов на основе WebSocket логов для плавной анимации
+  useEffect(() => {
+    if (allLogs.length > 0) {
+      // Обновляем узлы на основе логов
+      setNodes((prevNodes) => {
+        let hasChanges = false;
+        const updatedNodes = prevNodes.map((node) => {
+          const nodeLog = allLogs.find(log => log.nodeId === node.id);
+          if (nodeLog && node.data.executionStatus !== nodeLog.status) {
+            hasChanges = true;
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                executionStatus: nodeLog.status,
+              },
+            };
+          }
+          return node;
+        });
+        
+        if (hasChanges) {
+          return updatedNodes;
+        }
+        return prevNodes;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allLogs]);
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
     console.log('Double click on node:', nodeId);
+    
+    // Загружаем логи перед открытием модального окна
+    if (executionState.lastExecutionId) {
+      loadExecutionLogs();
+    }
+    
     setNodes((currentNodes) => {
       const node = currentNodes.find(n => n.id === nodeId);
       console.log('Found node:', node);
@@ -86,7 +156,7 @@ export function WorkflowEditor(): JSX.Element {
       }
       return currentNodes;
     });
-  }, []);
+  }, [executionState.lastExecutionId, loadExecutionLogs]);
 
   const handleCloseConfigModal = useCallback(() => {
     setConfigModal({
@@ -384,6 +454,20 @@ export function WorkflowEditor(): JSX.Element {
     if (!workflowId) return;
 
     try {
+      // Очищаем статусы выполнения всех узлов перед новым запуском
+      setNodes((prevNodes) => 
+        prevNodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            executionStatus: null,
+          },
+        }))
+      );
+
+      // Очищаем логи предыдущего выполнения
+      setExecutionLogs([]);
+
       setExecutionState({
         isExecuting: true,
         triggeredNodeId: null,
@@ -406,7 +490,10 @@ export function WorkflowEditor(): JSX.Element {
 
       const result = await workflowApi.executeManual(workflowId, finalInputData);
 
-      // Извлекаем ID узлов, которые были выполнены
+      // Подписываемся на WebSocket обновления для этого execution
+      wsSubscribe(result.id);
+
+      // Извлекаем ID узлов, которые были выполнены (имеют выходные данные)
       const executedNodeIds = Object.keys(result.outputDataJson?.nodeOutputs || {});
       
       // Находим manual_trigger узел
@@ -414,8 +501,28 @@ export function WorkflowEditor(): JSX.Element {
         node.data.typeCode === 'manual_trigger'
       );
 
+      // Подсвечиваем ТОЛЬКО manual trigger сразу
+      // Остальные узлы будут подсвечиваться по мере получения WebSocket логов
+      setNodes((prevNodes) => {
+        const updatedNodes = prevNodes.map((node) => {
+          // Manual trigger загорается сразу при запуске
+          if (node.id === triggerNode?.id) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                executionStatus: 'success',
+                isTriggered: true,
+              },
+            };
+          }
+          
+          return node;
+        });
+        return updatedNodes;
+      });
+
       // Находим все edges, которые соединяют выполненные узлы
-      // (связь подсвечивается только если оба узла выполнились)
       const executedEdgeIds = edges
         .filter(edge => 
           executedNodeIds.includes(edge.source) && 
@@ -430,10 +537,12 @@ export function WorkflowEditor(): JSX.Element {
         lastExecutionId: result.id,
       });
 
+      // Убираем только executedEdges через 3 секунды
+      // isTriggered и executionStatus остаются до следующего запуска
       setTimeout(() => {
         setExecutionState({
           isExecuting: false,
-          triggeredNodeId: null,
+          triggeredNodeId: triggerNode?.id || null,
           executedEdges: [],
           lastExecutionId: result.id,
         });
@@ -448,19 +557,7 @@ export function WorkflowEditor(): JSX.Element {
         lastExecutionId: null,
       });
     }
-  }, [workflowId, nodes, edges]);
-
-  const handleOpenRunModal = useCallback(() => {
-    setRunModal({ isOpen: true });
-  }, []);
-
-  const handleCloseRunModal = useCallback(() => {
-    setRunModal({ isOpen: false });
-  }, []);
-
-  const handleRunWithData = useCallback((inputData: Record<string, unknown>) => {
-    handleRunWorkflow(inputData);
-  }, [handleRunWorkflow]);
+  }, [workflowId, nodes, edges, wsSubscribe]);
 
   const handleDeleteEdge = useCallback(async (edgeId: string) => {
     setEdges((prevEdges) => {
@@ -547,12 +644,22 @@ export function WorkflowEditor(): JSX.Element {
               </span>
             )}
           </div>
-          <div 
-            ref={dotsRef} 
-            onClick={handleDotsClick} 
-            className="workflow-editor__dots-button"
-          >
-            <MM_DotsSVG />
+          <div className="workflow-editor__header-right">
+            {/* WebSocket индикатор подключения */}
+            <div 
+              className={`workflow-editor__ws-indicator workflow-editor__ws-indicator--${connectionStatus}`}
+              title={`WebSocket: ${connectionStatus === 'connected' ? 'подключен' : connectionStatus === 'connecting' ? 'подключение...' : connectionStatus === 'error' ? 'ошибка' : 'отключен'}`}
+            >
+              <span className="workflow-editor__ws-dot"></span>
+              {connectionStatus === 'connected' && <span className="workflow-editor__ws-text">Real-time</span>}
+            </div>
+            <div 
+              ref={dotsRef} 
+              onClick={handleDotsClick} 
+              className="workflow-editor__dots-button"
+            >
+              <MM_DotsSVG />
+            </div>
           </div>
         </div>
 
@@ -608,7 +715,7 @@ export function WorkflowEditor(): JSX.Element {
 
               <button
                 className="workflow-editor__run-btn"
-                onClick={handleOpenRunModal}
+                onClick={() => handleRunWorkflow()}
                 title="Запустить сценарий"
               >
                 Запустить сценарий
@@ -620,6 +727,7 @@ export function WorkflowEditor(): JSX.Element {
               lastExecutionId={executionState.lastExecutionId}
               onHeightChange={setLogsPanelHeight}
               nodes={nodes}
+              realtimeLogs={allLogs}
             />
           </div>
         </div>
@@ -631,13 +739,9 @@ export function WorkflowEditor(): JSX.Element {
           nodeData={configModal.nodeData}
           onClose={handleCloseConfigModal}
           onSave={handleSaveNodeConfig}
-        />
-
-        <RunWorkflowModal
-          isOpen={runModal.isOpen}
-          onClose={handleCloseRunModal}
-          onRun={handleRunWithData}
-          workflowName={workflow?.name || "Сценарий"}
+          edges={edges}
+          nodes={nodes}
+          executionLogs={allLogs}
         />
       </div>
     </div>
