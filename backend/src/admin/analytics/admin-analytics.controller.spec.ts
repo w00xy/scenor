@@ -59,23 +59,23 @@ describe('AdminAnalyticsController', () => {
         projects: {
           total: 50,
           byType: [
-            { type: 'PERSONAL', _count: 30 },
-            { type: 'TEAM', _count: 20 },
+            { type: 'PERSONAL' as const, _count: 30 },
+            { type: 'TEAM' as const, _count: 20 },
           ],
         },
         workflows: {
           total: 200,
           byStatus: [
-            { status: 'ACTIVE', _count: 150 },
-            { status: 'INACTIVE', _count: 50 },
+            { status: 'active' as const, _count: 150 },
+            { status: 'inactive' as const, _count: 50 },
           ],
         },
         executions: {
           total: 1000,
           byStatus: [
-            { status: 'SUCCESS', _count: 800 },
-            { status: 'FAILED', _count: 150 },
-            { status: 'RUNNING', _count: 50 },
+            { status: 'success' as const, _count: 800 },
+            { status: 'failed' as const, _count: 150 },
+            { status: 'running' as const, _count: 50 },
           ],
         },
       };
@@ -95,8 +95,8 @@ describe('AdminAnalyticsController', () => {
       const mockAnalytics = {
         totalExecutions: 1000,
         executionsByStatus: [
-          { status: 'SUCCESS', _count: 800 },
-          { status: 'FAILED', _count: 200 },
+          { status: 'success' as const, _count: 800 },
+          { status: 'failed' as const, _count: 200 },
         ],
         successRate: '80.00',
         avgExecutionTime: 45.5,
@@ -117,8 +117,8 @@ describe('AdminAnalyticsController', () => {
       const mockAnalytics = {
         totalExecutions: 100,
         executionsByStatus: [
-          { status: 'SUCCESS', _count: 90 },
-          { status: 'FAILED', _count: 10 },
+          { status: 'success' as const, _count: 90 },
+          { status: 'failed' as const, _count: 10 },
         ],
         successRate: '90.00',
         avgExecutionTime: 30.2,

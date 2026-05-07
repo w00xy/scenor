@@ -48,5 +48,5 @@ export class UpdateProjectDto {
 
 export class TransferOwnershipDto {
   @IsString()
-  newOwnerId: string;
+  newOwnerId!: string;
 }

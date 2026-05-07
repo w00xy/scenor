@@ -65,8 +65,16 @@ describe('AdminUsersController', () => {
             id: 'user-1',
             username: 'testuser',
             email: 'test@example.com',
-            role: 'USER',
+            role: 'USER' as const,
             isBlocked: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            profile: null,
+            _count: {
+              projects: 0,
+              createdWorkflows: 0,
+              startedExecutions: 0,
+            },
           },
         ],
         total: 1,
@@ -121,8 +129,17 @@ describe('AdminUsersController', () => {
         id: userId,
         username: 'testuser',
         email: 'test@example.com',
-        role: 'USER',
+        role: 'USER' as const,
         isBlocked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        profile: null,
+        _count: {
+          projects: 0,
+          memberships: 0,
+          createdWorkflows: 0,
+          startedExecutions: 0,
+        },
       };
 
       service.getUserById.mockResolvedValue(mockUser);
@@ -142,7 +159,10 @@ describe('AdminUsersController', () => {
         id: userId,
         username: 'newusername',
         email: 'new@example.com',
-        role: 'USER',
+        role: 'USER' as const,
+        isBlocked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       service.updateUser.mockResolvedValue(mockUpdatedUser);
@@ -166,7 +186,10 @@ describe('AdminUsersController', () => {
         id: userId,
         username: 'testuser',
         email: 'test@example.com',
-        role: 'SUPER_ADMIN',
+        role: 'SUPER_ADMIN' as const,
+        isBlocked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       service.updateUser.mockResolvedValue(mockUpdatedUser);
@@ -191,7 +214,10 @@ describe('AdminUsersController', () => {
         id: userId,
         username: 'testuser',
         email: 'test@example.com',
+        role: 'USER' as const,
         isBlocked: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       service.blockUser.mockResolvedValue(mockBlockedUser);
@@ -215,7 +241,10 @@ describe('AdminUsersController', () => {
         id: userId,
         username: 'testuser',
         email: 'test@example.com',
+        role: 'USER' as const,
         isBlocked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       service.unblockUser.mockResolvedValue(mockUnblockedUser);
@@ -279,9 +308,12 @@ describe('AdminUsersController', () => {
         activities: [
           {
             id: 'activity-1',
+            createdAt: new Date(),
             userId,
             action: 'LOGIN',
-            createdAt: new Date(),
+            details: null,
+            ipAddress: null,
+            userAgent: null,
           },
         ],
         total: 1,

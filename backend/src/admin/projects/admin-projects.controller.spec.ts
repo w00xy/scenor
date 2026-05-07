@@ -61,10 +61,17 @@ describe('AdminProjectsController', () => {
         projects: [
           {
             id: 'project-1',
+            createdAt: new Date(),
+            updatedAt: new Date(),
             name: 'Test Project',
+            ownerId: 'user-1',
             description: 'Test description',
-            type: 'PERSONAL',
+            type: 'PERSONAL' as const,
             isArchived: false,
+            _count: {
+              members: 0,
+              workflows: 0,
+            },
             owner: {
               id: 'user-1',
               username: 'testuser',
@@ -133,10 +140,17 @@ describe('AdminProjectsController', () => {
       const projectId = 'project-123';
       const mockProject = {
         id: projectId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         name: 'Test Project',
+        ownerId: 'user-1',
         description: 'Test description',
-        type: 'PERSONAL',
+        type: 'PERSONAL' as const,
         isArchived: false,
+        _count: {
+          credentials: 0,
+          workflows: 0,
+        },
         owner: {
           id: 'user-1',
           username: 'testuser',
@@ -161,9 +175,12 @@ describe('AdminProjectsController', () => {
       const updateDto = { name: 'Updated Project', description: 'Updated description' };
       const mockUpdatedProject = {
         id: projectId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         name: 'Updated Project',
+        ownerId: 'user-1',
         description: 'Updated description',
-        type: 'PERSONAL',
+        type: 'PERSONAL' as const,
         isArchived: false,
       };
 
@@ -186,7 +203,12 @@ describe('AdminProjectsController', () => {
       const updateDto = { isArchived: true };
       const mockUpdatedProject = {
         id: projectId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         name: 'Test Project',
+        ownerId: 'user-1',
+        description: null,
+        type: 'PERSONAL' as const,
         isArchived: true,
       };
 
@@ -230,8 +252,13 @@ describe('AdminProjectsController', () => {
       const transferDto = { newOwnerId: 'user-456' };
       const mockUpdatedProject = {
         id: projectId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
         name: 'Test Project',
         ownerId: 'user-456',
+        description: null,
+        type: 'PERSONAL' as const,
+        isArchived: false,
       };
 
       service.transferOwnership.mockResolvedValue(mockUpdatedProject);
@@ -258,9 +285,9 @@ describe('AdminProjectsController', () => {
         credentialsCount: 3,
         membersCount: 2,
         executionsByStatus: [
-          { status: 'SUCCESS', _count: 80 },
-          { status: 'FAILED', _count: 15 },
-          { status: 'RUNNING', _count: 5 },
+          { status: 'success' as const, _count: 80 },
+          { status: 'failed' as const, _count: 15 },
+          { status: 'running' as const, _count: 5 },
         ],
       };
 
