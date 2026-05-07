@@ -20,7 +20,7 @@ describe('AdminUsersController', () => {
   };
 
   const mockRequest = {
-    user: { id: 'admin-id-123', role: 'SUPER_ADMIN' },
+    user: { sub: 'admin-id-123', role: 'SUPER_ADMIN' },
     ip: '127.0.0.1',
     headers: { 'user-agent': 'test-agent' },
   };

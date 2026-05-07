@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionsService } from './executions.service';
 import { DatabaseService } from '../database/database.service';
+import { ExecutionGateway } from './gateways/execution.gateway';
 import {
   BadRequestException,
   ForbiddenException,
@@ -52,12 +53,21 @@ describe('ExecutionsService', () => {
       $transaction: jest.fn(),
     };
 
+    const mockExecutionGateway = {
+      broadcastExecutionUpdate: jest.fn(),
+      broadcastNodeLog: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExecutionsService,
         {
           provide: DatabaseService,
           useValue: prismaMock,
+        },
+        {
+          provide: ExecutionGateway,
+          useValue: mockExecutionGateway,
         },
       ],
     }).compile();
