@@ -105,6 +105,10 @@ export class UsersService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.isBlocked) {
+      throw new UnauthorizedException('Your account has been blocked. Please contact support.');
+    }
+
     const isPasswordCorrect = await this.usersUtils.comparePassword(
       password,
       user.passwordHash,
@@ -134,6 +138,10 @@ export class UsersService {
     const user = await this.usersRepository.findOne(payload.sub);
     if (!user) {
       throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (user.isBlocked) {
+      throw new UnauthorizedException('Your account has been blocked. Please contact support.');
     }
 
     return this.authTokenService.generateTokens(user.id, user.role);
