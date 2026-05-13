@@ -19,10 +19,14 @@ interface ExecutionResult {
 }
    
 
+interface DbInsertNodeConfig {
+  table?: string;
+  values?: Record<string, unknown>;
+}
+
 interface DbInsertConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
+  config: DbInsertNodeConfig;
+  onSave: (config: DbInsertNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -30,7 +34,7 @@ interface DbInsertConfigProps {
 
 export function DbInsertConfig({ 
   config, 
-  _onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null

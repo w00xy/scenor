@@ -60,9 +60,9 @@ export function ChangePasswordModal({
       showFeedback("Пароль успешно изменён", "success");
       onSuccess?.();
       onClose();
-    } catch (error: any) {
-   
-      showFeedback(error.message || "Ошибка смены пароля", "error");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Ошибка смены пароля";
+      showFeedback(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }

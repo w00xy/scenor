@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { JSX, useState, useRef } from "react";
 import "./NodeConfig.scss";
 
@@ -9,11 +10,9 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
-  inputDataJson: any;
-  outputDataJson: any;
-   
+  inputDataJson: unknown;
+  outputDataJson: unknown;
   errorMessage: string | null;
-   
   finishedAt: string | null;
 }
 
@@ -105,7 +104,7 @@ export function ResizableNodeConfig({
         } as React.CSSProperties}
       >
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child) && child.props.className?.includes('node-config__section--params')) {
+          if (React.isValidElement(child) && typeof child.props === 'object' && child.props && 'className' in child.props && typeof child.props.className === 'string' && child.props.className.includes('node-config__section--params')) {
             // Оборачиваем секцию Параметров в контейнер с язычком
             return (
               <div className="node-config__params-wrapper">
@@ -123,10 +122,11 @@ export function ResizableNodeConfig({
           }
           
           // Добавляем информацию о подключениях в секцию Вход
-          if (React.isValidElement(child) && child.props.className?.includes('node-config__section--input')) {
+          if (React.isValidElement(child) && typeof child.props === 'object' && child.props && 'className' in child.props && typeof child.props.className === 'string' && child.props.className.includes('node-config__section--input')) {
+            const childProps = child.props as { className: string; children: React.ReactNode };
             return (
-              <div className={child.props.className}>
-                {child.props.children}
+              <div className={childProps.className}>
+                {childProps.children}
                 {inputConnections.length > 0 && (
                   <div className="node-config__connections">
                     <h4 className="node-config__connections-title">Входящие подключения:</h4>
@@ -154,10 +154,11 @@ export function ResizableNodeConfig({
           }
           
           // Добавляем информацию о подключениях и результатах в секцию Выход
-          if (React.isValidElement(child) && child.props.className?.includes('node-config__section--output')) {
+          if (React.isValidElement(child) && typeof child.props === 'object' && child.props && 'className' in child.props && typeof child.props.className === 'string' && child.props.className.includes('node-config__section--output')) {
+            const childProps = child.props as { className: string; children: React.ReactNode };
             return (
-              <div className={child.props.className}>
-                {child.props.children}
+              <div className={childProps.className}>
+                {childProps.children}
                 {outputConnections.length > 0 && (
                   <div className="node-config__connections">
                     <h4 className="node-config__connections-title">Исходящие подключения:</h4>

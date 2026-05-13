@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { getAccessToken, userApi } from "../services/api";
 
@@ -24,6 +24,8 @@ interface CurrentUserContextType {
 const CurrentUserContext = createContext<CurrentUserContextType | undefined>(
   undefined,
 );
+
+export { CurrentUserContext };
 
 const DEFAULT_USERNAME = "Пользователь";
 
@@ -89,15 +91,4 @@ export function CurrentUserProvider({
       {children}
     </CurrentUserContext.Provider>
   );
-}
-
-export function useCurrentUser() {
- 
-  const context = useContext(CurrentUserContext);
-
-  if (!context) {
-    throw new Error("useCurrentUser must be used within CurrentUserProvider");
-  }
-
-  return context;
 }

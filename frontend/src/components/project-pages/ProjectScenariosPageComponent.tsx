@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ProjectEmptyState } from "./project_empty_state/ProjectEmptyState";
 import { useCurrentUsername } from "../../hooks/useCurrentUsername";
 import { useWorkflows, Workflow } from "../../context/WorkflowsContext";
-import { useProjects } from "../../context/ProjectsContext";
+import { useProjects } from "../../hooks/useProjectsContext";
 import { MM_overview_scen_component } from "../overview/pages_overview/overview_scen/MM_overview_scen_component/MM_overview_scen_component";
 import { MM_overview_scen_div_one } from "../overview/pages_overview/overview_scen/MM_overview_scen_div_one/MM_overview_scen_div_one";
 import { MM_overview_scen_div_two } from "../overview/pages_overview/overview_scen/MM_overview_scen_div_two/MM_overview_scen_div_two";

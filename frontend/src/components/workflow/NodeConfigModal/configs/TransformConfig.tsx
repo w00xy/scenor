@@ -19,10 +19,13 @@ interface ExecutionResult {
 }
    
 
+interface TransformNodeConfig {
+  script?: string;
+}
+
 interface TransformConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
+  config: TransformNodeConfig;
+  onSave: (config: TransformNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -30,15 +33,14 @@ interface TransformConfigProps {
 
 export function TransformConfig({ 
   config, 
-  _onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
 }: TransformConfigProps): JSX.Element {
-   
   const [localConfig, setLocalConfig] = useState(config || { script: 'return input;' });
 
-  const handleChange = (newConfig: any) => {
+  const handleChange = (newConfig: TransformNodeConfig) => {
     setLocalConfig(newConfig);
     // TODO: Автосохранение будет реализовано позже
   };

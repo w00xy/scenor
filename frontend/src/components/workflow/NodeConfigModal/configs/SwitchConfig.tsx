@@ -19,23 +19,27 @@ interface ExecutionResult {
 }
    
 
-interface SwitchConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
-  inputConnections?: ConnectionInfo[];
-  outputConnections?: ConnectionInfo[];
-  executionResult?: ExecutionResult | null;
-}
-
 interface SwitchCase {
   value: string;
   output: string;
 }
 
+interface SwitchNodeConfig {
+  expression?: string;
+  cases?: SwitchCase[];
+}
+
+interface SwitchConfigProps {
+  config: SwitchNodeConfig;
+  onSave: (config: SwitchNodeConfig) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
+}
+
 export function SwitchConfig({ 
   config, 
-  _onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
@@ -48,24 +52,23 @@ export function SwitchConfig({
   const addCase = () => {
     const newConfig = {
       ...localConfig,
-      cases: [...localConfig.cases, { value: '', output: '' }]
+      cases: [...(localConfig.cases || []), { value: '', output: '' }]
     };
     setLocalConfig(newConfig);
     // TODO: Автосохранение будет реализовано позже
   };
 
   const removeCase = (index: number) => {
-   
     const newConfig = {
       ...localConfig,
-      cases: localConfig.cases.filter((_: any, i: number) => i !== index)
+      cases: localConfig.cases?.filter((_, i: number) => i !== index) || []
     };
     setLocalConfig(newConfig);
     // TODO: Автосохранение будет реализовано позже
   };
 
   const updateCase = (index: number, field: keyof SwitchCase, value: string) => {
-    const newCases = [...localConfig.cases];
+    const newCases = [...(localConfig.cases || [])];
     newCases[index] = { ...newCases[index], [field]: value };
     const newConfig = { ...localConfig, cases: newCases };
     setLocalConfig(newConfig);
@@ -113,7 +116,7 @@ export function SwitchConfig({
 
         <div className="node-config__field">
           <label className="node-config__label">Варианты (Cases)</label>
-          {localConfig.cases.map((caseItem: SwitchCase, index: number) => (
+          {(localConfig.cases || []).map((caseItem: SwitchCase, index: number) => (
             <div key={index} className="node-config__condition">
               <input
                 type="text"

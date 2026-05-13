@@ -85,6 +85,7 @@ export function useExecutionWebSocket(
     });
 
     wsServiceRef.current = service;
+    const subscriptionsToClean = subscribedExecutionsRef.current;
 
     if (autoConnect) {
       service.connect();
@@ -92,11 +93,11 @@ export function useExecutionWebSocket(
 
     return () => {
       // Отписываемся от всех execution при размонтировании
-      subscribedExecutionsRef.current.forEach(execId => {
+      const currentSubscriptions = Array.from(subscriptionsToClean);
+      currentSubscriptions.forEach(execId => {
         service.unsubscribe(execId);
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-      subscribedExecutionsRef.current.clear();
+      subscriptionsToClean.clear();
     };
   }, [autoConnect, handleConnectionChange, handleExecutionUpdate, handleNodeLog, handleError]);
 
@@ -107,12 +108,14 @@ export function useExecutionWebSocket(
       wsServiceRef.current.subscribe(executionId);
       subscribedExecutionsRef.current.add(executionId);
 
+      const currentExecutionId = executionId;
+      const subscriptionsToClean = subscribedExecutionsRef.current;
+
       return () => {
-        if (subscribedExecutionsRef.current.has(executionId)) {
-          console.warn('[useExecutionWebSocket] Auto-unsubscribing from:', executionId);
-          wsServiceRef.current.unsubscribe(executionId);
-          subscribedExecutionsRef.current.delete(executionId);
-     
+        if (subscriptionsToClean.has(currentExecutionId)) {
+          console.warn('[useExecutionWebSocket] Auto-unsubscribing from:', currentExecutionId);
+          wsServiceRef.current.unsubscribe(currentExecutionId);
+          subscriptionsToClean.delete(currentExecutionId);
         }
       };
     }

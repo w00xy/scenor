@@ -19,10 +19,13 @@ interface ExecutionResult {
 }
    
 
+interface DelayNodeConfig {
+  durationMs?: number;
+}
+
 interface DelayConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
+  config: DelayNodeConfig;
+  onSave: (config: DelayNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -38,7 +41,7 @@ export function DelayConfig({
    
   const [localConfig, setLocalConfig] = useState(config || { durationMs: 1000 });
 
-  const handleChange = (newConfig: any) => {
+  const handleChange = (newConfig: DelayNodeConfig) => {
     setLocalConfig(newConfig);
   };
 

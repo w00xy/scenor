@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
-import { useCurrentUser } from '../context/CurrentUserContext';
+import { useCurrentUser } from '../hooks/useCurrentUserContext';
 import { authApi, setTokens } from '../services/api';
 import { validateRegistrationForm } from '../utils/validation/registrationValidation';
-import { useProjects } from '../context/ProjectsContext';
+import { useProjects } from '../hooks/useProjectsContext';
 export function useRegister() {
   const { showFeedback } = useFieldFeedbackContext();
   const { refreshCurrentUser } = useCurrentUser();

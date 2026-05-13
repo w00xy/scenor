@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFieldFeedbackContext } from '../context/FieldFeedbackContext';
-import { useCurrentUser } from '../context/CurrentUserContext';
+import { useCurrentUser } from '../hooks/useCurrentUserContext';
 import { authApi, setTokens } from '../services/api';
-import { useProjects } from '../context/ProjectsContext';
+import { useProjects } from '../hooks/useProjectsContext';
 export function useLogin() {
   const { showFeedback } = useFieldFeedbackContext();
   const { refreshCurrentUser } = useCurrentUser();

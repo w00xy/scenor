@@ -1,6 +1,6 @@
 import React, { JSX, useState, useRef } from "react";
 import { useMenu } from "../../../context/MenuContext";
-import { useProjects } from "../../../context/ProjectsContext";
+import { useProjects } from "../../../hooks/useProjectsContext";
 import "./left_nav_btns.scss";
 import { LNBtn } from "./left_nav_btn/left_nav_btn";
 import { SettingsMenu } from "../sidebar_settings_menu/SettingsMenu";

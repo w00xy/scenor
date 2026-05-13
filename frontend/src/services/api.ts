@@ -13,6 +13,22 @@ class ApiError extends Error {
   }
 }
 
+// Типы для JSON данных
+type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
+type JsonObject = {
+  [key: string]: JsonValue;
+};
+type JsonArray = JsonValue[];
+
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parseJsonSafe = async (response: Response): Promise<any> => {
   if (response.status === 204) {
@@ -89,7 +105,7 @@ export const authApi = {
     username?: string;
     password: string;
   }) =>
-    request<{ accessToken: string; refreshToken: string; user: any }>(
+    request<{ accessToken: string; refreshToken: string; user: User }>(
    
       "/users/login",
       { method: "POST", body: JSON.stringify(credentials) },
@@ -347,7 +363,7 @@ export const workflowApi = {
     posX: number;
    
     posY: number;
-    configJson?: any;
+    configJson?: JsonObject;
   }) =>
     request<{
       id: string;
@@ -358,7 +374,7 @@ export const workflowApi = {
    
       posX: number;
       posY: number;
-      configJson: any;
+      configJson: JsonObject;
       createdAt: string;
       updatedAt: string;
     }>(`/workflows/${workflowId}/nodes`, { method: "POST", body: JSON.stringify(data) }, true),
@@ -369,7 +385,7 @@ export const workflowApi = {
     label?: string;
     posX?: number;
     posY?: number;
-    configJson?: any;
+    configJson?: JsonObject;
     isDisabled?: boolean;
   }) =>
     request<{
@@ -381,7 +397,7 @@ export const workflowApi = {
       label: string | null;
       posX: number;
       posY: number;
-      configJson: any;
+      configJson: JsonObject;
       isDisabled: boolean;
       updatedAt: string;
     }>(`/workflows/${workflowId}/nodes/${nodeId}`, { method: "PUT", body: JSON.stringify(data) }, true),
@@ -421,9 +437,9 @@ export const workflowApi = {
       status: string;
       startedAt: string;
       finishedAt: string | null;
-      inputDataJson: any;
+      inputDataJson: JsonObject;
       outputDataJson: {
-        nodeOutputs: Record<string, any[]>;
+        nodeOutputs: Record<string, JsonArray>;
         executedSteps: number;
       };
       errorMessage: string | null;
@@ -436,15 +452,14 @@ export const workflowApi = {
     request<Array<{
    
       id: string;
-   
       workflowId: string;
       startedByUserId: string;
       triggerType: string;
       status: string;
       startedAt: string;
       finishedAt: string | null;
-      inputDataJson: any;
-      outputDataJson: any;
+      inputDataJson: JsonObject;
+      outputDataJson: JsonObject;
       errorMessage: string | null;
     }>>(`/workflows/${workflowId}/executions?limit=${params?.limit || 50}&offset=${params?.offset || 0}`, { method: "GET" }, true),
 
@@ -459,8 +474,8 @@ export const workflowApi = {
       status: string;
       startedAt: string;
       finishedAt: string | null;
-      inputDataJson: any;
-      outputDataJson: any;
+      inputDataJson: JsonObject;
+      outputDataJson: JsonObject;
    
       errorMessage: string | null;
    
@@ -474,8 +489,8 @@ export const workflowApi = {
       status: string;
       startedAt: string;
       finishedAt: string | null;
-      inputDataJson: any;
-      outputDataJson: any;
+      inputDataJson: JsonObject;
+      outputDataJson: JsonObject;
       errorMessage: string | null;
     }>>(`/workflows/${workflowId}/executions/${executionId}/logs?limit=${params?.limit || 100}&offset=${params?.offset || 0}`, { method: "GET" }, true),
 };

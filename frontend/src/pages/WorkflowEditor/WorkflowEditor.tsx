@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState, useCallback, useRef } from "react";
+import { JSX, useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
@@ -10,7 +10,7 @@ import { WorkflowActionsMenu } from "../../components/overview/pages_overview/ov
 import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/BottomLogsPanel";
 import { NodeConfigWrapper } from "../../components/workflow/NodeConfigModal/configs/NodeConfigWrapper";
 import { useWorkflows } from "../../context/WorkflowsContext";
-import { useProjects } from "../../context/ProjectsContext";
+import { useProjects } from "../../hooks/useProjectsContext";
 import { workflowApi } from "../../services/api";
 import { useExecutionWebSocket } from "../../hooks/useExecutionWebSocket";
 import { Node, Edge, useNodesState, useEdgesState } from "reactflow";
@@ -18,14 +18,20 @@ import PlusSVG from "../../assets/common/Plus.svg?react";
 import MM_DotsSVG from "../../assets/common/Dots.svg?react";
 import "./WorkflowEditor.scss";
 
+interface Workflow {
+  id: string;
+  name: string;
+  projectId: string;
+  [key: string]: unknown;
+}
+
 export function WorkflowEditor(): JSX.Element {
   const { workflowId, projectId } = useParams<{ workflowId: string; projectId: string }>();
   const navigate = useNavigate();
   const { getWorkflow } = useWorkflows();
   const { projects } = useProjects();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [workflow, setWorkflow] = useState<any>(null);
+  const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nodes, setNodes, _onNodesChange] = useNodesState([]);
@@ -36,6 +42,7 @@ export function WorkflowEditor(): JSX.Element {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const dotsRef = useRef<HTMLDivElement>(null);
+  const [logsPanelHeight, setLogsPanelHeight] = useState(300);
   
   const lastSavedPositions = useRef<Map<string, { x: number; y: number }>>(new Map());
   
@@ -51,15 +58,11 @@ export function WorkflowEditor(): JSX.Element {
     lastExecutionId: null,
   });
 
-  const [logsPanelHeight, _setLogsPanelHeight] = useState(40);
-   
-
   const [configModal, setConfigModal] = useState<{
     isOpen: boolean;
     nodeId: string | null;
     nodeType: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    nodeData: any;
+    nodeData: Record<string, unknown> | null;
   }>({
     isOpen: false,
     nodeId: null,
@@ -67,9 +70,15 @@ export function WorkflowEditor(): JSX.Element {
     nodeData: null,
   });
 
-   
   // Состояние для хранения загруженных логов выполнения
-  const [executionLogs, setExecutionLogs] = useState<any[]>([]);
+  const [executionLogs, setExecutionLogs] = useState<Array<{
+    nodeId: string;
+    status: string;
+    inputJson?: unknown;
+    outputJson?: unknown;
+    errorMessage?: string | null;
+    finishedAt?: string | null;
+  }>>([]);
 
   // WebSocket для real-time обновлений
   const { 
@@ -85,7 +94,7 @@ export function WorkflowEditor(): JSX.Element {
   });
 
   // Объединяем логи из WebSocket и загруженные логи
-  const allLogs = [...executionLogs, ...wsLogs];
+  const allLogs = useMemo(() => [...executionLogs, ...wsLogs], [executionLogs, wsLogs]);
 
   // Загрузка логов последнего выполнения
   const loadExecutionLogs = useCallback(async () => {
@@ -135,8 +144,7 @@ export function WorkflowEditor(): JSX.Element {
         return prevNodes;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allLogs]);
+  }, [allLogs, setNodes]);
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
     // console.warn('Double click on node:', nodeId);
@@ -158,10 +166,9 @@ export function WorkflowEditor(): JSX.Element {
           nodeData: node.data,
         });
       }
-     
       return currentNodes;
     });
-  }, [executionState.lastExecutionId, loadExecutionLogs]);
+  }, [executionState.lastExecutionId, loadExecutionLogs, setNodes]);
 
   const handleCloseConfigModal = useCallback(() => {
     setConfigModal({
@@ -169,11 +176,10 @@ export function WorkflowEditor(): JSX.Element {
       nodeId: null,
       nodeType: null,
       nodeData: null,
-   
     });
   }, []);
 
-  const handleSaveNodeConfig = useCallback(async (nodeId: string, config: any) => {
+  const handleSaveNodeConfig = useCallback(async (nodeId: string, config: Record<string, unknown>) => {
     if (!workflowId) return;
 
     try {
@@ -188,12 +194,11 @@ export function WorkflowEditor(): JSX.Element {
             : node
         )
       );
-     
     } catch (error) {
       console.error("Failed to save node config:", error);
       alert("Не удалось сохранить конфигурацию узла");
     }
-  }, [workflowId]);
+  }, [workflowId, setNodes]);
 
   const handleDeleteNode = useCallback(async (nodeId: string) => {
     if (!workflowId) return;
@@ -211,13 +216,12 @@ export function WorkflowEditor(): JSX.Element {
         prevEdges.filter((edge) => 
           edge.source !== nodeId && edge.target !== nodeId
         )
-     
       );
     } catch (error) {
       console.error("Failed to delete node:", error);
       alert("Не удалось удалить узел");
     }
-  }, [workflowId]);
+  }, [workflowId, setNodes, setEdges]);
 
   useEffect(() => {
     const loadWorkflow = async () => {
@@ -282,14 +286,13 @@ export function WorkflowEditor(): JSX.Element {
       } catch (err) {
         console.error("Failed to load workflow:", err);
         setError("Не удалось загрузить сценарий");
-     
       } finally {
         setIsLoading(false);
       }
     };
 
     void loadWorkflow();
-  }, [workflowId]);
+  }, [workflowId, getWorkflow, handleDeleteNode, handleNodeDoubleClick, handleRunWorkflow, setNodes, setEdges]);
 
   const handleNodesChange = useCallback(async (updatedNodes: Node[]) => {
     if (!workflowId) return;
@@ -314,7 +317,6 @@ export function WorkflowEditor(): JSX.Element {
         }
         return Promise.resolve();
       });
-     
 
       await Promise.all(updatePromises);
     } catch (error) {
@@ -322,8 +324,7 @@ export function WorkflowEditor(): JSX.Element {
     }
   }, [workflowId]);
 
-  const handleEdgesChange = useCallback(async (updatedEdges: Edge[]) => {
-   
+  const handleEdgesChange = useCallback(async (_updatedEdges: Edge[]) => {
     if (!workflowId) return;
   }, [workflowId]);
 
@@ -332,7 +333,7 @@ export function WorkflowEditor(): JSX.Element {
 
     try {
       await workflowApi.updateWorkflow(workflowId, { name: workflowName });
-      setWorkflow((prev: any) => ({ ...prev, name: workflowName }));
+      setWorkflow((prev) => ({ ...prev, name: workflowName }));
       setIsEditingName(false);
     } catch (error) {
       console.error("Failed to update workflow name:", error);
@@ -413,7 +414,6 @@ export function WorkflowEditor(): JSX.Element {
           configJson: createdNode.configJson,
           onDelete: handleDeleteNode,
           onPlay: isTriggerNode ? handleRunWorkflow : undefined,
-     
           onDoubleClick: handleNodeDoubleClick,
         },
       };
@@ -423,7 +423,7 @@ export function WorkflowEditor(): JSX.Element {
       console.error("Failed to create node:", error);
       alert("Не удалось создать узел");
     }
-  }, [workflowId, setNodes]);
+  }, [workflowId, setNodes, handleDeleteNode, handleNodeDoubleClick, handleRunWorkflow]);
 
   const handleDotsClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -559,26 +559,24 @@ export function WorkflowEditor(): JSX.Element {
           lastExecutionId: result.id,
         });
       }, 3000);
-     
     } catch (error) {
       console.error("Failed to execute workflow:", error);
       alert("Не удалось запустить сценарий");
       setExecutionState({
         isExecuting: false,
         triggeredNodeId: null,
-     
         executedEdges: [],
         lastExecutionId: null,
       });
     }
-  }, [workflowId, nodes, edges, wsSubscribe]);
+  }, [workflowId, nodes, edges, wsSubscribe, setNodes]);
 
   const handleDeleteEdge = useCallback(async (edgeId: string) => {
     setEdges((prevEdges) => {
       const newEdges = prevEdges.filter((edge) => edge.id !== edgeId);
       return newEdges;
     });
-  }, []);
+  }, [setEdges]);
 
   if (isLoading) {
     return (

@@ -19,10 +19,13 @@ interface ExecutionResult {
 }
    
 
+interface ManualTriggerNodeConfig {
+  inputDataJson?: unknown;
+}
+
 interface ManualTriggerConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
+  config: ManualTriggerNodeConfig;
+  onSave: (config: ManualTriggerNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -58,10 +61,9 @@ export function ManualTriggerConfig({
       const parsed = JSON.parse(value);
       setJsonError(null);
       const updated = { ...localConfig, inputDataJson: parsed };
-     
       setLocalConfig(updated);
       onSave(updated);
-    } catch (e) {
+    } catch {
       setJsonError("Некорректный JSON");
     }
   };
@@ -89,7 +91,7 @@ export function ManualTriggerConfig({
             <textarea
               className={`node-config__textarea ${jsonError ? 'error' : ''}`}
               value={inputDataJson}
-              onChange={(_e) => handleInputDataChange(e.target.value)}
+              onChange={(e) => handleInputDataChange(e.target.value)}
               placeholder='{"key": "value"}'
               rows={8}
             />

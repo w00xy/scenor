@@ -71,7 +71,6 @@ export function CustomEdge({
         markerEnd={markerEnd} 
         style={edgeStyle}
         interactionWidth={20}
-        className={isExecuted ? 'executed' : ''}
       />
       {/* Невидимый широкий путь для лучшего обнаружения наведения */}
       <path

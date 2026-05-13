@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { useParams } from "react-router-dom";
-import { useProjects } from "../context/ProjectsContext";
+import { useProjects } from "../hooks/useProjectsContext";
 import { PersonalProject } from "./PersonalProject/PersonalProject";
 import { TeamProject } from "./TeamProject/TeamProject";
 

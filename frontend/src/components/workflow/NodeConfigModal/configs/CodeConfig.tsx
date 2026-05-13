@@ -19,10 +19,14 @@ interface ExecutionResult {
 }
    
 
+interface CodeNodeConfig {
+  language?: string;
+  source?: string;
+}
+
 interface CodeConfigProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: any;
-  onSave: (config: any) => void;
+  config: CodeNodeConfig;
+  onSave: (config: CodeNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;

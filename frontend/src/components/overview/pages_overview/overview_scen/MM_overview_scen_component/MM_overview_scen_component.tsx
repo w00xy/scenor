@@ -19,7 +19,7 @@ export function MM_overview_scen_component({
   last_update,
   data_created,
   projectName,
-  _workflowId,
+  workflowId: _workflowId,
   onOpen,
   onDelete,
 }: MM_overview_scen_componentProps): JSX.Element {
