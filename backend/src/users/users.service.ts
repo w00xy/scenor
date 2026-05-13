@@ -235,6 +235,30 @@ export class UsersService {
     return this.toPublicUser(deletedUser);
   }
 
+  async deleteOwnAccount(userId: string, password: string) {
+    const normalizedPassword = password?.trim();
+    if (!normalizedPassword) {
+      throw new BadRequestException('Password is required');
+    }
+
+    const user = await this.usersRepository.findOne(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await this.usersUtils.comparePassword(
+      normalizedPassword,
+      user.passwordHash,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Password is incorrect');
+    }
+
+    const deletedUser = await this.usersRepository.delete(userId);
+    return this.toPublicUser(deletedUser);
+  }
+
   async changePassword(userId: string, data: ChangePasswordDto) {
     const currentPassword = data.currentPassword?.trim();
     const newPassword = data.newPassword?.trim();

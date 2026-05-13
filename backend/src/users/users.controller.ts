@@ -14,26 +14,27 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { UsersService } from './users.service.js';
-import { CreateUserDto } from './dto/users-create.dto.js';
-import { UpdateUserDto } from './dto/users-update.dto.js';
-import { LoginUserDto } from './dto/users-login.dto.js';
-import { RefreshTokenDto } from './dto/users-refresh-token.dto.js';
-import { ChangePasswordDto } from './dto/users-change-password.dto.js';
-import { CheckPasswordDto } from './dto/users-check-password.dto.js';
-import { AuthGuard } from '../auth/auth.guard.js';
-import { RolesGuard } from '../auth/roles.guard.js';
-import { Roles } from '../auth/roles.decorator.js';
-import { Role } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+
+import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
-import { UserResponseDto } from './dto/user-response.dto.js';
-import { AuthResponseDto } from './dto/auth-response.dto.js';
-import { UsersListResponseDto } from './dto/users-list-response.dto.js';
-import { PasswordCheckResponseDto } from './dto/password-check-response.dto.js';
-import { ChangePasswordResponseDto } from './dto/change-password-response.dto.js';
-import { DeleteUserResponseDto } from './dto/delete-user-response.dto.js';
+import {
+  AuthResponseDto,
+  ChangePasswordDto,
+  ChangePasswordResponseDto,
+  CheckPasswordDto,
+  CreateUserDto,
+  DeleteOwnAccountDto,
+  DeleteUserResponseDto,
+  LoginUserDto,
+  PasswordCheckResponseDto,
+  RefreshTokenDto,
+  UpdateUserDto,
+  UserResponseDto,
+  UsersListResponseDto,
+} from './dto/index.js';
+import { UsersService } from './users.service.js';
 
 type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
@@ -109,19 +110,6 @@ export class UsersController {
     return this.usersService.updateUser(userId, data);
   }
 
-  @Delete(':id/delete')
-  @ApiOperation({summary: "Удалить пользователя для Администратора"})
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
-  @ApiBearerAuth('access-token')
-  @ApiResponse({ status: 200, description: 'Пользователь успешно удалён', type: DeleteUserResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - недостаточно прав (требуется роль SUPER_ADMIN)' })
-  @ApiResponse({ status: 404, description: 'Not Found - пользователь не найден' })
-  async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.usersService.deleteUser(id);
-  }
-
   @Put('password')
   @ApiOperation({summary: "Изменить пароль"})
   @UseGuards(AuthGuard)
@@ -156,5 +144,24 @@ export class UsersController {
     }
 
     return this.usersService.checkPassword(userId, data.password);
+  }
+
+  @Delete()
+  @UseGuards(AuthGuard)
+  @ApiOperation({summary: "Удалить свой аккаунт"})
+  @ApiBearerAuth('access-token')
+  @ApiResponse({ status: 200, description: 'Аккаунт успешно удалён', type: DeleteUserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация или неверный пароль' })
+  @ApiResponse({ status: 404, description: 'Not Found - пользователь не найден' })
+  async deleteOwnAccount(
+    @Req() request: AuthenticatedRequest,
+    @Body() data: DeleteOwnAccountDto,
+  ) {
+    const userId = request.user?.sub;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.usersService.deleteOwnAccount(userId, data.password);
   }
 }
