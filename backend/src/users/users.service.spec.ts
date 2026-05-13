@@ -29,6 +29,7 @@ describe('UsersService', () => {
   });
 
   const toPublicUser = (user: User) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, role, ...publicUser } = user;
     return {
       ...publicUser,
@@ -76,13 +77,9 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    usersRepository = module.get(
-      UsersRepository,
-    ) as jest.Mocked<UsersRepository>;
-    usersUtils = module.get(UsersUtils) as jest.Mocked<UsersUtils>;
-    authTokenService = module.get(
-      AuthTokenService,
-    ) as jest.Mocked<AuthTokenService>;
+    usersRepository = module.get(UsersRepository);
+    usersUtils = module.get(UsersUtils);
+    authTokenService = module.get(AuthTokenService);
   });
 
   it('should be defined', () => {
@@ -113,15 +110,19 @@ describe('UsersService', () => {
         password: 'strongpass123',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByEmail).toHaveBeenCalledWith(
         'alex@example.com',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByUsername).toHaveBeenCalledWith('Alex');
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.create).toHaveBeenCalledWith({
         username: 'Alex',
         email: 'alex@example.com',
         password: 'new-hash',
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authTokenService.generateTokens).toHaveBeenCalledWith(
         createdUser.id,
         createdUser.role,
@@ -161,7 +162,9 @@ describe('UsersService', () => {
           password: 'strongpass123',
         }),
       ).rejects.toThrow(ConflictException);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersUtils.hashPassword).not.toHaveBeenCalled();
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.create).not.toHaveBeenCalled();
     });
   });
@@ -183,13 +186,16 @@ describe('UsersService', () => {
         password: 'strongpass123',
       });
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersRepository.findByEmail).toHaveBeenCalledWith(
         'alex@example.com',
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(usersUtils.comparePassword).toHaveBeenCalledWith(
         'strongpass123',
         user.passwordHash,
       );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authTokenService.generateTokens).toHaveBeenCalledWith(
         user.id,
         user.role,
@@ -229,7 +235,230 @@ describe('UsersService', () => {
     });
   });
 
+  describe('refreshTokens', () => {
+    it('should verify refresh token and return new pair', async () => {
+      const user = createUserEntity();
+      const tokens = {
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      };
 
+      authTokenService.verifyRefreshToken.mockResolvedValue({
+        sub: user.id,
+        role: user.role,
+      });
+      usersRepository.findOne.mockResolvedValue(user);
+      authTokenService.generateTokens.mockResolvedValue(tokens);
 
+      const result = await service.refreshTokens('  valid-refresh-token  ');
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(authTokenService.verifyRefreshToken).toHaveBeenCalledWith(
+        'valid-refresh-token',
+      );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      expect(result).toEqual(tokens);
+    });
+
+    it('should throw BadRequestException when refresh token is empty', async () => {
+      await expect(service.refreshTokens(' ')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.refreshTokens(' ')).rejects.toThrow(
+        'Refresh token is required',
+      );
+    });
+
+    it('should throw UnauthorizedException when token payload references missing user', async () => {
+      authTokenService.verifyRefreshToken.mockResolvedValue({
+        sub: '4a6f2609-fc15-4060-8b17-8556be22008b',
+        role: Role.USER,
+      });
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.refreshTokens('valid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('getAllUsers', () => {
+    it('should return public users list', async () => {
+      const firstUser = createUserEntity();
+      const secondUser = createUserEntity({
+        id: '5f6428ba-95dd-4f7b-b5bc-c1e874acff77',
+        username: 'Maria',
+        email: 'maria@example.com',
+      });
+
+      usersRepository.findAll.mockResolvedValue([firstUser, secondUser]);
+
+      const result = await service.getAllUsers(2, 0);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findAll).toHaveBeenCalledWith(2, 0);
+      expect(result).toEqual([
+        toPublicUser(firstUser),
+        toPublicUser(secondUser),
+      ]);
+      expect(result[0]).not.toHaveProperty('passwordHash');
+      expect(result[1]).not.toHaveProperty('passwordHash');
+    });
+
+    it('should throw BadRequestException for invalid limit', async () => {
+      await expect(service.getAllUsers(0, 0)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.getAllUsers(0, 0)).rejects.toThrow(
+        'limit must be an integer between 1 and 100',
+      );
+    });
+  });
+
+  describe('getUserById', () => {
+    it('should return public user', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+
+      const result = await service.getUserById(user.id);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      expect(result).toEqual(toPublicUser(user));
+      expect(result).not.toHaveProperty('passwordHash');
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.getUserById('c5086a2d-a2b8-4f93-bbbf-086d13ebdd4a'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('updateUser', () => {
+    it('should update user with normalized data and hashed password', async () => {
+      const user = createUserEntity();
+      const updatedUser = createUserEntity({
+        username: 'Alex Updated',
+        email: 'alex.updated@example.com',
+        passwordHash: 'updated-hash',
+      });
+
+      usersRepository.findOne.mockResolvedValue(user);
+      usersRepository.findByUsername.mockResolvedValue(null);
+      usersRepository.findByEmail.mockResolvedValue(null);
+      usersUtils.hashPassword.mockResolvedValue('updated-hash');
+      usersRepository.update.mockResolvedValue(updatedUser);
+
+      const result = await service.updateUser(user.id, {
+        username: '  Alex Updated  ',
+        email: '  ALEX.UPDATED@EXAMPLE.COM  ',
+        password: 'newstrongpass123',
+      });
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findByUsername).toHaveBeenCalledWith(
+        'Alex Updated',
+      );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findByEmail).toHaveBeenCalledWith(
+        'alex.updated@example.com',
+      );
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.update).toHaveBeenCalledWith(user.id, {
+        username: 'Alex Updated',
+        email: 'alex.updated@example.com',
+        password: 'updated-hash',
+      });
+      expect(result).toEqual(toPublicUser(updatedUser));
+      expect(result).not.toHaveProperty('passwordHash');
+    });
+
+    it('should throw NotFoundException when user to update does not exist', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.updateUser('9389f503-ba78-479e-9b7b-9f6755af20d3', {
+          username: 'New Name',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should delete user and return public user', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+      usersRepository.delete.mockResolvedValue(user);
+
+      const result = await service.deleteUser(user.id);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.delete).toHaveBeenCalledWith(user.id);
+      expect(result).toEqual(toPublicUser(user));
+      expect(result).not.toHaveProperty('passwordHash');
+    });
+
+    it('should throw NotFoundException when deleting unknown user', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.deleteUser('f8eb17aa-c986-4309-9f20-4f658ec859d0'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('checkPassword', () => {
+    it('should return ok true when password matches hash', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+      usersUtils.comparePassword.mockResolvedValue(true);
+
+      const result = await service.checkPassword(user.id, '  strongpass123  ');
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersRepository.findOne).toHaveBeenCalledWith(user.id);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(usersUtils.comparePassword).toHaveBeenCalledWith(
+        'strongpass123',
+        user.passwordHash,
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should return ok false when password does not match hash', async () => {
+      const user = createUserEntity();
+      usersRepository.findOne.mockResolvedValue(user);
+      usersUtils.comparePassword.mockResolvedValue(false);
+
+      const result = await service.checkPassword(user.id, 'wrongpass123');
+
+      expect(result).toEqual({ ok: false });
+    });
+
+    it('should throw BadRequestException when password is empty', async () => {
+      await expect(service.checkPassword('user-id', ' ')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.checkPassword('user-id', ' ')).rejects.toThrow(
+        'Password is required',
+      );
+    });
+
+    it('should throw NotFoundException when user does not exist', async () => {
+      usersRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.checkPassword(
+          'f8eb17aa-c986-4309-9f20-4f658ec859d0',
+          'password',
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 });

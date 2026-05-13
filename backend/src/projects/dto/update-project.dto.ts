@@ -35,4 +35,3 @@ export class UpdateProjectDto {
   @IsBoolean()
   isArchived?: boolean;
 }
-

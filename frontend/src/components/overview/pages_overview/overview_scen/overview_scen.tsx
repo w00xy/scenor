@@ -4,7 +4,7 @@ import "./overview_scen.scss";
 import { MM_overview_scen_div_one } from "./MM_overview_scen_div_one/MM_overview_scen_div_one";
 import { MM_overview_scen_component } from "./MM_overview_scen_component/MM_overview_scen_component";
 import { MM_overview_scen_div_two } from "./MM_overview_scen_div_two/MM_overview_scen_div_two";
-import { useProjects } from "../../../../context/ProjectsContext";
+import { useProjects } from "../../../../hooks/useProjectsContext";
 import { useWorkflows, Workflow } from "../../../../context/WorkflowsContext";
 import { workflowApi } from "../../../../services/api";
 import { formatTimeAgo } from "../../../../utils/timeFormat";
@@ -36,7 +36,7 @@ export function Overview_scen(): JSX.Element {
         setIsLoading(true);
         const workflowsPromises = projects.map(async (project) => {
           try {
-            const workflows = await getProjectWorkflows(project.id);
+            const _workflows = await getProjectWorkflows(project.id);
             return workflows.map((workflow) => ({
               ...workflow,
               projectName: project.name,
@@ -56,6 +56,7 @@ export function Overview_scen(): JSX.Element {
     };
 
     void loadAllWorkflows();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects.length]);
 
   const formatDate = (dateString: string): string => {

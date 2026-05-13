@@ -86,9 +86,10 @@ export function validateNodeConfigByType(type: string, config: unknown) {
     const message = result.error.issues
       .map((issue) => `${issue.path.join('.') || 'config'}: ${issue.message}`)
       .join('; ');
-    throw new BadRequestException(`Invalid config for node "${type}": ${message}`);
+    throw new BadRequestException(
+      `Invalid config for node "${type}": ${message}`,
+    );
   }
 
   return result.data as Record<string, unknown>;
 }
-

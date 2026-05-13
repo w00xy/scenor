@@ -1,5 +1,10 @@
 import { Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
@@ -17,8 +22,15 @@ export class NodeTypesController {
 
   @Get()
   @ApiOperation({ summary: 'Получить список доступных типов узлов' })
-  @ApiResponse({ status: 200, description: 'Список типов узлов успешно получен', type: NodeTypesListResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
+  @ApiResponse({
+    status: 200,
+    description: 'Список типов узлов успешно получен',
+    type: NodeTypesListResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
   async listActiveNodeTypes() {
     return this.nodeTypesService.listActiveNodeTypes();
   }
@@ -26,12 +38,23 @@ export class NodeTypesController {
   @Post('seed')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Инициализировать базовые типы узлов (только для администратора)' })
-  @ApiResponse({ status: 201, description: 'Базовые типы узлов успешно инициализированы', type: SeedNodeTypesResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - недостаточно прав (требуется роль SUPER_ADMIN)' })
+  @ApiOperation({
+    summary: 'Инициализировать базовые типы узлов (только для администратора)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Базовые типы узлов успешно инициализированы',
+    type: SeedNodeTypesResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - недостаточно прав (требуется роль SUPER_ADMIN)',
+  })
   async seedDefaultNodeTypes() {
     return this.nodeTypesService.seedDefaultNodeTypes();
   }
 }
-

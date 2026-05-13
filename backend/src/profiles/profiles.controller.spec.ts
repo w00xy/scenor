@@ -34,7 +34,7 @@ describe('ProfilesController', () => {
     }).compile();
 
     controller = module.get<ProfilesController>(ProfilesController);
-    profilesService = module.get(ProfilesService) as jest.Mocked<ProfilesService>;
+    profilesService = module.get(ProfilesService);
   });
 
   it('should be defined', () => {
@@ -43,12 +43,16 @@ describe('ProfilesController', () => {
 
   it('getProfile should use user id from token payload', async () => {
     const userId = '163f81cc-9b0d-4da8-b95f-7de5198a5c73';
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const request = { user: { sub: userId } } as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const profile = {
       id: 'f57232ba-d8b9-45b2-818c-8f63dc058f27',
       userId,
       firstName: 'Alex',
     } as any;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     profilesService.getProfileByUserId.mockResolvedValue(profile);
 
     const result = await controller.getProfile(request);
@@ -71,8 +75,10 @@ describe('ProfilesController', () => {
       id: 'a6f8df29-f2c6-4ab4-bf6c-1a9b9a2f94e4',
       userId,
       firstName: 'Alex',
+
       lastName: 'Johnson',
     } as any;
+
     profilesService.putProfile.mockResolvedValue(profile);
 
     const result = await controller.putProfile(request, data);

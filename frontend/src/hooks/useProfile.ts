@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFieldFeedbackContext } from "../context/FieldFeedbackContext";
 import Cookies from "universal-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -101,7 +101,7 @@ export function useProfile() {
     }
   };
 
-  const loadData = async (id: string) => {
+  const loadData = useCallback(async (id: string) => {
     try {
       const profile = await profileApi.getProfile(id);
       syncProfileFields(
@@ -128,7 +128,7 @@ export function useProfile() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showFeedback]);
 
   useEffect(() => {
     const token = cookies.get("accessToken");
@@ -137,15 +137,20 @@ export function useProfile() {
       return;
     }
 
-    try {
-      const decoded = jwtDecode<{ sub: string }>(token);
-      setUserId(decoded.sub);
-      loadData(decoded.sub);
-    } catch (error) {
-      showFeedback("Ошибка загрузки профиля", "error");
-      setIsLoading(false);
-    }
-  }, [showFeedback]);
+    const loadUserData = async () => {
+      try {
+        const decoded = jwtDecode<{ sub: string }>(token);
+        setUserId(decoded.sub);
+        await loadData(decoded.sub);
+      } catch {
+        showFeedback("Ошибка загрузки профиля", "error");
+        setIsLoading(false);
+      }
+    };
+
+    void loadUserData();
+  }, [loadData, showFeedback]);
+     
 
   const handleSave = async () => {
     if (!canSave) return;

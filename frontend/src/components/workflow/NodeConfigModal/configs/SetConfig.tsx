@@ -10,15 +10,22 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface SetNodeConfig {
+  values?: Record<string, unknown>;
+}
 
 interface SetConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: SetNodeConfig;
+  onSave: (config: SetNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -26,19 +33,18 @@ interface SetConfigProps {
 
 export function SetConfig({ 
   config, 
-  onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
 }: SetConfigProps): JSX.Element {
-  const [localConfig, setLocalConfig] = useState(config || { values: {} });
+  const [_localConfig, _setLocalConfig] = useState(config || { values: {} });
   const [valuesText, setValuesText] = useState(
-    JSON.stringify(localConfig.values || {}, null, 2)
+    JSON.stringify((config || { values: {} }).values || {}, null, 2)
   );
 
   const handleChange = (text: string) => {
     setValuesText(text);
-    // TODO: Автосохранение будет реализовано позже
   };
 
   return (

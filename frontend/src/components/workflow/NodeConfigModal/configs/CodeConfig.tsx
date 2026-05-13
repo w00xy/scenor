@@ -10,15 +10,23 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface CodeNodeConfig {
+  language?: string;
+  source?: string;
+}
 
 interface CodeConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: CodeNodeConfig;
+  onSave: (config: CodeNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;

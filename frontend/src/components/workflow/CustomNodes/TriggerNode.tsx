@@ -27,7 +27,7 @@ export const TriggerNode = memo(({ data, selected, id }: NodeProps): JSX.Element
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('TriggerNode double click:', id, 'has handler:', !!data?.onDoubleClick);
+    // console.warn('TriggerNode double click:', id, 'has handler:', !!data?.onDoubleClick);
     if (data?.onDoubleClick) {
       data.onDoubleClick(id);
     } else {

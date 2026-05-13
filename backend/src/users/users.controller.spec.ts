@@ -67,7 +67,7 @@ describe('UsersController', () => {
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    usersService = module.get(UsersService) as jest.Mocked<UsersService>;
+    usersService = module.get(UsersService);
   });
 
   it('should be defined', () => {
@@ -90,6 +90,7 @@ describe('UsersController', () => {
 
     const result = await controller.register(data);
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(usersService.createUser).toHaveBeenCalledWith(data);
     expect(result).toEqual(response);
   });
@@ -109,6 +110,7 @@ describe('UsersController', () => {
 
     const result = await controller.login(data);
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(usersService.loginUser).toHaveBeenCalledWith(data);
     expect(result).toEqual(response);
   });
@@ -146,6 +148,7 @@ describe('UsersController', () => {
 
   it('getUserById should call usersService.getUserById', async () => {
     const response = createPublicUser();
+
     usersService.getUserById.mockResolvedValue(response);
 
     const result = await controller.getUserById(response.id);
@@ -160,15 +163,19 @@ describe('UsersController', () => {
       email: 'alex.updated@example.com',
     });
     const id = '59c22156-6f13-495d-9b8a-8f47eec7d74c';
+
     const data = {
       username: 'Alex Updated',
+
       email: 'alex.updated@example.com',
       password: 'newpass123',
     };
+
     const request = { user: { sub: id, role: Role.USER } } as any;
 
     usersService.updateUser.mockResolvedValue(response);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const result = await controller.updateUser(request, data);
 
     expect(usersService.updateUser).toHaveBeenCalledWith(id, data);

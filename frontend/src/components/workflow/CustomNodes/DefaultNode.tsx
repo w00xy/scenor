@@ -24,7 +24,7 @@ export function DefaultNode({ data, selected, id }: NodeProps): JSX.Element {
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('DefaultNode double click:', id, 'has handler:', !!data?.onDoubleClick);
+    // console.warn('DefaultNode double click:', id, 'has handler:', !!data?.onDoubleClick);
     if (data?.onDoubleClick) {
       data.onDoubleClick(id);
     } else {

@@ -156,7 +156,10 @@ export class WorkflowsService {
     ]);
 
     const normalizedType = data.type.trim();
-    const nodeType = await this.resolveNodeType(normalizedType, data.nodeTypeId);
+    const nodeType = await this.resolveNodeType(
+      normalizedType,
+      data.nodeTypeId,
+    );
     await this.validateCredentialProjectScope(
       workflow.projectId,
       data.credentialsId,
@@ -164,7 +167,8 @@ export class WorkflowsService {
 
     let rawConfig =
       data.configJson ??
-      ((nodeType.defaultConfigJson as Record<string, unknown>) ?? {});
+      (nodeType.defaultConfigJson as Record<string, unknown>) ??
+      {};
 
     // Generate webhook token for webhook_trigger nodes
     if (normalizedType === 'webhook_trigger') {
@@ -302,7 +306,11 @@ export class WorkflowsService {
     return deletedNode;
   }
 
-  async createEdge(userId: string, workflowId: string, data: CreateWorkflowEdgeDto) {
+  async createEdge(
+    userId: string,
+    workflowId: string,
+    data: CreateWorkflowEdgeDto,
+  ) {
     await this.requireWorkflowAccess(userId, workflowId, [
       ProjectMemberRole.OWNER,
       ProjectMemberRole.EDITOR,
@@ -420,7 +428,12 @@ export class WorkflowsService {
     if (nodeTypeId) {
       const nodeType = await this.prisma.nodeType.findUnique({
         where: { id: nodeTypeId },
-        select: { id: true, code: true, isActive: true, defaultConfigJson: true },
+        select: {
+          id: true,
+          code: true,
+          isActive: true,
+          defaultConfigJson: true,
+        },
       });
       if (!nodeType) {
         throw new NotFoundException('Node type not found');

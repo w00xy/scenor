@@ -11,6 +11,7 @@ import { CodeConfig } from "./CodeConfig";
 import { DelayConfig } from "./DelayConfig";
 import { DbSelectConfig } from "./DbSelectConfig";
 import { DbInsertConfig } from "./DbInsertConfig";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { nodeDisplayNames } from "../../nodeIconMap";
 import { Edge, Node } from "reactflow";
 
@@ -22,8 +23,8 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
-  inputDataJson: any;
-  outputDataJson: any;
+  inputDataJson: unknown;
+  outputDataJson: unknown;
   errorMessage: string | null;
   finishedAt: string | null;
 }
@@ -32,12 +33,21 @@ interface NodeConfigWrapperProps {
   isOpen: boolean;
   nodeId: string;
   nodeType: string;
-  nodeData: any;
+  nodeData: Record<string, unknown>;
   onClose: () => void;
-  onSave: (nodeId: string, config: any) => void;
+  onSave: (nodeId: string, config: Record<string, unknown>) => void;
   edges?: Edge[];
   nodes?: Node[];
-  executionLogs?: any[];
+  executionLogs?: Array<{
+    nodeId: string;
+    status: string;
+    inputJson?: unknown;
+    inputDataJson?: unknown;
+    outputJson?: unknown;
+    outputDataJson?: unknown;
+    errorMessage: string | null;
+    finishedAt: string | null;
+  }>;
 }
 
 export function NodeConfigWrapper({
@@ -49,10 +59,11 @@ export function NodeConfigWrapper({
   onSave,
   edges = [],
   nodes = [],
+   
   executionLogs = [],
 }: NodeConfigWrapperProps): JSX.Element {
 
-  const handleSave = (config: any) => {
+  const handleSave = (config: Record<string, unknown>) => {
     onSave(nodeId, config);
     // Не закрываем модалку автоматически - пользователь закроет сам
   };
@@ -86,7 +97,7 @@ export function NodeConfigWrapper({
     ? (() => {
         const nodeLog = executionLogs.find(log => log.nodeId === nodeId);
         if (nodeLog) {
-          console.log('[NodeConfigWrapper] Found log for node:', nodeId, nodeLog);
+          console.warn('[NodeConfigWrapper] Found log for node:', nodeId, nodeLog);
           return {
             status: nodeLog.status,
             inputDataJson: nodeLog.inputJson || nodeLog.inputDataJson,
@@ -104,7 +115,7 @@ export function NodeConfigWrapper({
 
     const commonProps = {
       config,
-      onSave: handleSave,
+      onSave: handleSave as (config: Record<string, unknown>) => void,
       inputConnections,
       outputConnections,
       executionResult,

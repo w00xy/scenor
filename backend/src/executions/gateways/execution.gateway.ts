@@ -33,7 +33,8 @@ export class ExecutionGateway
   server!: Server;
 
   private readonly logger = new Logger(ExecutionGateway.name);
-  private executionSubscribers: Map<string, Set<AuthenticatedWebSocket>> = new Map();
+  private executionSubscribers: Map<string, Set<AuthenticatedWebSocket>> =
+    new Map();
   private heartbeatInterval?: NodeJS.Timeout;
 
   // Rate limiting configuration
@@ -46,29 +47,34 @@ export class ExecutionGateway
     private readonly prisma: DatabaseService,
   ) {}
 
-  afterInit(server: Server) {
+  afterInit() {
     this.logger.log('WebSocket Gateway initialized');
     this.startHeartbeat();
   }
 
-  async handleConnection(client: AuthenticatedWebSocket, request: IncomingMessage) {
+  async handleConnection(
+    client: AuthenticatedWebSocket,
+    request: IncomingMessage,
+  ) {
     try {
       // Extract token from query string or headers
       const token = this.extractToken(request);
-      
+
       if (!token) {
         this.logger.warn('Connection rejected: No token provided');
-        client.send(JSON.stringify({ 
-          type: 'error', 
-          message: 'Authentication required' 
-        }));
+        client.send(
+          JSON.stringify({
+            type: 'error',
+            message: 'Authentication required',
+          }),
+        );
         client.close(1008, 'Authentication required');
         return;
       }
 
       // Verify JWT token
       const payload = await this.authTokenService.verifyAccessToken(token);
-      
+
       // Attach user info to client
       client.userId = payload.sub;
       client.isAlive = true;
@@ -77,12 +83,14 @@ export class ExecutionGateway
       client.lastSubscribeTime = 0;
 
       this.logger.log(`Client connected: userId=${payload.sub}`);
-      
+
       // Send connection success
-      client.send(JSON.stringify({ 
-        type: 'connected', 
-        userId: payload.sub 
-      }));
+      client.send(
+        JSON.stringify({
+          type: 'connected',
+          userId: payload.sub,
+        }),
+      );
 
       // Setup pong handler
       client.on('pong', () => {
@@ -93,20 +101,23 @@ export class ExecutionGateway
       client.on('message', (data: Buffer) => {
         this.handleMessage(client, data);
       });
-
     } catch (error) {
-      this.logger.warn(`Connection rejected: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      client.send(JSON.stringify({ 
-        type: 'error', 
-        message: 'Invalid or expired token' 
-      }));
+      this.logger.warn(
+        `Connection rejected: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      client.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Invalid or expired token',
+        }),
+      );
       client.close(1008, 'Invalid token');
     }
   }
 
   handleDisconnect(client: AuthenticatedWebSocket) {
     this.logger.log(`Client disconnected: userId=${client.userId}`);
-    
+
     // Clean up subscriptions
     for (const subscribers of this.executionSubscribers.values()) {
       subscribers.delete(client);
@@ -115,23 +126,34 @@ export class ExecutionGateway
 
   private handleMessage(client: AuthenticatedWebSocket, data: Buffer) {
     try {
-      const message = JSON.parse(data.toString());
-      
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const message: { event?: string; data?: unknown } = JSON.parse(
+        data.toString(),
+      );
+
       switch (message.event) {
         case 'subscribe-execution':
-          this.handleSubscribeExecution(client, message.data);
+          void this.handleSubscribeExecution(
+            client,
+            message.data as { executionId: string },
+          );
           break;
         case 'unsubscribe-execution':
-          this.handleUnsubscribeExecution(client, message.data);
+          this.handleUnsubscribeExecution(
+            client,
+            message.data as { executionId: string },
+          );
           break;
         case 'ping':
           this.handlePing(client);
           break;
         default:
-          this.sendError(client, `Unknown event: ${message.event}`);
+          this.sendError(client, `Unknown event: ${String(message.event)}`);
       }
     } catch (error) {
-      this.logger.error(`Message handling error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `Message handling error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       this.sendError(client, 'Invalid message format');
     }
   }
@@ -162,7 +184,9 @@ export class ExecutionGateway
       }
 
       // Check max subscriptions per client
-      if ((client.subscriptionCount || 0) >= this.MAX_SUBSCRIPTIONS_PER_CLIENT) {
+      if (
+        (client.subscriptionCount || 0) >= this.MAX_SUBSCRIPTIONS_PER_CLIENT
+      ) {
         this.sendError(
           client,
           `Maximum ${this.MAX_SUBSCRIPTIONS_PER_CLIENT} subscriptions per client`,
@@ -177,8 +201,11 @@ export class ExecutionGateway
       }
 
       // Verify access rights to execution
-      const hasAccess = await this.verifyExecutionAccess(client.userId, executionId);
-      
+      const hasAccess = await this.verifyExecutionAccess(
+        client.userId,
+        executionId,
+      );
+
       if (!hasAccess) {
         this.sendError(client, 'Access denied to this execution');
         return;
@@ -188,7 +215,7 @@ export class ExecutionGateway
       if (!this.executionSubscribers.has(executionId)) {
         this.executionSubscribers.set(executionId, new Set());
       }
-      
+
       const subscribers = this.executionSubscribers.get(executionId);
       if (subscribers) {
         subscribers.add(client);
@@ -226,7 +253,10 @@ export class ExecutionGateway
       if (subscribers) {
         subscribers.delete(client);
         client.subscriptions?.delete(executionId);
-        client.subscriptionCount = Math.max(0, (client.subscriptionCount || 0) - 1);
+        client.subscriptionCount = Math.max(
+          0,
+          (client.subscriptionCount || 0) - 1,
+        );
       }
 
       this.logger.log(
@@ -386,7 +416,9 @@ export class ExecutionGateway
         const authClient = client as AuthenticatedWebSocket;
 
         if (authClient.isAlive === false) {
-          this.logger.warn(`Terminating inactive client: userId=${authClient.userId}`);
+          this.logger.warn(
+            `Terminating inactive client: userId=${authClient.userId}`,
+          );
           return authClient.terminate();
         }
 

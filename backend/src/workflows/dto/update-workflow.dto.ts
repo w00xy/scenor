@@ -57,4 +57,3 @@ export class UpdateWorkflowDto {
   @IsBoolean()
   isPublic?: boolean;
 }
-

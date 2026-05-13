@@ -1,4 +1,4 @@
-import { useCurrentUser } from "../context/CurrentUserContext";
+import { useCurrentUser } from "../hooks/useCurrentUserContext";
 
 export function useCurrentUsername(defaultValue = "Пользователь") {
   const { username } = useCurrentUser();

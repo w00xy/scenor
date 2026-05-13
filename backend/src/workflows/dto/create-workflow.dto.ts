@@ -45,4 +45,3 @@ export class CreateWorkflowDto {
   @IsBoolean()
   isPublic?: boolean;
 }
-

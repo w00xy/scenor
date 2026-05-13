@@ -6,13 +6,27 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
-  CREDENTIALS_ENCRYPTION_KEY: z.string().length(64, 'CREDENTIALS_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)'),
+  CREDENTIALS_ENCRYPTION_KEY: z
+    .string()
+    .length(
+      64,
+      'CREDENTIALS_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)',
+    ),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   HOSTNAME: z.string().default('127.0.0.1'),
   NODE_ENV: z.string().optional(),
-  ADMIN_EMAIL: z.string().email('ADMIN_EMAIL must be a valid email').default('admin@scenor.local'),
-  ADMIN_USERNAME: z.string().min(3, 'ADMIN_USERNAME must be at least 3 characters').default('admin'),
-  ADMIN_PASSWORD: z.string().min(6, 'ADMIN_PASSWORD must be at least 6 characters').default('admin123'),
+  ADMIN_EMAIL: z
+    .string()
+    .email('ADMIN_EMAIL must be a valid email')
+    .default('admin@scenor.local'),
+  ADMIN_USERNAME: z
+    .string()
+    .min(3, 'ADMIN_USERNAME must be at least 3 characters')
+    .default('admin'),
+  ADMIN_PASSWORD: z
+    .string()
+    .min(6, 'ADMIN_PASSWORD must be at least 6 characters')
+    .default('admin123'),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
@@ -31,7 +45,7 @@ export function getEnvFilePaths(): string[] {
       files.push('.env.prod');
     }
     if (nodeEnv === 'dev') {
-      files.push('.env.dev')
+      files.push('.env.dev');
     }
     files.push(`.env.${nodeEnv}`);
   }

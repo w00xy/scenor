@@ -10,15 +10,22 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface ManualTriggerNodeConfig {
+  inputDataJson?: unknown;
+}
 
 interface ManualTriggerConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: ManualTriggerNodeConfig;
+  onSave: (config: ManualTriggerNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -56,7 +63,7 @@ export function ManualTriggerConfig({
       const updated = { ...localConfig, inputDataJson: parsed };
       setLocalConfig(updated);
       onSave(updated);
-    } catch (e) {
+    } catch {
       setJsonError("Некорректный JSON");
     }
   };

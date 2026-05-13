@@ -10,15 +10,23 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface WebhookTriggerNodeConfig {
+  path?: string;
+  method?: string;
+}
 
 interface WebhookTriggerConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: WebhookTriggerNodeConfig;
+  onSave: (config: WebhookTriggerNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -26,14 +34,14 @@ interface WebhookTriggerConfigProps {
 
 export function WebhookTriggerConfig({ 
   config, 
-  onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null
 }: WebhookTriggerConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || { path: '/hook', method: 'POST' });
 
-  const handleChange = (newConfig: any) => {
+  const handleChange = (newConfig: WebhookTriggerNodeConfig) => {
     setLocalConfig(newConfig);
     // TODO: Автосохранение будет реализовано позже
   };

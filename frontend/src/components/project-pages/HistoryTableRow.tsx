@@ -29,9 +29,7 @@ export function HistoryTableRow({
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const dotsRef = useRef<HTMLDivElement>(null);
 
-  const handleDotsClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
+  const handleDotsClick = () => {
     if (dotsRef.current) {
       const rect = dotsRef.current.getBoundingClientRect();
       setMenuPosition({
@@ -49,7 +47,7 @@ export function HistoryTableRow({
     }
 
     try {
-      console.log("Deleting execution:", executionId);
+      console.warn("Deleting execution:", executionId);
       setShowMenu(false);
     } catch (error) {
       console.error("Failed to delete execution:", error);

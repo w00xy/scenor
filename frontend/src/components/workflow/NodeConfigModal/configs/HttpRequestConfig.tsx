@@ -10,15 +10,27 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface HttpRequestNodeConfig {
+  url?: string;
+  method?: string;
+  headers?: Record<string, string>;
+  query?: Record<string, unknown>;
+  body?: unknown;
+  timeout?: number;
+}
 
 interface HttpRequestConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: HttpRequestNodeConfig;
+  onSave: (config: HttpRequestNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -66,9 +78,10 @@ export function HttpRequestConfig({
       console.error('JSON parse error:', error);
     }
   };
+   
 
   // Обновление локального состояния без сохранения
-  const handleChange = (newConfig: any) => {
+  const handleChange = (newConfig: HttpRequestNodeConfig) => {
     setLocalConfig(newConfig);
   };
 

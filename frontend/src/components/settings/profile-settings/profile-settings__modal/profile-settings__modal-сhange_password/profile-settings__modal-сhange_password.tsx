@@ -3,6 +3,7 @@ import { InputField } from "../../../../../components/auth_reg/InputField/InputF
 import { ModeName } from "../../../../../components/auth_reg/ModeName/ModeName";
 import { ARButton } from "../../../../../components/auth_reg/ARButton/ARButton";
 import { Input } from "../../../../../components/auth_reg/Input/Input";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FieldSpacer } from "../../../../../components/auth_reg/FieldSpacer/FieldSpacer";
 import { useState } from "react";
 import { useFieldFeedbackContext } from "../../../../../context/FieldFeedbackContext";
@@ -59,8 +60,9 @@ export function ChangePasswordModal({
       showFeedback("Пароль успешно изменён", "success");
       onSuccess?.();
       onClose();
-    } catch (error: any) {
-      showFeedback(error.message || "Ошибка смены пароля", "error");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Ошибка смены пароля";
+      showFeedback(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }

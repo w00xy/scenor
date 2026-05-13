@@ -35,6 +35,16 @@ const ProjectsContext = createContext<ProjectsContextType | undefined>(
   undefined,
 );
 
+export { ProjectsContext };
+
+export function useProjects(): ProjectsContextType {
+  const context = useContext(ProjectsContext);
+  if (!context) {
+    throw new Error("useProjects must be used within ProjectsProvider");
+  }
+  return context;
+}
+
 export function ProjectsProvider({
   children,
 }: {
@@ -71,6 +81,7 @@ export function ProjectsProvider({
     }
 
     void refreshProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const personalProject =
@@ -115,14 +126,4 @@ export function ProjectsProvider({
       {children}
     </ProjectsContext.Provider>
   );
-}
-
-export function useProjects() {
-  const context = useContext(ProjectsContext);
-
-  if (!context) {
-    throw new Error("useProjects must be used within ProjectsProvider");
-  }
-
-  return context;
 }

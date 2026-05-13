@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { useProjects } from "../../context/ProjectsContext";
+import { useProjects } from "../../hooks/useProjectsContext";
 import { ProjectLayout } from "../../components/shared/ProjectLayout/ProjectLayout";
 import "./TeamProject.scss";
 

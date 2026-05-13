@@ -20,13 +20,13 @@ export class CredentialsService {
     private readonly configService: ConfigService,
   ) {
     const key = this.configService.get<string>('CREDENTIALS_ENCRYPTION_KEY');
-    
+
     if (!key) {
       throw new Error(
         'CREDENTIALS_ENCRYPTION_KEY is not set in environment variables',
       );
     }
-    
+
     this.encryptionKey = Buffer.from(key, 'hex');
   }
 
@@ -197,7 +197,9 @@ export class CredentialsService {
     }
 
     if (data.data !== undefined) {
-      updateData.encryptedData = this.encrypt(data.data) as Prisma.InputJsonValue;
+      updateData.encryptedData = this.encrypt(
+        data.data,
+      ) as Prisma.InputJsonValue;
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -255,7 +257,9 @@ export class CredentialsService {
     };
   }
 
-  private decrypt(encryptedData: Record<string, unknown>): Record<string, unknown> {
+  private decrypt(
+    encryptedData: Record<string, unknown>,
+  ): Record<string, unknown> {
     const iv = Buffer.from(String(encryptedData.iv), 'hex');
     const authTag = Buffer.from(String(encryptedData.authTag), 'hex');
     const encrypted = String(encryptedData.data);

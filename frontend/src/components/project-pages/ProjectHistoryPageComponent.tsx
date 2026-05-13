@@ -13,7 +13,9 @@ interface Execution {
   status: string;
   startedAt: string;
   finishedAt: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
 }
@@ -151,7 +153,7 @@ export function ProjectHistoryPageComponent(): JSX.Element {
     }
 
     try {
-      console.log("Deleting executions:", Array.from(selectedExecutions));
+      console.warn("Deleting executions:", Array.from(selectedExecutions));
       
       setExecutions(executions.filter(e => !selectedExecutions.has(e.id)));
       setSelectedExecutions(new Set());

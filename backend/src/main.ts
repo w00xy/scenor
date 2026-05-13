@@ -7,14 +7,14 @@ import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Configure WebSocket adapter
   app.useWebSocketAdapter(new WsAdapter(app));
 
   app.enableCors({
     origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
     credentials: true,
-  })
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -44,11 +44,11 @@ async function bootstrap() {
   // Initialize admin user and node types
   const initializationService = app.get(InitializationService);
   await initializationService.initialize();
-  
+
   const port = process.env.PORT ?? 3000;
   const hostname = process.env.HOSTNAME ?? '0.0.0.0';
   await app.listen(port, hostname);
-  
+
   console.log(`App started on http://${hostname}:${port}`);
 }
-bootstrap();
+void bootstrap();

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useProjects } from "../../../context/ProjectsContext";
+import { useProjects } from "../../../hooks/useProjectsContext";
 import { useWorkflows } from "../../../context/WorkflowsContext";
 import { CreateMenuItem } from "./CreateMenuItem";
 import "./CreateMenu.scss";

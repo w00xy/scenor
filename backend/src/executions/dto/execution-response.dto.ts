@@ -26,14 +26,14 @@ export class ExecutionResponseDto {
     description: 'Входные данные для выполнения',
     nullable: true,
   })
-  inputDataJson!: any | null;
+  inputDataJson!: Record<string, unknown> | null;
 
   @ApiProperty({
     example: { result: 'success', data: { id: 456 } },
     description: 'Результат выполнения',
     nullable: true,
   })
-  outputDataJson!: any | null;
+  outputDataJson!: Record<string, unknown> | null;
 
   @ApiProperty({
     example: 'Connection timeout',

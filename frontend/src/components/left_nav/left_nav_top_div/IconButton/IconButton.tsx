@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React from "react";
 import "./IconButton.scss";
 import { useNavigate } from "react-router-dom";
 

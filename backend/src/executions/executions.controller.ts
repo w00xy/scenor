@@ -13,11 +13,20 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AuthTokenPayload } from '../auth/auth-token.service.js';
-import { DeleteExecutionDto, DeleteExecutionResponseDto, RunWorkflowManualDto } from './dto/index.js';
+import {
+  DeleteExecutionDto,
+  DeleteExecutionResponseDto,
+  RunWorkflowManualDto,
+} from './dto/index.js';
 import { ExecutionsService } from './executions.service.js';
 import { ExecutionResponseDto } from './dto/execution-response.dto.js';
 import { ExecutionsListResponseDto } from './dto/executions-list-response.dto.js';
@@ -36,9 +45,19 @@ export class ExecutionsController {
 
   @Post('manual')
   @ApiOperation({ summary: 'Запустить workflow вручную' })
-  @ApiResponse({ status: 201, description: 'Workflow успешно запущен, возвращает информацию о выполнении', type: ExecutionResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
+  @ApiResponse({
+    status: 201,
+    description: 'Workflow успешно запущен, возвращает информацию о выполнении',
+    type: ExecutionResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - нет доступа к workflow',
+  })
   @ApiResponse({ status: 404, description: 'Not Found - workflow не найден' })
   async runManual(
     @Req() request: AuthenticatedRequest,
@@ -55,9 +74,16 @@ export class ExecutionsController {
 
   @Post('webhook/:webhookToken')
   @ApiOperation({ summary: 'Запустить workflow через webhook' })
-  @ApiResponse({ status: 201, description: 'Workflow успешно запущен через webhook', type: ExecutionResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Workflow успешно запущен через webhook',
+    type: ExecutionResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
-  @ApiResponse({ status: 404, description: 'Not Found - workflow или webhook не найден' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - workflow или webhook не найден',
+  })
   async runWebhook(
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
     @Param('webhookToken') webhookToken: string,
@@ -72,9 +98,19 @@ export class ExecutionsController {
 
   @Get()
   @ApiOperation({ summary: 'Получить список выполнений workflow' })
-  @ApiResponse({ status: 200, description: 'Список выполнений успешно получен', type: ExecutionsListResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
+  @ApiResponse({
+    status: 200,
+    description: 'Список выполнений успешно получен',
+    type: ExecutionsListResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - нет доступа к workflow',
+  })
   @ApiResponse({ status: 404, description: 'Not Found - workflow не найден' })
   async listExecutions(
     @Req() request: AuthenticatedRequest,
@@ -93,10 +129,23 @@ export class ExecutionsController {
 
   @Get(':executionId')
   @ApiOperation({ summary: 'Получить детали выполнения workflow' })
-  @ApiResponse({ status: 200, description: 'Детали выполнения успешно получены', type: ExecutionResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
-  @ApiResponse({ status: 404, description: 'Not Found - выполнение или workflow не найден' })
+  @ApiResponse({
+    status: 200,
+    description: 'Детали выполнения успешно получены',
+    type: ExecutionResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - нет доступа к workflow',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - выполнение или workflow не найден',
+  })
   async getExecution(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -112,10 +161,23 @@ export class ExecutionsController {
 
   @Get(':executionId/logs')
   @ApiOperation({ summary: 'Получить логи выполнения узлов workflow' })
-  @ApiResponse({ status: 200, description: 'Логи выполнения успешно получены', type: ExecutionLogsListResponseDto })
-  @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
-  @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
-  @ApiResponse({ status: 404, description: 'Not Found - выполнение или workflow не найден' })
+  @ApiResponse({
+    status: 200,
+    description: 'Логи выполнения успешно получены',
+    type: ExecutionLogsListResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - нет доступа к workflow',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - выполнение или workflow не найден',
+  })
   async getExecutionLogs(
     @Req() request: AuthenticatedRequest,
     @Param('workflowId', new ParseUUIDPipe()) workflowId: string,
@@ -135,26 +197,26 @@ export class ExecutionsController {
 
   @Delete(':executionId')
   @ApiOperation({ summary: 'Удалить выполнение workflow и все его логи' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Выполнение успешно удалено', 
-    type: DeleteExecutionResponseDto 
+  @ApiResponse({
+    status: 200,
+    description: 'Выполнение успешно удалено',
+    type: DeleteExecutionResponseDto,
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Bad Request - выполнение в процессе выполнения' 
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - выполнение в процессе выполнения',
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Unauthorized - требуется авторизация' 
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - требуется авторизация',
   })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - недостаточно прав для удаления' 
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - недостаточно прав для удаления',
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Not Found - выполнение или workflow не найден' 
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - выполнение или workflow не найден',
   })
   async deleteExecution(
     @Req() request: AuthenticatedRequest,
@@ -179,4 +241,3 @@ export class ExecutionsController {
     return userId;
   }
 }
-

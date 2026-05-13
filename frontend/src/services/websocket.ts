@@ -16,7 +16,9 @@ export interface NodeLog {
   status: 'running' | 'success' | 'failed';
   startedAt: string;
   finishedAt: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
 }
@@ -60,7 +62,7 @@ export class ExecutionWebSocketService {
 
   public connect(): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('[WebSocket] Already connected');
+      console.warn('[WebSocket] Already connected');
       return;
     }
 
@@ -76,11 +78,11 @@ export class ExecutionWebSocketService {
       this.updateConnectionStatus('connecting');
       const wsUrl = `${WS_BASE_URL}/executions?token=${encodeURIComponent(token)}`;
       
-      console.log('[WebSocket] Connecting to:', wsUrl);
+      console.warn('[WebSocket] Connecting to:', wsUrl);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('[WebSocket] Connected');
+        console.warn('[WebSocket] Connected');
         this.updateConnectionStatus('connected');
         this.reconnectAttempts = 0;
         this.startHeartbeat();
@@ -102,7 +104,7 @@ export class ExecutionWebSocketService {
       };
 
       this.ws.onclose = (event) => {
-        console.log('[WebSocket] Closed:', event.code, event.reason);
+        console.warn('[WebSocket] Closed:', event.code, event.reason);
         this.updateConnectionStatus('disconnected');
         this.stopHeartbeat();
         
@@ -110,7 +112,7 @@ export class ExecutionWebSocketService {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-          console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+          console.warn(`[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
           
           this.reconnectTimeout = setTimeout(() => {
             this.connect();
@@ -128,7 +130,7 @@ export class ExecutionWebSocketService {
   }
 
   public disconnect(): void {
-    console.log('[WebSocket] Disconnecting');
+    console.warn('[WebSocket] Disconnecting');
     
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
@@ -153,7 +155,7 @@ export class ExecutionWebSocketService {
       return;
     }
 
-    console.log('[WebSocket] Subscribing to execution:', executionId);
+    console.warn('[WebSocket] Subscribing to execution:', executionId);
     this.subscriptions.add(executionId);
     
     this.send({
@@ -169,7 +171,7 @@ export class ExecutionWebSocketService {
       return;
     }
 
-    console.log('[WebSocket] Unsubscribing from execution:', executionId);
+    console.warn('[WebSocket] Unsubscribing from execution:', executionId);
     this.subscriptions.delete(executionId);
     
     this.send({
@@ -186,6 +188,7 @@ export class ExecutionWebSocketService {
     return this.connectionStatus === 'connected' && this.ws?.readyState === WebSocket.OPEN;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private send(data: any): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console.warn('[WebSocket] Cannot send: not connected');
@@ -202,31 +205,31 @@ export class ExecutionWebSocketService {
   private handleMessage(data: string): void {
     try {
       const message: WebSocketMessage = JSON.parse(data);
-      console.log('[WebSocket] Message received:', message.type, message);
+      console.warn('[WebSocket] Message received:', message.type, message);
 
       switch (message.type) {
         case 'connected':
-          console.log('[WebSocket] Server confirmed connection, userId:', message.userId);
+          console.warn('[WebSocket] Server confirmed connection, userId:', message.userId);
           break;
 
         case 'subscribed':
-          console.log('[WebSocket] Subscribed to execution:', message.executionId);
+          console.warn('[WebSocket] Subscribed to execution:', message.executionId);
           break;
 
         case 'unsubscribed':
-          console.log('[WebSocket] Unsubscribed from execution:', message.executionId);
+          console.warn('[WebSocket] Unsubscribed from execution:', message.executionId);
           break;
 
         case 'execution-update':
           if (message.executionId && message.data) {
-            console.log('[WebSocket] Execution update:', message.executionId, message.data.status);
+            console.warn('[WebSocket] Execution update:', message.executionId, message.data.status);
             this.callbacks.onExecutionUpdate?.(message.executionId, message.data);
           }
           break;
 
         case 'node-log':
           if (message.executionId && message.nodeLog) {
-            console.log('[WebSocket] Node log:', message.executionId, message.nodeLog.nodeId, message.nodeLog.status);
+            console.warn('[WebSocket] Node log:', message.executionId, message.nodeLog.nodeId, message.nodeLog.status);
             this.callbacks.onNodeLog?.(message.executionId, message.nodeLog);
           }
           break;
@@ -237,7 +240,7 @@ export class ExecutionWebSocketService {
           break;
 
         case 'pong':
-          console.log('[WebSocket] Pong received');
+          console.warn('[WebSocket] Pong received');
           break;
 
         default:
@@ -251,7 +254,7 @@ export class ExecutionWebSocketService {
   private updateConnectionStatus(status: ConnectionStatus): void {
     if (this.connectionStatus !== status) {
       this.connectionStatus = status;
-      console.log('[WebSocket] Connection status changed:', status);
+      console.warn('[WebSocket] Connection status changed:', status);
       this.callbacks.onConnectionChange?.(status);
     }
   }
@@ -262,7 +265,7 @@ export class ExecutionWebSocketService {
     // Отправляем ping каждые 25 секунд (сервер ожидает каждые 30 секунд)
     this.heartbeatInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        console.log('[WebSocket] Sending ping');
+        console.warn('[WebSocket] Sending ping');
         this.send({ event: 'ping' });
       }
     }, 25000);

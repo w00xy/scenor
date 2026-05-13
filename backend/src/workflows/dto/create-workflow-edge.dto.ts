@@ -59,4 +59,3 @@ export class CreateWorkflowEdgeDto {
   @MaxLength(255)
   label?: string;
 }
-

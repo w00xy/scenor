@@ -5,21 +5,19 @@ import "./NodeConfigModal.scss";
 
 interface NodeConfigModalProps {
   isOpen: boolean;
-  nodeId: string;
-  nodeType: string;
-  nodeData: any;
   onClose: () => void;
-  onSave: (nodeId: string, config: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSave: (config: any) => void;
+  nodeType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  nodeData: any;
   children: React.ReactNode;
 }
 
 export function NodeConfigModal({
   isOpen,
-  nodeId,
-  nodeType,
-  nodeData,
   onClose,
-  onSave,
+  nodeType,
   children,
 }: NodeConfigModalProps): JSX.Element | null {
   useEffect(() => {

@@ -32,7 +32,7 @@ export const validatePassword = (password: string): ValidationResult => {
     };
   }
 
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     return {
       isValid: false,
       message: "Пароль должен содержать хотя бы один спецсимвол (!@#$%^&*)",

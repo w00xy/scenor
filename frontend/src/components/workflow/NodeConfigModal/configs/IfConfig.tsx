@@ -10,24 +10,32 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
-
-interface IfConfigProps {
-  config: any;
-  onSave: (config: any) => void;
-  inputConnections?: ConnectionInfo[];
-  outputConnections?: ConnectionInfo[];
-  executionResult?: ExecutionResult | null;
-}
+   
 
 interface Condition {
   left: string;
   operator: string;
-  right: any;
+  right: string;
+}
+
+interface IfNodeConfig {
+  mode?: string;
+  conditions?: Condition[];
+}
+
+interface IfConfigProps {
+  config: IfNodeConfig;
+  onSave: (config: IfNodeConfig) => void;
+  inputConnections?: ConnectionInfo[];
+  outputConnections?: ConnectionInfo[];
+  executionResult?: ExecutionResult | null;
 }
 
 export function IfConfig({ 
@@ -45,7 +53,7 @@ export function IfConfig({
   const addCondition = () => {
     const newConfig = {
       ...localConfig,
-      conditions: [...localConfig.conditions, { left: '', operator: 'equals', right: '' }]
+      conditions: [...(localConfig.conditions || []), { left: '', operator: 'equals', right: '' }]
     };
     setLocalConfig(newConfig);
     onSave(newConfig);
@@ -54,14 +62,14 @@ export function IfConfig({
   const removeCondition = (index: number) => {
     const newConfig = {
       ...localConfig,
-      conditions: localConfig.conditions.filter((_: any, i: number) => i !== index)
+      conditions: localConfig.conditions?.filter((_, i: number) => i !== index) || []
     };
     setLocalConfig(newConfig);
     onSave(newConfig);
   };
 
   const updateCondition = (index: number, field: keyof Condition, value: string) => {
-    const newConditions = [...localConfig.conditions];
+    const newConditions = [...(localConfig.conditions || [])];
     newConditions[index] = { ...newConditions[index], [field]: value };
     const newConfig = { ...localConfig, conditions: newConditions };
     setLocalConfig(newConfig);
@@ -72,7 +80,7 @@ export function IfConfig({
   };
 
   const handleOperatorChange = (index: number, operator: string) => {
-    const newConditions = [...localConfig.conditions];
+    const newConditions = [...(localConfig.conditions || [])];
     newConditions[index] = { ...newConditions[index], operator };
     const newConfig = { ...localConfig, conditions: newConditions };
     setLocalConfig(newConfig);
@@ -118,7 +126,7 @@ export function IfConfig({
 
         <div className="node-config__field">
           <label className="node-config__label">Условия</label>
-          {localConfig.conditions.map((condition: Condition, index: number) => (
+          {(localConfig.conditions || []).map((condition: Condition, index: number) => (
             <div key={index} className="node-config__condition">
               <input
                 type="text"

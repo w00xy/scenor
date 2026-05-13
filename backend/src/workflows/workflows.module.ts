@@ -11,4 +11,3 @@ import { WorkflowsService } from './workflows.service.js';
   exports: [WorkflowsService],
 })
 export class WorkflowsModule {}
-

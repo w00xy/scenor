@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCurrentUser } from "../../../context/CurrentUserContext";
-import { useProjects } from "../../../context/ProjectsContext";
+import { useCurrentUser } from "../../../hooks/useCurrentUserContext";
+import { useProjects } from "../../../hooks/useProjectsContext";
 import { clearTokens } from "../../../services/api";
 import ProfileIcon from "../../../assets/settings/Profile.svg?react";
 import OpenDoorIcon from "../../../assets/settings/OpenDoor.svg?react";

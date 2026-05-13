@@ -4,7 +4,6 @@ import {
   Background,
   Controls,
   MiniMap,
-  addEdge,
   useNodesState,
   useEdgesState,
   Connection,
@@ -14,6 +13,8 @@ import {
   NodeTypes,
   ReactFlowInstance,
   PanOnScrollMode,
+  NodeChange,
+  EdgeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./FlowCanvas.scss";
@@ -21,7 +22,7 @@ import { TriggerNode } from "../CustomNodes/TriggerNode";
 import { DefaultNode } from "../CustomNodes/DefaultNode";
 import { CustomEdge } from "../CustomEdges/CustomEdge";
 import { workflowApi } from "../../../services/api";
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -70,7 +71,7 @@ export function FlowCanvas({
   initialEdges = [],
   onNodesChange,
   onEdgesChange,
-  onAddNode,
+  onAddNode: _onAddNode,
   onDeleteEdge,
   executionState,
 }: FlowCanvasProps): JSX.Element {
@@ -168,69 +169,8 @@ export function FlowCanvas({
         alert("Не удалось удалить связь");
       }
     },
-    [workflowId, setEdges, onDeleteEdge]
+    [edges],
   );
-
-  const prevEdgesLengthRef = useRef(initialEdges.length);
-  useEffect(() => {
-    if (initialEdges.length > prevEdgesLengthRef.current) {
-      const newEdges = initialEdges.slice(prevEdgesLengthRef.current);
-      const edgesWithDelete = newEdges.map(edge => ({
-        ...edge,
-        data: { ...edge.data, onDelete: handleDeleteEdge }
-      }));
-      setEdges((currentEdges) => [...currentEdges, ...edgesWithDelete]);
-      prevEdgesLengthRef.current = initialEdges.length;
-    }
-    else if (prevEdgesLengthRef.current === 0 && initialEdges.length > 0) {
-      const edgesWithDelete = initialEdges.map(edge => ({
-        ...edge,
-        data: { ...edge.data, onDelete: handleDeleteEdge }
-      }));
-      setEdges(edgesWithDelete);
-      prevEdgesLengthRef.current = initialEdges.length;
-    }
-    else if (initialEdges.length < prevEdgesLengthRef.current) {
-      const edgesWithDelete = initialEdges.map(edge => ({
-        ...edge,
-        data: { ...edge.data, onDelete: handleDeleteEdge }
-      }));
-      setEdges(edgesWithDelete);
-      prevEdgesLengthRef.current = initialEdges.length;
-    }
-  }, [initialEdges, setEdges, handleDeleteEdge]);
-
-  // Обновляем edges при изменении executionState
-  useEffect(() => {
-    if (!executionState) return;
-
-    const executedEdges = executionState.executedEdges || [];
-
-    setEdges((currentEdges) =>
-      currentEdges.map((edge) => ({
-        ...edge,
-        data: {
-          ...edge.data,
-          isExecuted: executedEdges.includes(edge.id),
-          onDelete: edge.data?.onDelete || handleDeleteEdge,
-        },
-        className: executedEdges.includes(edge.id) ? 'executed' : '',
-      }))
-    );
-  }, [executionState, setEdges, handleDeleteEdge]);
-
-  const isInitialMount = useRef(true);
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      setEdges((currentEdges) =>
-        currentEdges.map((edge) => ({
-          ...edge,
-          data: { ...edge.data, onDelete: handleDeleteEdge }
-        }))
-      );
-    }
-  }, [setEdges]);
 
   const onConnect = useCallback(
     async (params: Connection) => {
@@ -257,32 +197,37 @@ export function FlowCanvas({
           },
         };
 
+        
         setEdges((prevEdges) => [...prevEdges, flowEdge]);
         onEdgesChange?.([...edges, flowEdge]);
-      } catch (error) {
+      } catch {
         alert("Не удалось создать связь");
       }
     },
     [workflowId, edges, setEdges, onEdgesChange, handleDeleteEdge]
+     
   );
+     
 
   const handleNodesChange = useCallback(
-    async (changes: any) => {
-      const removeChanges = changes.filter((change: any) => change.type === 'remove');
+    async (changes: NodeChange[]) => {
+      const removeChanges = changes.filter((change) => change.type === 'remove');
       
       if (removeChanges.length > 0 && workflowId) {
         for (const change of removeChanges) {
           try {
             await workflowApi.deleteNode(workflowId, change.id);
           } catch (error) {
+            console.error('Failed to delete node:', error);
           }
         }
+     
       }
 
       onNodesChangeInternal(changes);
       
       const positionChanges = changes.filter(
-        (change: any) => change.type === 'position' && change.dragging === false
+        (change) => change.type === 'position' && change.dragging === false
       );
 
       if (positionChanges.length > 0) {
@@ -302,13 +247,14 @@ export function FlowCanvas({
             return boundedNodes;
           });
         }, 0);
+     
       }
     },
     [workflowId, onNodesChangeInternal, setNodes, debouncedSavePositions]
   );
 
   const handleEdgesChange = useCallback(
-    async (changes: any) => {
+    async (changes: EdgeChange[]) => {
       onEdgesChangeInternal(changes);
       
       setTimeout(() => {

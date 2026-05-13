@@ -26,7 +26,7 @@ export function RunWorkflowModal({ isOpen, onClose, onRun, workflowName }: RunWo
     try {
       JSON.parse(value);
       setJsonError(null);
-    } catch (e) {
+    } catch {
       setJsonError("Некорректный JSON");
     }
   };
@@ -41,7 +41,7 @@ export function RunWorkflowModal({ isOpen, onClose, onRun, workflowName }: RunWo
     if (inputJson.trim() !== "") {
       try {
         parsedData = JSON.parse(inputJson);
-      } catch (e) {
+      } catch {
         setJsonError("Некорректный JSON");
         return;
       }

@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateWorkflowEdgeDto {
   @ApiPropertyOptional({
@@ -55,4 +61,3 @@ export class UpdateWorkflowEdgeDto {
   @MaxLength(255)
   label?: string;
 }
-

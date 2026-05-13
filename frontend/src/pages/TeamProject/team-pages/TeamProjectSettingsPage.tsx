@@ -1,6 +1,7 @@
 import { JSX, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useProjects } from "../../../context/ProjectsContext";
+import { useProjects } from "../../../hooks/useProjectsContext";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ProfileSettingsTitleH2 } from "../../../components/settings/profile-settings/profile-settings__title/profile-settings__title_H2/profile-settings__title_H2";
 import { ProfileSettingsField } from "../../../components/settings/profile-settings/profile-settings__field/profile-settings__field";
 import "./TeamProjectSettingsPage.scss";

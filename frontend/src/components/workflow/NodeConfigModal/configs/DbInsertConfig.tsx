@@ -10,15 +10,23 @@ interface ConnectionInfo {
 
 interface ExecutionResult {
   status: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputDataJson: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   outputDataJson: any;
   errorMessage: string | null;
   finishedAt: string | null;
 }
+   
+
+interface DbInsertNodeConfig {
+  table?: string;
+  values?: Record<string, unknown>;
+}
 
 interface DbInsertConfigProps {
-  config: any;
-  onSave: (config: any) => void;
+  config: DbInsertNodeConfig;
+  onSave: (config: DbInsertNodeConfig) => void;
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
@@ -26,7 +34,7 @@ interface DbInsertConfigProps {
 
 export function DbInsertConfig({ 
   config, 
-  onSave,
+  onSave: _onSave,
   inputConnections = [],
   outputConnections = [],
   executionResult = null

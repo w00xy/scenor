@@ -11,9 +11,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Log request
-    this.logger.log(
-      `→ ${method} ${originalUrl} - ${ip} - ${userAgent}`,
-    );
+    this.logger.log(`→ ${method} ${originalUrl} - ${ip} - ${userAgent}`);
 
     // Log request body for POST/PUT/PATCH (excluding sensitive data)
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -43,7 +41,7 @@ export class LoggerMiddleware implements NestMiddleware {
     next();
   }
 
-  private sanitizeBody(body: any): any {
+  private sanitizeBody(body: unknown): Record<string, unknown> {
     if (!body || typeof body !== 'object') {
       return {};
     }
@@ -61,7 +59,7 @@ export class LoggerMiddleware implements NestMiddleware {
       'credentialData',
     ];
 
-    const sanitized = { ...body };
+    const sanitized = { ...(body as Record<string, unknown>) };
 
     for (const field of sensitiveFields) {
       if (field in sanitized) {
