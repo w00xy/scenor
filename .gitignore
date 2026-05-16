@@ -7,6 +7,7 @@
 .kilo
 .claude
 CONTEXT.md
+CONTEXT/
 
 # Git internals and tooling
 *.log
@@ -47,3 +48,13 @@ backend/.env.dev
 
 node_modules
 frontend/node_modules
+
+docs/
+CONTEXT/
+backend/src/auth/README-TESTS.md
+backend/src/executions/README.md
+backend/src/executions/gateways/CHANGELOG.md
+backend/src/executions/gateways/INTEGRATION.md
+backend/src/executions/gateways/QUICKSTART.md
+backend/src/executions/gateways/README.md
+backend/src/executions/gateways/SUMMARY.md
