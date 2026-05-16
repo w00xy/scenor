@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminProjectsController } from './admin-projects.controller';
 import { AdminProjectsService } from '../services/admin-projects.service';
 import { AdminGuard } from '../guards/admin.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '../../auth/auth.guard.js';
 
 describe('AdminProjectsController', () => {
   let controller: AdminProjectsController;
@@ -36,7 +36,7 @@ describe('AdminProjectsController', () => {
           useValue: { canActivate: jest.fn().mockReturnValue(true) },
         },
         {
-          provide: AuthGuard('jwt'),
+          provide: AuthGuard,
           useValue: { canActivate: jest.fn().mockReturnValue(true) },
         },
       ],

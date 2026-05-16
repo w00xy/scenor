@@ -7,13 +7,13 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '../../auth/auth.guard.js';
 import { AdminGuard } from '../guards/admin.guard';
 import { AdminWorkflowsService } from '../services/admin-workflows.service';
 import { GetWorkflowsQueryDto } from '../dto/admin-workflows.dto';
 
 @Controller('admin/workflows')
-@UseGuards(AuthGuard('jwt'), AdminGuard)
+@UseGuards(AuthGuard, AdminGuard)
 export class AdminWorkflowsController {
   constructor(
     private readonly adminWorkflowsService: AdminWorkflowsService,

@@ -10,7 +10,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '../../auth/auth.guard.js';
 import { AdminGuard } from '../guards/admin.guard';
 import { AdminProjectsService } from '../services/admin-projects.service';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../dto/admin-projects.dto';
 
 @Controller('admin/projects')
-@UseGuards(AuthGuard('jwt'), AdminGuard)
+@UseGuards(AuthGuard, AdminGuard)
 export class AdminProjectsController {
   constructor(private readonly adminProjectsService: AdminProjectsService) {}
 
