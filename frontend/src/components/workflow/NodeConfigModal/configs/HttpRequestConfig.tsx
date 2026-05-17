@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useState, useRef, useCallback } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
 import { credentialsApi } from "../../../../services/api";
@@ -53,12 +53,22 @@ export function HttpRequestConfig({
     localConfig.body ? JSON.stringify(localConfig.body, null, 2) : ''
   );
 
+  const headersRef = useRef(headersText);
+  const queryRef = useRef(queryText);
+  const bodyRef = useRef(bodyText);
+  const urlRef = useRef(localConfig.url);
+
+  const updateHeaders = (v: string) => { headersRef.current = v; setHeadersText(v); };
+  const updateQuery = (v: string) => { queryRef.current = v; setQueryText(v); };
+  const updateBody = (v: string) => { bodyRef.current = v; setBodyText(v); };
+  const updateUrl = (v: string) => { urlRef.current = v; setLocalConfig(prev => ({ ...prev, url: v })); };
+
   const handleSave = async () => {
     try {
-      let hText = headersText;
-      let qText = queryText;
-      let bText = bodyText;
-      let rUrl = localConfig.url || '';
+      let hText = headersRef.current;
+      let qText = queryRef.current;
+      let bText = bodyRef.current;
+      let rUrl = urlRef.current || '';
 
       // Резолвим [CredentialName] в сырых строках
       const nameRe = /\[(.+?)\]/g;
@@ -71,8 +81,9 @@ export function HttpRequestConfig({
           const cred = nameToCred.get(credName);
           if (!cred) continue;
           try {
-            const data = await credentialsApi.getCredentialData(cred.id);
-            const secret = data?.apiKey || data?.password || data?.token || '';
+            const resp = await credentialsApi.getCredentialData(cred.id);
+            const inner = (resp as any)?.data;
+            const secret = inner?.apiKey || inner?.password || inner?.token || '';
             const esc = credName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const re = new RegExp(`\\[${esc}\\]`, 'g');
             hText = hText.replace(re, secret);
@@ -136,7 +147,7 @@ export function HttpRequestConfig({
             type="text"
             className="node-config__input"
             value={localConfig.url || ''}
-            onChange={(e) => handleChange({ ...localConfig, url: e.target.value })}
+            onChange={(e) => updateUrl(e.target.value)}
             onBlur={handleBlur}
             placeholder="https://api.example.com/resource"
           />
@@ -166,7 +177,7 @@ export function HttpRequestConfig({
           <textarea
             className="node-config__textarea"
             value={headersText}
-            onChange={(e) => setHeadersText(e.target.value)}
+            onChange={(e) => updateHeaders(e.target.value)}
             onBlur={handleSave}
             placeholder='{"Content-Type": "application/json"}'
             rows={4}
@@ -178,7 +189,7 @@ export function HttpRequestConfig({
           <textarea
             className="node-config__textarea"
             value={queryText}
-            onChange={(e) => setQueryText(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
             onBlur={handleSave}
             placeholder='{"page": 1, "limit": 10}'
             rows={4}
@@ -190,7 +201,7 @@ export function HttpRequestConfig({
           <textarea
             className="node-config__textarea"
             value={bodyText}
-            onChange={(e) => setBodyText(e.target.value)}
+            onChange={(e) => updateBody(e.target.value)}
             onBlur={handleSave}
             placeholder='{"key": "value"}'
             rows={6}

@@ -1,6 +1,7 @@
 import React, { JSX, useState, useRef } from "react";
 import { useMenu } from "../../../context/MenuContext";
 import { useProjects } from "../../../context/ProjectsContext";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
 import "./left_nav_btns.scss";
 import { LNBtn } from "./left_nav_btn/left_nav_btn";
 import { SettingsMenu } from "../sidebar_settings_menu/SettingsMenu";
@@ -14,8 +15,10 @@ import ReviewSVG from "../../../assets/navigation/Review.svg?react";
 export function LNav(): JSX.Element {
   const { collapsed } = useMenu();
   const { personalProjectId, teamProjects } = useProjects();
+  const { currentUser } = useCurrentUser();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const isAdmin = currentUser?.role === 'SUPER_ADMIN';
 
   return (
     <div className="LNav">
@@ -47,6 +50,7 @@ export function LNav(): JSX.Element {
         )}
       </div>
       <div className="group_btn">
+        {isAdmin && <LNBtn icon={<LockSVG />} text="Админ панель" to="/admin/dashboard" />}
         <LNBtn icon={<TemplateSVG />} text="Шаблоны" to="/templates" />
         <div className={`settings-wrapper ${collapsed ? "collapsed" : ""}`}>
           <button

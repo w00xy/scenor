@@ -1,11 +1,14 @@
+@use "../../styles/variables/_variables" as *;
 @use "../../styles/mixins/_mixins" as *;
+
+// ====== LAYOUT ======
 
 .admin-layout {
   display: flex;
   height: 100vh;
   background: #0d0d0d;
-  color: #e0e0e0;
-  font-family: "Inter", sans-serif;
+  color: $color-white;
+  font-family: $font-family;
 }
 
 .admin-layout__sidebar {
@@ -13,62 +16,295 @@
   min-width: 240px;
   display: flex;
   flex-direction: column;
-  background: #141414;
-  border-right: 1px solid #222;
+  background: #212121;
+  border-right: 1px solid #424242;
 }
 
 .admin-layout__brand {
-  padding: 20px 16px;
+  padding: 20px 12px 16px;
   font-size: 16px;
   font-weight: 600;
   color: #ff4b33;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #1e1e1e;
+  user-select: none;
 }
 
 .admin-layout__nav {
   flex: 1;
-  padding: 12px 8px;
+  padding: 0 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-sizing: border-box;
 }
 
 .admin-layout__nav-item {
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #ADADAD;
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  gap: 6px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  @include left_menu_btn;
   text-decoration: none;
-  font-size: 14px;
-  transition: background 0.15s, color 0.15s;
-}
+  transition: background-color 0.2s, color 0.2s;
 
-.admin-layout__nav-item:hover {
-  background: #1e1e1e;
-  color: #e0e0e0;
-}
+  &:hover {
+    background-color: #383838;
+  }
 
-.admin-layout__nav-item--active {
-  background: #1e1e1e;
-  color: #ff4b33;
+  &--active {
+    background-color: #2F2F2F;
+    color: $color-white;
+  }
 }
 
 .admin-layout__back-link {
-  padding: 16px;
-  color: #666;
+  display: flex;
+  align-items: center;
+  padding: 7px 8px;
+  gap: 6px;
+  @include left_menu_btn;
   text-decoration: none;
-  font-size: 13px;
-  border-top: 1px solid #1e1e1e;
+  transition: background-color 0.2s;
+  border-top: 1px solid #424242;
+  margin: 8px 8px 12px;
+  width: auto;
+
+  &:hover {
+    background-color: #383838;
+    border-radius: 6px;
+  }
 }
 
-.admin-layout__back-link:hover {
-  color: #ADADAD;
-}
+// ====== CONTENT ======
 
 .admin-layout__content {
   flex: 1;
-  padding: 32px;
+  padding: 24px 32px;
   overflow-y: auto;
+  background: #171717;
 
   @include custom-scrollbar;
+}
+
+// ====== DASHBOARD ======
+
+.admin-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 60%;
+  height: 60vh;
+}
+
+.admin-dashboard__card {
+  background: #272727;
+  border: 1px solid #424242;
+  border-radius: 8px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.admin-dashboard__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+}
+
+.admin-dashboard__card-label {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ADADAD;
+}
+
+.admin-dashboard__card-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: $color-white;
+  line-height: 1;
+}
+
+.admin-dashboard__card-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.admin-dashboard__stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-dashboard__stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.admin-dashboard__stat-label {
+  font-size: 14px;
+  color: #ADADAD;
+}
+
+.admin-dashboard__stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-white;
+}
+
+// ====== TABLES (как История) ======
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+
+  thead tr {
+    background: #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: $font-family;
+    font-size: 13px;
+    font-weight: 500;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #2a2a2a;
+    transition: background 0.2s;
+
+    &:hover { background: rgba(255, 255, 255, 0.05); }
+  }
+
+  td {
+    padding: 14px 16px;
+    font-family: $font-family;
+    font-size: 14px;
+    color: $color-white;
+  }
+}
+
+.admin-table__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-table__mono {
+  font-family: monospace;
+  font-size: 12px;
+  color: #ADADAD;
+}
+
+// ====== BADGES ======
+
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+
+  &--user { background: rgba(110, 168, 254, 0.12); color: #6ea8fe; }
+  &--admin { background: rgba(255, 75, 51, 0.12); color: #ff4b33; }
+  &--success { background: rgba(76, 175, 80, 0.12); color: #4caf50; }
+  &--danger { background: rgba(255, 75, 51, 0.12); color: #ff4b33; }
+}
+
+// ====== BUTTONS ======
+
+.admin-btn {
+  padding: 7px 14px;
+  border-radius: 5px;
+  border: 1px solid #424242;
+  background: #272727;
+  color: $color-white;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: $font-family;
+  transition: background 0.15s;
+
+  &:hover { background: #2B2B2B; }
+
+  &--sm { padding: 4px 10px; font-size: 12px; }
+  &--danger { color: #ff4b33; border-color: rgba(255, 75, 51, 0.2); &:hover { background: rgba(255, 75, 51, 0.08); } }
+}
+
+// ====== COMMON ======
+
+.admin-page__title {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 20px;
+  color: $color-white;
+}
+
+.admin-page__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #ADADAD;
+  font-size: 14px;
+}
+
+// ====== FILTERS ======
+
+.admin-users__filters,
+.admin-projects__filters,
+.admin-audit__filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-users__search {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 5px;
+  border: 1px solid #424242;
+  background: #1a1a1a;
+  color: #ADADAD;
+  font-size: 12px;
+  font-family: $font-family;
+  outline: none;
+  min-width: 200px;
+
+  &::placeholder { color: #ADADAD; }
+  &:focus { border-color: #ff4b33; }
+}
+
+.admin-users__select {
+  height: 32px;
+  padding: 0 30px 0 16px;
+  border-radius: 5px;
+  border: 1px solid #424242;
+  background: #1a1a1a;
+  color: #ADADAD;
+  font-size: 12px;
+  font-family: $font-family;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+
+  &:focus { border-color: #ff4b33; }
+
+  option {
+    background: #1a1a1a;
+    color: #ADADAD;
+  }
 }

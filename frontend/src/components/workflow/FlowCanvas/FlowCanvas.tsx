@@ -13,7 +13,6 @@ import {
   BackgroundVariant,
   NodeTypes,
   ReactFlowInstance,
-  PanOnScrollMode,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import "./FlowCanvas.scss";
@@ -49,10 +48,10 @@ interface FlowCanvasProps {
 }
 
 const CANVAS_BOUNDS = {
-  minX: -2000,
-  maxX: 2000,
-  minY: -2000,
-  maxY: 2000,
+  minX: -10000,
+  maxX: 10000,
+  minY: -10000,
+  maxY: 10000,
 };
 
 const nodeTypes: NodeTypes = {
@@ -354,13 +353,13 @@ export function FlowCanvas({
         onMoveEnd={onMoveEnd}
         nodeTypes={memoizedNodeTypes}
         edgeTypes={memoizedEdgeTypes}
-        minZoom={0.8}
-        maxZoom={2}
+        minZoom={0.15}
+        maxZoom={4}
         fitView
         proOptions={{ hideAttribution: true }}
         zoomOnScroll={true}
-        panOnScroll={true}
-        panOnScrollMode={PanOnScrollMode.Free}
+        panOnScroll={false}
+        panOnDrag={true}
         preventScrolling={true}
         translateExtent={[
           [CANVAS_BOUNDS.minX, CANVAS_BOUNDS.minY],

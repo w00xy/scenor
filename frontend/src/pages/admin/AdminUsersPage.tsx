@@ -1,7 +1,6 @@
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { adminUsersApi } from '../../services/admin/adminApi';
 import type { AdminUser } from '../../types/admin';
-import './AdminUsersPage.scss';
 
 export function AdminUsersPage(): JSX.Element {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -18,7 +17,7 @@ export function AdminUsersPage(): JSX.Element {
         role: roleFilter || undefined,
         isBlocked: blockFilter === 'blocked' ? true : blockFilter === 'active' ? false : undefined,
       });
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : (data as any).users || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -42,7 +41,11 @@ export function AdminUsersPage(): JSX.Element {
     try {
       await adminUsersApi.deleteUser(user.id);
       loadUsers();
-    } catch (e) { console.error(e); }
+    } catch (e: any) {
+      alert(e?.status === 500
+        ? `Нельзя удалить "${user.username}": пользователь владеет проектами. Сначала удалите или передайте его проекты.`
+        : `Ошибка: ${e?.message || 'не удалось удалить пользователя'}`);
+    }
   };
 
   const handleResetPassword = async (user: AdminUser) => {

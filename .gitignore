@@ -49,6 +49,7 @@ backend/.env.dev
 node_modules
 frontend/node_modules
 
+skills/
 docs/
 CONTEXT/
 backend/src/auth/README-TESTS.md

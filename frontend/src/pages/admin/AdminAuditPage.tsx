@@ -1,7 +1,6 @@
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { adminAuditApi } from '../../services/admin/adminApi';
 import type { AuditLog } from '../../types/admin';
-import './AdminAuditPage.scss';
 
 export function AdminAuditPage(): JSX.Element {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -16,7 +15,7 @@ export function AdminAuditPage(): JSX.Element {
         action: actionFilter || undefined,
         targetType: targetFilter || undefined,
       });
-      setLogs(data);
+      setLogs(Array.isArray(data) ? data : (data as any).logs || []);
     } catch (e) {
       console.error(e);
     } finally {

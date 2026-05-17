@@ -45,8 +45,20 @@ export function CredentialSelector({
               className="credential-selector__option"
               draggable
               onDragStart={(e) => {
-                e.dataTransfer.setData('text/plain', `[${c.name}]`);
+                const text = `[${c.name}]`;
+                e.dataTransfer.setData('text/plain', text);
                 e.dataTransfer.effectAllowed = 'copy';
+                const el = document.createElement('div');
+                el.style.cssText =
+                  'position:fixed;top:-9999px;left:-9999px;padding:8px 16px;' +
+                  'background:#ff4b33;border-radius:8px;' +
+                  'color:#ffffff;font-family:Inter,sans-serif;font-size:14px;font-weight:600;' +
+                  'white-space:nowrap;box-shadow:0 4px 16px rgba(255,75,51,0.4);';
+                el.textContent = c.name;
+                document.body.appendChild(el);
+                const rect = el.getBoundingClientRect();
+                e.dataTransfer.setDragImage(el, rect.width / 2, rect.height / 2);
+                setTimeout(() => document.body.removeChild(el), 0);
               }}
             >
               <span className="credential-selector__option-type">{typeLabels[c.type] || c.type}</span>

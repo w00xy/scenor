@@ -1,7 +1,6 @@
 import { JSX, useCallback, useEffect, useState } from 'react';
 import { adminProjectsApi } from '../../services/admin/adminApi';
 import type { AdminProject } from '../../types/admin';
-import './AdminProjectsPage.scss';
 
 export function AdminProjectsPage(): JSX.Element {
   const [projects, setProjects] = useState<AdminProject[]>([]);
@@ -16,7 +15,7 @@ export function AdminProjectsPage(): JSX.Element {
         search: search || undefined,
         type: typeFilter || undefined,
       });
-      setProjects(data);
+      setProjects(Array.isArray(data) ? data : (data as any).projects || []);
     } catch (e) {
       console.error(e);
     } finally {
