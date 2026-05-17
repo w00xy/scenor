@@ -67,3 +67,23 @@
   justify-content: center;
   z-index: 1;
 }
+
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+
+    &:hover {
+      background: #666;
+    }
+  }
+}

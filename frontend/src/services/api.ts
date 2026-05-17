@@ -43,7 +43,7 @@ const sendRequest = async (
   });
 };
 
-async function request<T>(
+export async function request<T>(
   endpoint: string,
   options: RequestInit = {},
   requireAuth: boolean = false,
@@ -463,4 +463,52 @@ export const workflowApi = {
       outputDataJson: any;
       errorMessage: string | null;
     }>>(`/workflows/${workflowId}/executions/${executionId}/logs?limit=${params?.limit || 100}&offset=${params?.offset || 0}`, { method: "GET" }, true),
+};
+
+export const credentialsApi = {
+  getCredentials: (projectId: string) =>
+    request<Array<{
+      id: string;
+      projectId: string;
+      name: string;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+    }>>(`/projects/${projectId}/credentials`, { method: "GET" }, true),
+
+  createCredential: (projectId: string, data: {
+    name: string;
+    type: string;
+    data: Record<string, unknown>;
+  }) =>
+    request<{
+      id: string;
+      projectId: string;
+      name: string;
+      type: string;
+      createdAt: string;
+    }>(`/projects/${projectId}/credentials`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, true),
+
+  updateCredential: (credentialId: string, data: {
+    name?: string;
+    data?: Record<string, unknown>;
+  }) =>
+    request<{
+      id: string;
+      name: string;
+      type: string;
+      updatedAt: string;
+    }>(`/credentials/${credentialId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }, true),
+
+  deleteCredential: (credentialId: string) =>
+    request<void>(`/credentials/${credentialId}`, { method: "DELETE" }, true),
+
+  getCredentialData: (credentialId: string) =>
+    request<Record<string, unknown>>(`/credentials/${credentialId}/data`, { method: "GET" }, true),
 };

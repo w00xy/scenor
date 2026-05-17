@@ -51,6 +51,18 @@ export function ProjectLayout({
     return "Создать сценарий";
   };
 
+  const handleActionClick = () => {
+    if (pathname.endsWith("/credentials")) {
+      window.dispatchEvent(new CustomEvent('open-credential-form'));
+      return;
+    }
+    if (pathname.endsWith("/scenario")) {
+      handleCreateScenario();
+      return;
+    }
+    navigate(`/projects/${projectId}/scenario`);
+  };
+
   const handleCreateScenario = async () => {
     if (!projectId || isCreating) return;
 
@@ -97,7 +109,7 @@ export function ProjectLayout({
               <button
                 type="button"
                 className={`${className}__action`}
-                onClick={pathname.endsWith("/scenario") ? handleCreateScenario : () => navigate(`/projects/${projectId}/scenario`)}
+                onClick={handleActionClick}
                 disabled={isCreating}
               >
                 {isCreating ? "Создание..." : getActionText()}

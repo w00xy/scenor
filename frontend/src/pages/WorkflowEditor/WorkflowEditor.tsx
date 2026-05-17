@@ -11,7 +11,7 @@ import { BottomLogsPanel } from "../../components/workflow/BottomLogsPanel/Botto
 import { NodeConfigWrapper } from "../../components/workflow/NodeConfigModal/configs/NodeConfigWrapper";
 import { useWorkflows } from "../../context/WorkflowsContext";
 import { useProjects } from "../../context/ProjectsContext";
-import { workflowApi } from "../../services/api";
+import { workflowApi, credentialsApi } from "../../services/api";
 import { useExecutionWebSocket } from "../../hooks/useExecutionWebSocket";
 import { Node, Edge, useNodesState, useEdgesState } from "reactflow";
 import PlusSVG from "../../assets/common/Plus.svg?react";
@@ -52,6 +52,9 @@ export function WorkflowEditor(): JSX.Element {
 
   const [logsPanelHeight, setLogsPanelHeight] = useState(40);
 
+  const [credentials, setCredentials] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const activeProjectId = projectId || workflow?.projectId;
+
   const [configModal, setConfigModal] = useState<{
     isOpen: boolean;
     nodeId: string | null;
@@ -79,6 +82,14 @@ export function WorkflowEditor(): JSX.Element {
     autoConnect: true,
     autoSubscribe: false,
   });
+
+  // Загрузка учётных данных проекта
+  useEffect(() => {
+    if (!activeProjectId) return;
+    credentialsApi.getCredentials(activeProjectId)
+      .then(setCredentials)
+      .catch(() => setCredentials([]));
+  }, [activeProjectId]);
 
   // Объединяем логи из WebSocket и загруженные логи
   const allLogs = [...executionLogs, ...wsLogs];
@@ -285,31 +296,34 @@ export function WorkflowEditor(): JSX.Element {
   const handleNodesChange = useCallback(async (updatedNodes: Node[]) => {
     if (!workflowId) return;
 
-    try {
-      const updatePromises = updatedNodes.map((node) => {
-        const lastSaved = lastSavedPositions.current.get(node.id);
+    const savePromises = updatedNodes.map(async (node) => {
+      if (!node.id) return;
+
+      const lastSaved = lastSavedPositions.current.get(node.id);
+      
+      if (!lastSaved || 
+          lastSaved.x !== node.position.x || 
+          lastSaved.y !== node.position.y) {
         
-        if (!lastSaved || 
-            lastSaved.x !== node.position.x || 
-            lastSaved.y !== node.position.y) {
-          
-          lastSavedPositions.current.set(node.id, {
-            x: node.position.x,
-            y: node.position.y,
-          });
-          
-          return workflowApi.updateNode(workflowId, node.id, {
+        lastSavedPositions.current.set(node.id, {
+          x: node.position.x,
+          y: node.position.y,
+        });
+        
+        try {
+          await workflowApi.updateNode(workflowId, node.id, {
             posX: node.position.x,
             posY: node.position.y,
           });
+        } catch (err: any) {
+          if (err?.status !== 404) {
+            console.error("Failed to save node position:", node.id, err);
+          }
         }
-        return Promise.resolve();
-      });
+      }
+    });
 
-      await Promise.all(updatePromises);
-    } catch (error) {
-      console.error("Failed to save node positions:", error);
-    }
+    await Promise.allSettled(savePromises);
   }, [workflowId]);
 
   const handleEdgesChange = useCallback(async (updatedEdges: Edge[]) => {
@@ -496,31 +510,31 @@ export function WorkflowEditor(): JSX.Element {
       // Извлекаем ID узлов, которые были выполнены (имеют выходные данные)
       const executedNodeIds = Object.keys(result.outputDataJson?.nodeOutputs || {});
       
-      // Находим manual_trigger узел
-      const triggerNode = nodes.find(node => 
-        node.data.typeCode === 'manual_trigger'
-      );
-
-      // Подсвечиваем ТОЛЬКО manual trigger сразу
-      // Остальные узлы будут подсвечиваться по мере получения WebSocket логов
+      // Подсвечиваем ВСЕ выполненные узлы сразу
+      // (WebSocket тоже подписан — дополнит если execution был асинхронным)
       setNodes((prevNodes) => {
+        let hasChanges = false;
         const updatedNodes = prevNodes.map((node) => {
-          // Manual trigger загорается сразу при запуске
-          if (node.id === triggerNode?.id) {
+          if (executedNodeIds.includes(node.id)) {
+            hasChanges = true;
             return {
               ...node,
               data: {
                 ...node.data,
-                executionStatus: 'success',
+                executionStatus: result.status === 'success' ? 'success' : 'failed',
                 isTriggered: true,
               },
             };
           }
-          
           return node;
         });
-        return updatedNodes;
+        return hasChanges ? updatedNodes : prevNodes;
       });
+
+      // Находим manual_trigger среди выполненных узлов
+      const triggerNodeId = nodes.find(
+        (n) => n.data.typeCode === 'manual_trigger' && executedNodeIds.includes(n.id)
+      )?.id || executedNodeIds[0] || null;
 
       // Находим все edges, которые соединяют выполненные узлы
       const executedEdgeIds = edges
@@ -532,7 +546,7 @@ export function WorkflowEditor(): JSX.Element {
 
       setExecutionState({
         isExecuting: false,
-        triggeredNodeId: triggerNode?.id || null,
+        triggeredNodeId: triggerNodeId,
         executedEdges: executedEdgeIds,
         lastExecutionId: result.id,
       });
@@ -542,7 +556,7 @@ export function WorkflowEditor(): JSX.Element {
       setTimeout(() => {
         setExecutionState({
           isExecuting: false,
-          triggeredNodeId: triggerNode?.id || null,
+          triggeredNodeId: triggerNodeId,
           executedEdges: [],
           lastExecutionId: result.id,
         });
@@ -742,6 +756,7 @@ export function WorkflowEditor(): JSX.Element {
           edges={edges}
           nodes={nodes}
           executionLogs={allLogs}
+          credentials={credentials}
         />
       </div>
     </div>

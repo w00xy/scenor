@@ -9,6 +9,7 @@ interface MM_overview_scen_div_oneProps {
   onSortChange: (value: string) => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  noUpdateDate?: boolean;
 }
 
 export function MM_overview_scen_div_one({
@@ -17,6 +18,7 @@ export function MM_overview_scen_div_one({
   onSortChange,
   searchValue = "",
   onSearchChange,
+  noUpdateDate = false,
 }: MM_overview_scen_div_oneProps): JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onSortChange(event.target.value);
@@ -44,7 +46,7 @@ export function MM_overview_scen_div_one({
         </option>
         <option value="Name">По названию</option>
         <option value="Creation date">По дате создания</option>
-        <option value="Update date">По дате обновления</option>
+        {!noUpdateDate && <option value="Update date">По дате обновления</option>}
       </select>
     </div>
   );

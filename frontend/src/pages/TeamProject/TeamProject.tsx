@@ -18,6 +18,7 @@ export function TeamProject(): JSX.Element {
     <ProjectLayout
       projectId={projectId || null}
       projectName={currentProject?.name}
+      projectSubtitle={currentProject?.description || undefined}
       isLoading={isLoading}
       showActionButton={true}
       className="team-project"

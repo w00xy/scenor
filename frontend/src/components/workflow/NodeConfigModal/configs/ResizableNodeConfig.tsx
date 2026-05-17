@@ -1,4 +1,5 @@
-import React, { JSX, useState, useRef } from "react";
+import React, { JSX, useState, useCallback } from "react";
+import { CredentialSelector } from "./CredentialSelector";
 import "./NodeConfig.scss";
 
 interface ConnectionInfo {
@@ -22,6 +23,41 @@ interface ResizableNodeConfigProps {
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
+  credentials?: Array<{ id: string; name: string; type: string }>;
+}
+
+function JsonDataBlock({ data }: { data: unknown }) {
+  const [copied, setCopied] = useState(false);
+  const jsonStr = JSON.stringify(data, null, 2);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(jsonStr);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = jsonStr;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  }, [jsonStr]);
+
+  return (
+    <div className="node-config__data-block">
+      <button className="node-config__copy-btn" onClick={handleCopy}>
+        {copied ? '✓ Скопировано' : '📋 Копировать'}
+      </button>
+      <pre className="node-config__data-json">{jsonStr}</pre>
+    </div>
+  );
 }
 
 export function ResizableNodeConfig({ 
@@ -30,7 +66,8 @@ export function ResizableNodeConfig({
   children,
   inputConnections = [],
   outputConnections = [],
-  executionResult = null
+  executionResult = null,
+  credentials = [],
 }: ResizableNodeConfigProps): JSX.Element {
   
   // Смещение секции Параметров от центра (в пикселях)
@@ -124,6 +161,11 @@ export function ResizableNodeConfig({
           if (React.isValidElement(child) && child.props.className?.includes('node-config__section--input')) {
             return (
               <div className={child.props.className}>
+                {credentials.length > 0 && (
+                  <CredentialSelector
+                    credentials={credentials}
+                  />
+                )}
                 {child.props.children}
                 {inputConnections.length > 0 && (
                   <div className="node-config__connections">
@@ -141,10 +183,7 @@ export function ResizableNodeConfig({
                  {executionResult && executionResult.inputDataJson && (
                    <div className="node-config__data-display">
                      <h4 className="node-config__data-title">Входные данные (последнее выполнение):</h4>
-                     <details className="node-config__data-details" open>
-                       <summary>Показать данные</summary>
-                       <pre className="node-config__data-json">{JSON.stringify(executionResult.inputDataJson, null, 2)}</pre>
-                     </details>
+                     <JsonDataBlock data={executionResult.inputDataJson} />
                    </div>
                  )}
               </div>
@@ -172,10 +211,7 @@ export function ResizableNodeConfig({
                  {executionResult && executionResult.outputDataJson && (
                    <div className="node-config__data-display">
                      <h4 className="node-config__data-title">Выходные данные (последнее выполнение):</h4>
-                     <details className="node-config__data-details" open>
-                       <summary>Показать данные</summary>
-                       <pre className="node-config__data-json">{JSON.stringify(executionResult.outputDataJson, null, 2)}</pre>
-                     </details>
+                     <JsonDataBlock data={executionResult.outputDataJson} />
                    </div>
                  )}
                 {executionResult && (

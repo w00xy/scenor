@@ -1,0 +1,46 @@
+.admin-page__title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 24px;
+  color: #e0e0e0;
+}
+
+.admin-page__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #ADADAD;
+  font-size: 14px;
+}
+
+.admin-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.admin-dashboard__card {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.admin-dashboard__card-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ff4b33;
+  margin-bottom: 4px;
+}
+
+.admin-dashboard__card-label {
+  font-size: 14px;
+  color: #ADADAD;
+  margin-bottom: 6px;
+}
+
+.admin-dashboard__card-sub {
+  font-size: 12px;
+  color: #666;
+}

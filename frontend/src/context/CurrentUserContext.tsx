@@ -33,7 +33,7 @@ export function CurrentUserProvider({
   children: React.ReactNode;
 }) {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const clearCurrentUser = () => {
     setCurrentUser(null);
@@ -55,7 +55,15 @@ export function CurrentUserProvider({
         return null;
       }
 
-      const user = await userApi.getUser(decoded.sub);
+      const data = await userApi.getUser(decoded.sub);
+      const user: CurrentUser = {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+        role: (data as Record<string, unknown>).globalRole as string || data.role || 'USER',
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
       setCurrentUser(user);
       return user;
     } catch {

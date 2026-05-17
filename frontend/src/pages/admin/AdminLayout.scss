@@ -1,0 +1,74 @@
+@use "../../styles/mixins/_mixins" as *;
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background: #0d0d0d;
+  color: #e0e0e0;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-layout__sidebar {
+  width: 240px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  background: #141414;
+  border-right: 1px solid #222;
+}
+
+.admin-layout__brand {
+  padding: 20px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ff4b33;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.admin-layout__nav {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-layout__nav-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #ADADAD;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-layout__nav-item:hover {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+.admin-layout__nav-item--active {
+  background: #1e1e1e;
+  color: #ff4b33;
+}
+
+.admin-layout__back-link {
+  padding: 16px;
+  color: #666;
+  text-decoration: none;
+  font-size: 13px;
+  border-top: 1px solid #1e1e1e;
+}
+
+.admin-layout__back-link:hover {
+  color: #ADADAD;
+}
+
+.admin-layout__content {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+
+  @include custom-scrollbar;
+}

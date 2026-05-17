@@ -11,11 +11,17 @@ import { MenuProvider } from "./context/MenuContext";
 import { ProjectsProvider } from "./context/ProjectsContext";
 import { WorkflowsProvider } from "./context/WorkflowsContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AdminRoute } from "./components/AdminRoute";
 import { ProfileSettings } from "./components/settings/profile-settings/profile-settings";
 import { ProjectRouter } from "./pages/ProjectRouter";
 import { ProjectPageRouter } from "./pages/ProjectPageRouter";
 import { TeamProjectSettingsPage } from "./pages/TeamProject/team-pages/TeamProjectSettingsPage";
 import { WorkflowEditor } from "./pages/WorkflowEditor/WorkflowEditor";
+import { AdminLayout } from "./pages/admin/AdminLayout";
+import { AdminDashboard } from "./pages/admin/AdminDashboard";
+import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
+import { AdminProjectsPage } from "./pages/admin/AdminProjectsPage";
+import { AdminAuditPage } from "./pages/admin/AdminAuditPage";
 
 export default function App() {
   return (
@@ -47,6 +53,15 @@ export default function App() {
                     <Route path="/projects/:projectId/workflows/:workflowId" element={<WorkflowEditor />} />
                     <Route path="/settings" element={<SettingsLayout />}>
                       <Route path="profile" element={<ProfileSettings />} />
+                    </Route>
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminLayout />}>
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="users" element={<AdminUsersPage />} />
+                        <Route path="projects" element={<AdminProjectsPage />} />
+                        <Route path="audit" element={<AdminAuditPage />} />
+                      </Route>
                     </Route>
                   </Route>
                 </Routes>

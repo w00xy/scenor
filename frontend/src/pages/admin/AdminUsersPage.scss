@@ -1,0 +1,88 @@
+.admin-users__filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-users__search {
+  flex: 1;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #141414;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.admin-users__search::placeholder { color: #555; }
+
+.admin-users__select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #141414;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  th {
+    color: #ADADAD;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td { color: #e0e0e0; }
+
+  tbody tr:hover { background: #141414; }
+}
+
+.admin-table__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+
+  &--user { background: #1e3a5f; color: #6ea8fe; }
+  &--admin { background: #3d1e1e; color: #ff4b33; }
+  &--success { background: #1a3d1a; color: #4caf50; }
+  &--danger { background: #3d1e1e; color: #ff4b33; }
+}
+
+.admin-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+
+  &:hover { background: #2a2a2a; }
+
+  &--sm { padding: 4px 10px; font-size: 12px; }
+  &--danger { color: #ff4b33; border-color: #3d1e1e; &:hover { background: #2a1515; } }
+}

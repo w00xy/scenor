@@ -233,15 +233,21 @@ export function BottomLogsPanel({ workflowId, lastExecutionId, onHeightChange, n
                     <div className="log-item__error">{log.errorMessage}</div>
                   )}
                   {log.inputDataJson && Object.keys(log.inputDataJson).length > 0 && (
-                    <details className="log-item__input">
+                    <details className="log-item__input" open>
                       <summary>Входные данные</summary>
-                      <pre>{JSON.stringify(log.inputDataJson, null, 2)}</pre>
+                      <div className="log-item__data-block">
+                        <button className="log-item__copy-btn" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(JSON.stringify(log.inputDataJson, null, 2)); }}>📋</button>
+                        <pre>{JSON.stringify(log.inputDataJson, null, 2)}</pre>
+                      </div>
                     </details>
                   )}
                   {log.outputDataJson && (
-                    <details className="log-item__output">
+                    <details className="log-item__output" open>
                       <summary>Результат выполнения</summary>
-                      <pre>{JSON.stringify(log.outputDataJson, null, 2)}</pre>
+                      <div className="log-item__data-block">
+                        <button className="log-item__copy-btn" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(JSON.stringify(log.outputDataJson, null, 2)); }}>📋</button>
+                        <pre>{JSON.stringify(log.outputDataJson, null, 2)}</pre>
+                      </div>
                     </details>
                   )}
                 </div>

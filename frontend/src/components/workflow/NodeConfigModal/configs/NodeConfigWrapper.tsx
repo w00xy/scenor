@@ -38,6 +38,7 @@ interface NodeConfigWrapperProps {
   edges?: Edge[];
   nodes?: Node[];
   executionLogs?: any[];
+  credentials?: Array<{ id: string; name: string; type: string }>;
 }
 
 export function NodeConfigWrapper({
@@ -50,6 +51,7 @@ export function NodeConfigWrapper({
   edges = [],
   nodes = [],
   executionLogs = [],
+  credentials = [],
 }: NodeConfigWrapperProps): JSX.Element {
 
   const handleSave = (config: any) => {
@@ -108,6 +110,7 @@ export function NodeConfigWrapper({
       inputConnections,
       outputConnections,
       executionResult,
+      credentials,
     };
 
     switch (nodeType) {

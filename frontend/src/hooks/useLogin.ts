@@ -33,7 +33,7 @@ export function useLogin() {
       navigate('/overview/scenario', { replace: true });
       return true;
     } catch (error: any) {
-      showFeedback(error.message || 'Неверный Email или пароль', 'error');
+      showFeedback(error.message || 'Неверный логин или пароль', 'error');
       return false;
     } finally {
       setIsLoading(false);

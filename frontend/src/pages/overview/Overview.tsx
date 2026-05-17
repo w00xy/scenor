@@ -1,6 +1,6 @@
 import "./Overview.scss";
 import React, { JSX } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { LNBody } from "../../components/left_nav/left_nav_body/left_nav_body";
 import { LNTDiv } from "../../components/left_nav/left_nav_top_div/Left_nav_top_div";
 import { HorRule } from "../../components/left_nav/left_nav_hr/HorRule";
@@ -10,6 +10,8 @@ import { MMTS_div_three } from "../../components/overview/main_menu_overview/mai
 
 
 export function Overview(): JSX.Element {
+  const location = useLocation();
+
   const getButtonText = () => {
     switch (location.pathname) {
       case "/overview/scenario":

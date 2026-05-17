@@ -1,6 +1,7 @@
 import { JSX, useState } from "react";
 import { ResizableNodeConfig } from "./ResizableNodeConfig";
 import "./NodeConfig.scss";
+import { credentialsApi } from "../../../../services/api";
 
 interface ConnectionInfo {
   nodeId: string;
@@ -22,6 +23,7 @@ interface HttpRequestConfigProps {
   inputConnections?: ConnectionInfo[];
   outputConnections?: ConnectionInfo[];
   executionResult?: ExecutionResult | null;
+  credentials?: Array<{ id: string; name: string; type: string }>;
 }
 
 export function HttpRequestConfig({ 
@@ -29,7 +31,8 @@ export function HttpRequestConfig({
   onSave,
   inputConnections = [],
   outputConnections = [],
-  executionResult = null
+  executionResult = null,
+  credentials = [],
 }: HttpRequestConfigProps): JSX.Element {
   const [localConfig, setLocalConfig] = useState(config || {
     url: 'https://api.example.com/resource',
@@ -50,14 +53,43 @@ export function HttpRequestConfig({
     localConfig.body ? JSON.stringify(localConfig.body, null, 2) : ''
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      const headers = headersText.trim() ? JSON.parse(headersText) : {};
-      const query = queryText.trim() ? JSON.parse(queryText) : {};
-      const body = bodyText.trim() ? JSON.parse(bodyText) : null;
+      let hText = headersText;
+      let qText = queryText;
+      let bText = bodyText;
+      let rUrl = localConfig.url || '';
+
+      // Резолвим [CredentialName] в сырых строках
+      const nameRe = /\[(.+?)\]/g;
+      const allText = hText + qText + bText + rUrl;
+      const foundNames = [...new Set([...allText.matchAll(nameRe)].map(m => m[1]))];
+
+      if (foundNames.length > 0 && credentials.length > 0) {
+        const nameToCred = new Map(credentials.map(c => [c.name, c]));
+        for (const credName of foundNames) {
+          const cred = nameToCred.get(credName);
+          if (!cred) continue;
+          try {
+            const data = await credentialsApi.getCredentialData(cred.id);
+            const secret = data?.apiKey || data?.password || data?.token || '';
+            const esc = credName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp(`\\[${esc}\\]`, 'g');
+            hText = hText.replace(re, secret);
+            qText = qText.replace(re, secret);
+            bText = bText.replace(re, secret);
+            rUrl = rUrl.replace(re, secret);
+          } catch { /* skip if credential not found */ }
+        }
+      }
+
+      const headers = hText.trim() ? JSON.parse(hText) : {};
+      const query = qText.trim() ? JSON.parse(qText) : {};
+      const body = bText.trim() ? JSON.parse(bText) : null;
 
       onSave({
         ...localConfig,
+        url: rUrl,
         headers,
         query,
         body,
@@ -74,7 +106,7 @@ export function HttpRequestConfig({
 
   // Сохранение при потере фокуса
   const handleBlur = () => {
-    handleSave();
+    void handleSave();
   };
 
   return (
@@ -84,6 +116,7 @@ export function HttpRequestConfig({
       inputConnections={inputConnections}
       outputConnections={outputConnections}
       executionResult={executionResult}
+      credentials={credentials}
     >
       <div className="node-config__section node-config__section--input">
         <h3 className="node-config__section-title">Вход</h3>
@@ -96,6 +129,7 @@ export function HttpRequestConfig({
         <h3 className="node-config__section-title">Параметры</h3>
         
         <div className="node-config__params-content">
+
         <div className="node-config__field">
           <label className="node-config__label">URL</label>
           <input
