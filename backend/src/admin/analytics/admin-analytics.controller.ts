@@ -4,7 +4,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '../../auth/auth.guard.js';
 import { AdminGuard } from '../guards/admin.guard';
 import { AdminAnalyticsService } from '../services/admin-analytics.service';
 import {
@@ -13,7 +13,7 @@ import {
 } from '../dto/admin-analytics.dto';
 
 @Controller('admin/analytics')
-@UseGuards(AuthGuard('jwt'), AdminGuard)
+@UseGuards(AuthGuard, AdminGuard)
 export class AdminAnalyticsController {
   constructor(
     private readonly adminAnalyticsService: AdminAnalyticsService,

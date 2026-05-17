@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from '../database/database.module';
+import { AuthModule } from '../auth/auth.module.js';
 
 // Guards
 import { AdminGuard } from './guards/admin.guard';
@@ -19,7 +21,11 @@ import { AdminAuditController } from './audit/admin-audit.controller';
 import { AdminWorkflowsController } from './workflows/admin-workflows.controller';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+  ],
   providers: [
     AdminGuard,
     AdminAuditService,

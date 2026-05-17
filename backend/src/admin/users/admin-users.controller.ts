@@ -10,7 +10,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '../../auth/auth.guard.js';
 import { AdminGuard } from '../guards/admin.guard';
 import { AdminUsersService } from '../services/admin-users.service';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../dto/admin-users.dto';
 
 @Controller('admin/users')
-@UseGuards(AuthGuard('jwt'), AdminGuard)
+@UseGuards(AuthGuard, AdminGuard)
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
