@@ -264,13 +264,18 @@ export class ExecutionGateway
     }
   }
 
-  broadcastNodeLog(executionId: string, nodeLog: unknown) {
+  broadcastNodeLog(
+    executionId: string,
+    nodeLog: unknown,
+    nodeMeta?: { nodeName?: string | null; nodeType?: string | null },
+  ) {
     const subscribers = this.executionSubscribers.get(executionId);
     if (subscribers) {
       const message = JSON.stringify({
         type: 'node-log',
         executionId,
         nodeLog,
+        nodeMeta,
       });
       subscribers.forEach((client) => {
         if (client.readyState === 1) {

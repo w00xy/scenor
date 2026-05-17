@@ -35,8 +35,8 @@ export class ExecutionsController {
   constructor(private readonly executionsService: ExecutionsService) {}
 
   @Post('manual')
-  @ApiOperation({ summary: 'Запустить workflow вручную' })
-  @ApiResponse({ status: 201, description: 'Workflow успешно запущен, возвращает информацию о выполнении', type: ExecutionResponseDto })
+  @ApiOperation({ summary: 'Создать и запустить workflow вручную (асинхронно)' })
+  @ApiResponse({ status: 201, description: 'Workflow поставлен в очередь. Статус: queued. Выполнение продолжится в фоне — подпишитесь на WebSocket для real-time обновлений.', type: ExecutionResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized - требуется авторизация' })
   @ApiResponse({ status: 403, description: 'Forbidden - нет доступа к workflow' })
   @ApiResponse({ status: 404, description: 'Not Found - workflow не найден' })
@@ -46,7 +46,7 @@ export class ExecutionsController {
     @Body() data: RunWorkflowManualDto,
   ) {
     const userId = this.requireUserId(request);
-    return this.executionsService.runManualWorkflow(
+    return this.executionsService.createManualExecution(
       userId,
       workflowId,
       data.inputDataJson,
@@ -54,8 +54,8 @@ export class ExecutionsController {
   }
 
   @Post('webhook/:webhookToken')
-  @ApiOperation({ summary: 'Запустить workflow через webhook' })
-  @ApiResponse({ status: 201, description: 'Workflow успешно запущен через webhook', type: ExecutionResponseDto })
+  @ApiOperation({ summary: 'Запустить workflow через webhook (асинхронно)' })
+  @ApiResponse({ status: 201, description: 'Workflow поставлен в очередь. Статус: queued. Выполнение продолжится в фоне — подпишитесь на WebSocket для real-time обновлений.', type: ExecutionResponseDto })
   @ApiResponse({ status: 400, description: 'Bad Request - неверные данные' })
   @ApiResponse({ status: 404, description: 'Not Found - workflow или webhook не найден' })
   async runWebhook(
@@ -63,7 +63,7 @@ export class ExecutionsController {
     @Param('webhookToken') webhookToken: string,
     @Body() data?: Record<string, unknown>,
   ) {
-    return this.executionsService.runWebhookWorkflow(
+    return this.executionsService.createWebhookExecution(
       workflowId,
       webhookToken,
       data ?? {},

@@ -2,7 +2,9 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import {
   ExecutionStatus,
@@ -27,13 +29,135 @@ type QueueItem = {
   payload: unknown;
 };
 
+type WorkflowWithGraph = Awaited<
+  ReturnType<ExecutionsService['requireWorkflowGraphAccess']>
+>;
+
+type WorkflowGraphMinimal = {
+  id: string;
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+};
+
 @Injectable()
-export class ExecutionsService {
+export class ExecutionsService implements OnModuleInit {
+  private readonly logger = new Logger(ExecutionsService.name);
+
+  /** Maximum concurrent workflow executions */
+  private static readonly MAX_CONCURRENT = 10;
+  private activeExecutions = 0;
+  private pendingQueue: Array<() => void> = [];
+
   constructor(
     private readonly prisma: DatabaseService,
     private readonly executionGateway: ExecutionGateway,
   ) {}
 
+  async onModuleInit() {
+    await this.recoverStaleExecutions();
+  }
+
+  /**
+   * Marks executions stuck in "running" state as failed.
+   * Called on startup — these are executions that were running
+   * when the server previously shut down.
+   */
+  private async recoverStaleExecutions() {
+    const stale = await this.prisma.workflowExecution.findMany({
+      where: { status: ExecutionStatus.running },
+      select: { id: true },
+    });
+
+    if (stale.length === 0) {
+      return;
+    }
+
+    this.logger.warn(
+      `Found ${stale.length} stale execution(s) in "running" state — marking as failed`,
+    );
+
+    await this.prisma.workflowExecution.updateMany({
+      where: { status: ExecutionStatus.running },
+      data: {
+        status: ExecutionStatus.failed,
+        finishedAt: new Date(),
+        errorMessage: 'Server restarted during execution',
+      },
+    });
+  }
+
+  /**
+   * Acquire an execution slot. If MAX_CONCURRENT slots are taken,
+   * the caller is queued until one is released.
+   */
+  private async acquireExecutionSlot(): Promise<void> {
+    if (this.activeExecutions < ExecutionsService.MAX_CONCURRENT) {
+      this.activeExecutions++;
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      this.pendingQueue.push(resolve);
+    });
+  }
+
+  /**
+   * Release an execution slot, allowing the next queued execution to start.
+   */
+  private releaseExecutionSlot(): void {
+    this.activeExecutions--;
+    const next = this.pendingQueue.shift();
+    if (next) {
+      this.activeExecutions++;
+      next();
+    }
+  }
+
+  async createManualExecution(
+    userId: string,
+    workflowId: string,
+    inputDataJson?: Record<string, unknown>,
+  ) {
+    const workflow = await this.requireWorkflowGraphAccess(userId, workflowId, [
+      ProjectMemberRole.OWNER,
+      ProjectMemberRole.EDITOR,
+    ]);
+
+    const execution = await this.prisma.workflowExecution.create({
+      data: {
+        workflowId,
+        startedByUserId: userId,
+        triggerType: TriggerType.manual,
+        status: ExecutionStatus.queued,
+        startedAt: new Date(),
+        inputDataJson: this.toNullablePrismaJson(inputDataJson ?? {}),
+      },
+    });
+
+    // Broadcast queued status — frontend subscribes, will receive progress
+    this.executionGateway.broadcastExecutionUpdate(execution.id, {
+      id: execution.id,
+      status: 'queued',
+      workflowId: execution.workflowId,
+      startedAt: execution.startedAt,
+      finishedAt: null,
+      totalNodes: this.countActiveNodes(workflow.nodes),
+      completedNodes: 0,
+      error: null,
+    });
+
+    // Run async — do NOT await, HTTP response returns immediately
+    setImmediate(() => {
+      this.executeWorkflowAsync(execution.id, workflow, inputDataJson);
+    });
+
+    return execution;
+  }
+
+  /**
+   * @deprecated Use createManualExecution for async two-phase execution.
+   * Kept for backward compatibility with tests and internal callers.
+   */
   async runManualWorkflow(
     userId: string,
     workflowId: string,
@@ -57,9 +181,14 @@ export class ExecutionsService {
 
     // Broadcast execution started
     this.executionGateway.broadcastExecutionUpdate(execution.id, {
+      id: execution.id,
       status: execution.status,
-      startedAt: execution.startedAt,
       workflowId: execution.workflowId,
+      startedAt: execution.startedAt,
+      finishedAt: null,
+      totalNodes: this.countActiveNodes(workflow.nodes),
+      completedNodes: 0,
+      error: null,
     });
 
     try {
@@ -85,10 +214,16 @@ export class ExecutionsService {
 
       // Broadcast execution completed successfully
       this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        id: execution.id,
         status: finishedExecution.status,
+        workflowId: execution.workflowId,
+        startedAt: execution.startedAt,
         finishedAt: finishedExecution.finishedAt,
-        outputDataJson: finishedExecution.outputDataJson,
+        totalNodes: this.countActiveNodes(workflow.nodes),
+        completedNodes: result.executedSteps,
         executedSteps: result.executedSteps,
+        outputDataJson: finishedExecution.outputDataJson,
+        error: null,
       });
 
       return finishedExecution;
@@ -107,12 +242,116 @@ export class ExecutionsService {
 
       // Broadcast execution failed
       this.executionGateway.broadcastExecutionUpdate(execution.id, {
+        id: execution.id,
         status: failedExecution.status,
+        workflowId: execution.workflowId,
+        startedAt: execution.startedAt,
         finishedAt: failedExecution.finishedAt,
-        errorMessage: failedExecution.errorMessage,
+        totalNodes: this.countActiveNodes(workflow.nodes),
+        completedNodes: 0,
+        error: failedExecution.errorMessage,
       });
 
       return failedExecution;
+    }
+  }
+
+  private async executeWorkflowAsync(
+    executionId: string,
+    workflow: WorkflowWithGraph | WorkflowGraphMinimal,
+    inputDataJson?: Record<string, unknown>,
+  ) {
+    await this.acquireExecutionSlot();
+    try {
+      await this._executeWorkflowUnsafe(executionId, workflow, inputDataJson);
+    } finally {
+      this.releaseExecutionSlot();
+    }
+  }
+
+  /**
+   * Actual execution logic, called from executeWorkflowAsync
+   * after acquiring an execution slot. NOT safe to call directly —
+   * does not manage the concurrency limiter.
+   */
+  private async _executeWorkflowUnsafe(
+    executionId: string,
+    workflow: WorkflowWithGraph | WorkflowGraphMinimal,
+    inputDataJson?: Record<string, unknown>,
+  ) {
+    // Phase 2: update status → running
+    await this.prisma.workflowExecution.update({
+      where: { id: executionId },
+      data: { status: ExecutionStatus.running },
+    });
+
+    this.executionGateway.broadcastExecutionUpdate(executionId, {
+      id: executionId,
+      status: 'running',
+      workflowId: workflow.id,
+      startedAt: new Date(),
+      finishedAt: null,
+      totalNodes: this.countActiveNodes(workflow.nodes),
+      completedNodes: 0,
+      error: null,
+    });
+
+    try {
+      const result = await this.executeGraph(
+        executionId,
+        workflow.nodes,
+        workflow.edges,
+        inputDataJson ?? {},
+      );
+
+      const finishedExecution = await this.prisma.workflowExecution.update({
+        where: { id: executionId },
+        data: {
+          status: ExecutionStatus.success,
+          finishedAt: new Date(),
+          outputDataJson: this.toNullablePrismaJson({
+            nodeOutputs: result.outputs,
+            executedSteps: result.executedSteps,
+          }),
+          errorMessage: null,
+        },
+      });
+
+      this.executionGateway.broadcastExecutionUpdate(executionId, {
+        id: executionId,
+        status: 'success',
+        workflowId: workflow.id,
+        startedAt: finishedExecution.startedAt,
+        finishedAt: finishedExecution.finishedAt,
+        totalNodes: this.countActiveNodes(workflow.nodes),
+        completedNodes: result.executedSteps,
+        executedSteps: result.executedSteps,
+        outputDataJson: finishedExecution.outputDataJson,
+        error: null,
+      });
+    } catch (error: any) {
+      const message =
+        error instanceof Error ? error.message : 'Workflow execution failed';
+
+      await this.prisma.workflowExecution.update({
+        where: { id: executionId },
+        data: {
+          status: ExecutionStatus.failed,
+          finishedAt: new Date(),
+          errorMessage: message,
+        },
+      });
+
+      this.executionGateway.broadcastExecutionUpdate(executionId, {
+        id: executionId,
+        status: 'failed',
+        workflowId: workflow.id,
+        startedAt: null,
+        finishedAt: new Date(),
+        totalNodes: this.countActiveNodes(workflow.nodes),
+        completedNodes: 0,
+        error: message,
+      });
     }
   }
 
@@ -200,6 +439,9 @@ export class ExecutionsService {
     }
 
     const nodeById = new Map(nodes.map((node) => [node.id, node]));
+    const totalActiveNodes = nodes.filter((n) => !n.isDisabled).length;
+    let completedNodes = 0;
+
     const outgoingByNodeId = new Map<string, WorkflowEdge[]>();
     const incomingCountByNodeId = new Map<string, number>();
 
@@ -273,7 +515,10 @@ export class ExecutionsService {
         });
 
         // Broadcast skipped node log
-        this.executionGateway.broadcastNodeLog(executionId, skippedLog);
+        this.executionGateway.broadcastNodeLog(executionId, skippedLog, {
+          nodeName: node.label || node.name,
+          nodeType: node.typeCode,
+        });
 
         for (const edge of outgoingByNodeId.get(node.id) ?? []) {
           queue.push({
@@ -296,7 +541,10 @@ export class ExecutionsService {
       });
 
       // Broadcast node started
-      this.executionGateway.broadcastNodeLog(executionId, log);
+      this.executionGateway.broadcastNodeLog(executionId, log, {
+        nodeName: node.label || node.name,
+        nodeType: node.typeCode,
+      });
 
       try {
         const result = await this.executeNode(node, item.payload, executionId);
@@ -311,7 +559,17 @@ export class ExecutionsService {
         });
 
         // Broadcast node completed successfully
-        this.executionGateway.broadcastNodeLog(executionId, updatedLog);
+        completedNodes += 1;
+        this.executionGateway.broadcastNodeLog(executionId, updatedLog, {
+          nodeName: node.label || node.name,
+          nodeType: node.typeCode,
+        });
+        this.executionGateway.broadcastExecutionUpdate(executionId, {
+          id: executionId,
+          status: 'running',
+          totalNodes: totalActiveNodes,
+          completedNodes,
+        });
 
         if (!outputs[node.id]) {
           outputs[node.id] = [];
@@ -341,7 +599,10 @@ export class ExecutionsService {
         });
 
         // Broadcast node failed
-        this.executionGateway.broadcastNodeLog(executionId, failedLog);
+        this.executionGateway.broadcastNodeLog(executionId, failedLog, {
+          nodeName: node.label || node.name,
+          nodeType: node.typeCode,
+        });
 
         throw error;
       }
@@ -672,6 +933,10 @@ export class ExecutionsService {
     return result;
   }
 
+  private countActiveNodes(nodes: WorkflowNode[]): number {
+    return nodes.filter((n) => !n.isDisabled).length;
+  }
+
   private toNullablePrismaJson(
     value: unknown,
   ): Prisma.InputJsonValue | Prisma.NullTypes.JsonNull {
@@ -705,6 +970,76 @@ export class ExecutionsService {
     return value;
   }
 
+  async createWebhookExecution(
+    workflowId: string,
+    webhookToken: string,
+    inputDataJson: Record<string, unknown>,
+  ) {
+    const workflow = await this.prisma.workflow.findUnique({
+      where: { id: workflowId },
+      include: {
+        nodes: true,
+        edges: true,
+        project: true,
+      },
+    });
+
+    if (!workflow) {
+      throw new NotFoundException('Workflow not found');
+    }
+
+    // Verify webhook token matches workflow's webhook trigger node
+    const webhookNode = workflow.nodes.find(
+      (node) => node.typeCode === 'webhook_trigger',
+    );
+
+    if (!webhookNode) {
+      throw new BadRequestException(
+        'Workflow does not have a webhook trigger node',
+      );
+    }
+
+    const config = webhookNode.configJson as Record<string, unknown>;
+    const configuredPath = config.path as string | undefined;
+    if (configuredPath !== webhookToken) {
+      throw new BadRequestException('Invalid webhook token');
+    }
+
+    const execution = await this.prisma.workflowExecution.create({
+      data: {
+        workflowId,
+        startedByUserId: null,
+        triggerType: TriggerType.webhook,
+        status: ExecutionStatus.queued,
+        startedAt: new Date(),
+        inputDataJson: this.toNullablePrismaJson(inputDataJson),
+      },
+    });
+
+    // Broadcast queued status
+    this.executionGateway.broadcastExecutionUpdate(execution.id, {
+      id: execution.id,
+      status: 'queued',
+      workflowId: execution.workflowId,
+      startedAt: execution.startedAt,
+      finishedAt: null,
+      totalNodes: this.countActiveNodes(workflow.nodes),
+      completedNodes: 0,
+      error: null,
+    });
+
+    // Run async — do NOT await
+    setImmediate(() => {
+      this.executeWorkflowAsync(execution.id, workflow, inputDataJson);
+    });
+
+    return execution;
+  }
+
+  /**
+   * @deprecated Use createWebhookExecution for async two-phase execution.
+   * Kept for backward compatibility.
+   */
   async runWebhookWorkflow(
     workflowId: string,
     webhookToken: string,
@@ -735,7 +1070,8 @@ export class ExecutionsService {
     }
 
     const config = webhookNode.configJson as Record<string, unknown>;
-    if (config.token !== webhookToken) {
+    const configuredPath = config.path as string | undefined;
+    if (configuredPath !== webhookToken) {
       throw new BadRequestException('Invalid webhook token');
     }
 
